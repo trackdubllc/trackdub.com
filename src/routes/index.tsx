@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useReveal } from "@/hooks/use-reveal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
