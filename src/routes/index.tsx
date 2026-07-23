@@ -33,6 +33,7 @@ function Index() {
         <ProductPlate />
         <TrustStrip />
         <PipelineFeature />
+        <Walkthrough />
         <StageChapters />
         <Control />
         <Performance />
@@ -51,6 +52,7 @@ function Index() {
 
 const NAV = [
   { href: "#pipeline", label: "Pipeline" },
+  { href: "#walkthrough", label: "Try it" },
   { href: "#control", label: "Control" },
   { href: "#performance", label: "Performance" },
   { href: "#pricing", label: "Pricing" },
