@@ -469,3 +469,27 @@ html.reduce-motion .reveal-child {
 html.reduce-motion .wave-bar,
 html.reduce-motion .flow-dot,
 html.reduce-motion [class*="animate-"] { animation: none !important; }
+
+/* Catch-all: any element inside a reduce-motion document loses every
+   animation and transition — including inline style={{ transition }},
+   Radix data-state animations, sheen sweeps, pulse-once, rail fill
+   easing, and anything future components add. Keep a 0.01ms duration
+   instead of 0 so transitionend / animationend listeners still fire. */
+html.reduce-motion,
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Explicitly silence the sheen sweep — display:none on ::after already
+   hides it, but this keeps the keyframe from running behind the scenes. */
+html.reduce-motion .btn-sheen::after,
+html.reduce-motion .btn-sheen:hover::after,
+html.reduce-motion .btn-sheen:focus-visible::after,
+html.reduce-motion .pulse-once { animation: none !important; }
