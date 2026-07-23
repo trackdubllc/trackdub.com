@@ -69,6 +69,14 @@ const NAV = [
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ];
+const NAV_PRIMARY = new Set([
+  "#pipeline",
+  "#walkthrough",
+  "#control",
+  "#performance",
+  "#pricing",
+  "#faq",
+]);
 
 function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
