@@ -648,7 +648,7 @@ function ResumableJob() {
                     <div className="flex items-baseline gap-3">
                       <span
                         className="font-mono text-[10px] uppercase tracking-[0.14em]"
-                        style={{ color: "oklch(0.82 0.14 40)" }}
+                        style={{ color: "oklch(0.78 0.15 258)" }}
                       >
                         {failure.code}
                       </span>
@@ -898,7 +898,7 @@ function WorkstationMock() {
                       s === "done"
                         ? "oklch(0.75 0.13 155)"
                         : s === "active"
-                          ? "oklch(0.68 0.14 50)"
+                          ? "oklch(0.68 0.15 258)"
                           : dim,
                   }}
                 >
@@ -943,7 +943,7 @@ function WorkstationMock() {
                 </span>
                 <span
                   className="font-mono text-[10px]"
-                  style={{ color: r.s === "S1" ? "oklch(0.68 0.14 50)" : "oklch(0.72 0.10 220)" }}
+                  style={{ color: r.s === "S1" ? "oklch(0.68 0.15 258)" : "oklch(0.70 0.12 190)" }}
                 >
                   {r.s}
                 </span>
@@ -956,7 +956,7 @@ function WorkstationMock() {
                     style={{
                       color: r.a ? "oklch(0.97 0.005 240)" : inkText,
                       textDecoration: r.a ? "underline" : "none",
-                      textDecorationColor: "oklch(0.68 0.14 50)",
+                      textDecorationColor: "oklch(0.68 0.15 258)",
                       textUnderlineOffset: 4,
                     }}
                   >
@@ -985,7 +985,7 @@ function WorkstationMock() {
                     y={30 - h / 2}
                     width={2.2}
                     height={h}
-                    fill={isActive ? "oklch(0.72 0.13 50)" : "oklch(0.55 0.03 240)"}
+                    fill={isActive ? "oklch(0.72 0.15 258)" : "oklch(0.55 0.03 240)"}
                   />
                 );
               })}
@@ -999,8 +999,8 @@ function WorkstationMock() {
             Speakers
           </div>
           {[
-            { n: "Anna", lang: "de-DE → en-US", ref: "3.4s ref", color: "oklch(0.68 0.14 50)" },
-            { n: "Mateo", lang: "de-DE → en-US", ref: "5.1s ref", color: "oklch(0.72 0.10 220)" },
+            { n: "Anna", lang: "de-DE → en-US", ref: "3.4s ref", color: "oklch(0.68 0.15 258)" },
+            { n: "Mateo", lang: "de-DE → en-US", ref: "5.1s ref", color: "oklch(0.70 0.12 190)" },
           ].map((s) => (
             <div key={s.n} className="mb-3 border-t pt-3 font-mono text-[11px]" style={{ borderColor: "oklch(0.28 0.014 250)" }}>
               <div className="flex items-center gap-2">
@@ -1018,7 +1018,7 @@ function WorkstationMock() {
           </div>
           <div className="mt-2 font-mono text-[12px]">Resumable · 62%</div>
           <div className="mt-2 h-[3px] w-full" style={{ background: "oklch(0.28 0.014 250)" }}>
-            <div className="h-full" style={{ width: "62%", background: "oklch(0.72 0.13 50)" }} />
+            <div className="h-full" style={{ width: "62%", background: "oklch(0.72 0.15 258)" }} />
           </div>
         </div>
       </div>
@@ -1161,8 +1161,8 @@ type Line = {
 };
 
 const INITIAL_SPEAKERS: Speaker[] = [
-  { id: "s1", name: "Anna", color: "oklch(0.68 0.14 50)", turns: 24 },
-  { id: "s2", name: "Mateo", color: "oklch(0.72 0.10 220)", turns: 18 },
+  { id: "s1", name: "Anna", color: "oklch(0.68 0.15 258)", turns: 24 },
+  { id: "s2", name: "Mateo", color: "oklch(0.70 0.12 190)", turns: 18 },
   { id: "s3", name: "Speaker 3", color: "oklch(0.55 0.03 240)", turns: 2 },
 ];
 
@@ -1755,8 +1755,8 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
               Speakers detected
             </div>
             {[
-              { n: "Anna", turns: 24, c: "oklch(0.68 0.14 50)" },
-              { n: "Mateo", turns: 18, c: "oklch(0.72 0.10 220)" },
+              { n: "Anna", turns: 24, c: "oklch(0.68 0.15 258)" },
+              { n: "Mateo", turns: 18, c: "oklch(0.70 0.12 190)" },
               { n: "Speaker 3", turns: 2, c: "oklch(0.55 0.03 240)" },
             ].map((s) => (
               <div key={s.n} className="flex items-center justify-between border-b py-3" style={{ borderColor: border }}>
@@ -1780,7 +1780,7 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
               <span>duration 3.14s / target 3.20s</span>
             </div>
             <div className="font-serif text-[17px] leading-snug">
-              "so every stage stays <span style={{ borderBottom: "2px solid oklch(0.68 0.14 50)" }}>editable</span>."
+              "so every stage stays <span style={{ borderBottom: "2px solid oklch(0.68 0.15 258)" }}>editable</span>."
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3 font-mono text-[11px]">
               {[
@@ -1806,7 +1806,7 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
               Timeline
             </div>
             {[
-              ["Dialogue EN", "oklch(0.68 0.14 50)", [10, 22, 34, 55, 70, 82]],
+              ["Dialogue EN", "oklch(0.68 0.15 258)", [10, 22, 34, 55, 70, 82]],
               ["Music", "oklch(0.55 0.06 220)", [5, 95]],
               ["SFX", "oklch(0.55 0.03 240)", [40, 62]],
             ].map(([label, color, pts]) => (
