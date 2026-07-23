@@ -1705,3 +1705,194 @@ function Colophon() {
     </footer>
   );
 }
+
+/* ---------------- architecture ---------------- */
+
+function Architecture() {
+  const layers: {
+    where: string;
+    tag: string;
+    stages: string;
+    what: string;
+    leaves: string;
+  }[] = [
+    {
+      where: "On device",
+      tag: "Default",
+      stages: "Ingest · Probe · VAD",
+      what: "FFmpeg-backed decode, scene split, voice-activity detection. Runs entirely on your CPU.",
+      leaves: "Nothing leaves the machine.",
+    },
+    {
+      where: "On device",
+      tag: "Default",
+      stages: "Transcribe · Diarize",
+      what: "ASR and speaker separation via bundled ONNX models. Accelerated by DirectML, CUDA, CoreML, or Windows ML when available; CPU otherwise.",
+      leaves: "Nothing leaves the machine.",
+    },
+    {
+      where: "On device",
+      tag: "Default",
+      stages: "Translate",
+      what: "Local MT model runs against the editable script. Glossary and per-speaker style are applied locally.",
+      leaves: "Nothing leaves the machine.",
+    },
+    {
+      where: "On device",
+      tag: "Default",
+      stages: "Voice · Mix · Export",
+      what: "TTS with per-speaker voice reference, alignment, ducking, and mux. GPU-accelerated where a provider is present; CPU fallback is always available.",
+      leaves: "Nothing leaves the machine.",
+    },
+    {
+      where: "Off device",
+      tag: "Opt-in",
+      stages: "Cloud translation · Cloud voice",
+      what: "A stage can be routed to a hosted provider you configure (DeepL, ElevenLabs, your own endpoint). Off by default; set per project, per stage.",
+      leaves: "Only the stage's input for that stage. Media and other stages stay local.",
+    },
+    {
+      where: "Off device",
+      tag: "Off by default",
+      stages: "Telemetry",
+      what: "Crash reports and anonymous usage counters. Disabled unless you turn them on in Preferences.",
+      leaves: "Stack traces and counters. No media, no transcripts.",
+    },
+  ];
+
+  const providers: {
+    name: string;
+    platform: string;
+    used: string;
+    notes: string;
+  }[] = [
+    {
+      name: "TensorRT RTX",
+      platform: "Windows · RTX 30/40/50",
+      used: "ASR · Diarize · TTS",
+      notes: "Selected automatically on supported RTX GPUs. First run compiles an engine cache per model; subsequent runs skip it.",
+    },
+    {
+      name: "DirectML",
+      platform: "Windows · any DX12 GPU",
+      used: "ASR · Diarize · TTS",
+      notes: "Works on Intel Arc, Iris Xe, AMD Radeon, and older NVIDIA cards. The broadest Windows fallback before CPU.",
+    },
+    {
+      name: "CUDA",
+      platform: "Windows / Linux · NVIDIA",
+      used: "ASR · Diarize · TTS",
+      notes: "Used when a matching CUDA runtime is present. Preferred over DirectML on non-RTX NVIDIA hardware.",
+    },
+    {
+      name: "CoreML",
+      platform: "macOS · Apple Silicon",
+      used: "ASR · Diarize · TTS",
+      notes: "Neural Engine + GPU. Selected automatically on M-series Macs.",
+    },
+    {
+      name: "CPU (ONNX Runtime)",
+      platform: "All platforms",
+      used: "Every stage",
+      notes: "Always present. If no accelerator is available — or a model isn't supported by the chosen provider — that stage falls back to CPU without failing the run.",
+    },
+  ];
+
+  return (
+    <section id="architecture" className="border-b border-border">
+      <Container className="py-20 sm:py-28">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-4">
+            <SectionNumber n="04a" label="Local-first architecture" />
+            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+              What runs where, and why.
+            </h2>
+            <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
+              Every stage of the pipeline runs on your machine by default. Cloud
+              providers are something you plug in per stage, not a place your
+              media silently ends up.
+            </p>
+            <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
+              Acceleration is layered: Trackdub prefers the fastest provider your
+              hardware supports and falls back stage-by-stage, never
+              project-by-project.
+            </p>
+          </div>
+
+          <div className="lg:col-span-8">
+            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Fig. 04a-i &nbsp;·&nbsp; Data plane
+            </div>
+            <div className="mt-3 rounded-none border border-border bg-surface/40">
+              <div className="grid grid-cols-12 border-b border-hairline px-5 py-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                <div className="col-span-3">Where</div>
+                <div className="col-span-4">Stages</div>
+                <div className="col-span-5">What leaves the machine</div>
+              </div>
+              {layers.map((l, i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-12 items-start gap-x-4 border-b border-hairline px-5 py-5 last:border-b-0"
+                >
+                  <div className="col-span-3">
+                    <div className="font-serif text-[18px] text-foreground">
+                      {l.where}
+                    </div>
+                    <div className="mt-1 inline-block border border-border px-2 py-[2px] font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                      {l.tag}
+                    </div>
+                  </div>
+                  <div className="col-span-4">
+                    <div className="font-mono text-[12px] text-foreground">
+                      {l.stages}
+                    </div>
+                    <div className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
+                      {l.what}
+                    </div>
+                  </div>
+                  <div className="col-span-5 font-mono text-[12px] leading-relaxed text-foreground">
+                    {l.leaves}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-14 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Fig. 04a-ii &nbsp;·&nbsp; Execution providers &amp; fallback order
+            </div>
+            <ol className="mt-3 border-t border-border">
+              {providers.map((p, i) => (
+                <li
+                  key={p.name}
+                  className="grid grid-cols-12 gap-x-4 border-b border-border py-5"
+                >
+                  <div className="col-span-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                    {String(i + 1).padStart(2, "0")}
+                  </div>
+                  <div className="col-span-4">
+                    <div className="font-serif text-[20px] text-foreground">
+                      {p.name}
+                    </div>
+                    <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      {p.platform}
+                    </div>
+                  </div>
+                  <div className="col-span-3 font-mono text-[12px] text-foreground">
+                    {p.used}
+                  </div>
+                  <div className="col-span-4 text-[14px] leading-relaxed text-muted-foreground">
+                    {p.notes}
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Fallback is per-stage. A missing provider on one stage does not
+              disable the rest of the pipeline.
+            </p>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
