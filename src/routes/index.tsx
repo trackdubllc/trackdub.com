@@ -1949,6 +1949,16 @@ function FAQ() {
               Not covered here? Write to{" "}
               <TextLink href="mailto:hello@trackdub.com">hello@trackdub.com</TextLink>.
             </p>
+            <p className="mt-4 text-[14px] leading-relaxed text-muted-foreground">
+              Data handling questions are covered in full in the{" "}
+              <Link
+                to="/privacy"
+                className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 text-foreground transition-colors hover:border-accent hover:text-accent"
+              >
+                privacy policy
+              </Link>
+              .
+            </p>
           </div>
           <dl className="lg:col-span-8">
             {items.map((it, i) => (
@@ -2019,6 +2029,7 @@ function Colophon() {
         ["Contact", "mailto:hello@trackdub.com"],
         ["Press", "mailto:press@trackdub.com"],
         ["Security", "mailto:security@trackdub.com"],
+        ["Privacy policy", "/privacy"],
         ["Legal", "mailto:legal@trackdub.com"],
       ],
     ],
