@@ -252,6 +252,7 @@ function Masthead() {
           ))}
         </nav>
         <div className="hidden items-center gap-6 md:flex">
+          <MotionToggle />
           <a
             href="mailto:hello@trackdub.com"
             className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
@@ -282,11 +283,71 @@ function Masthead() {
                 {n.label}
               </a>
             ))}
+            <div className="py-2"><MotionToggle /></div>
             <InkButton href="#pricing">Get Trackdub</InkButton>
           </Container>
         </div>
       )}
     </header>
+  );
+}
+
+/* ---------------- motion toggle ---------------- */
+
+type MotionMode = "full" | "reduced";
+const MOTION_KEY = "trackdub:motion";
+
+function MotionToggle() {
+  const [mode, setMode] = useState<MotionMode | null>(null);
+
+  useEffect(() => {
+    const stored = (typeof window !== "undefined"
+      ? (localStorage.getItem(MOTION_KEY) as MotionMode | null)
+      : null);
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const initial: MotionMode = stored ?? (prefersReduced ? "reduced" : "full");
+    setMode(initial);
+  }, []);
+
+  useEffect(() => {
+    if (!mode) return;
+    document.documentElement.classList.toggle("reduce-motion", mode === "reduced");
+    try {
+      localStorage.setItem(MOTION_KEY, mode);
+    } catch {}
+  }, [mode]);
+
+  const next: MotionMode = mode === "reduced" ? "full" : "reduced";
+  const label = mode === "reduced" ? "Motion: off" : "Motion: on";
+
+  return (
+    <button
+      type="button"
+      onClick={() => setMode(next)}
+      aria-pressed={mode === "reduced" ? "false" : "true"}
+      title={
+        mode === "reduced"
+          ? "Reduced motion is on. Click to enable animations."
+          : "Full motion is on. Click to reduce animations."
+      }
+      className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+    >
+      <span
+        aria-hidden="true"
+        className={`relative inline-block h-3 w-6 rounded-full border border-border transition-colors ${
+          mode === "reduced" ? "bg-transparent" : "bg-accent/60"
+        }`}
+      >
+        <span
+          className={`absolute top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-foreground transition-all duration-300 ${
+            mode === "reduced" ? "left-0.5" : "left-[calc(100%-0.625rem)]"
+          }`}
+        />
+      </span>
+      <span>{label}</span>
+    </button>
   );
 }
 
