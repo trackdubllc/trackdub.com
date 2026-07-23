@@ -216,6 +216,30 @@ function SectionRail() {
     activeRef.current = active;
   }, [active]);
 
+  // Cancel any in-flight smooth scroll the moment the user takes over with
+  // the wheel, touch, or keyboard — the animation should never fight input.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const cancel = () => cancelSmoothScroll();
+    const onKey = (e: KeyboardEvent) => {
+      // Only cancel for keys that actually scroll.
+      const scrollKeys = new Set([
+        "PageUp", "PageDown", "Home", "End",
+        "ArrowUp", "ArrowDown", " ", "Spacebar",
+      ]);
+      if (scrollKeys.has(e.key)) cancel();
+    };
+    window.addEventListener("wheel", cancel, { passive: true });
+    window.addEventListener("touchstart", cancel, { passive: true });
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("wheel", cancel);
+      window.removeEventListener("touchstart", cancel);
+      window.removeEventListener("keydown", onKey);
+      cancelSmoothScroll();
+    };
+  }, []);
+
   // Sync with URL hash — deep links should highlight the right chapter.
   useEffect(() => {
     if (typeof window === "undefined") return;
