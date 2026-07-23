@@ -88,6 +88,69 @@ function Rule({ className = "" }: { className?: string }) {
   return <div className={`h-px w-full bg-border ${className}`} aria-hidden />;
 }
 
+/* ---------------- section rail (kinetic progress) ---------------- */
+
+function SectionRail() {
+  const [active, setActive] = useState<string>("");
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const ids = NAV.map((n) => n.href.slice(1));
+    const targets = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (!targets.length) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const vis = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (vis[0]) setActive(vis[0].target.id);
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 1] },
+    );
+    targets.forEach((t) => io.observe(t));
+
+    const onScroll = () => setVisible(window.scrollY > 480);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  return (
+    <aside
+      aria-hidden
+      className={`pointer-events-none fixed left-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-2 transition-opacity duration-500 xl:flex ${visible ? "opacity-100" : "opacity-0"}`}
+    >
+      {NAV.map((n, i) => {
+        const id = n.href.slice(1);
+        const isActive = active === id;
+        return (
+          <a
+            key={id}
+            href={n.href}
+            className="pointer-events-auto group flex items-center gap-3"
+          >
+            <span
+              className={`h-px transition-all duration-300 ${isActive ? "w-8 bg-accent" : "w-3 bg-border group-hover:w-5 group-hover:bg-foreground/60"}`}
+            />
+            <span
+              className={`font-mono text-[10px] uppercase tracking-[0.14em] transition-colors ${isActive ? "text-accent" : "text-muted-foreground/0 group-hover:text-muted-foreground"}`}
+            >
+              {String(i + 1).padStart(2, "0")} · {n.label}
+            </span>
+          </a>
+        );
+      })}
+    </aside>
+  );
+}
+
 function TextLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <a
