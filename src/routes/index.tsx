@@ -617,10 +617,15 @@ function SectionRail() {
         draggingRef.current = false;
         setScrubbing(false);
       }, 0);
-    } else if (isTouch && e.type !== "pointercancel") {
-      // Short tap on touch: the browser won't synthesize a click reliably on
-      // the underlying anchor (especially in gap areas), so resolve to the
-      // nearest chapter ourselves.
+    } else if (e.type !== "pointercancel") {
+      // Non-drag release = a click/tap on the rail. Resolve to the nearest
+      // chapter based on pointer Y so it works everywhere in the rail column
+      // — on ticks, on labels, on tooltips, and in the gaps between rows.
+      // Suppress the anchor's own click so we don't double-jump.
+      suppressClickRef.current = true;
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 0);
       const id = nearestChapterId(e.clientY);
       if (id) jumpToChapter(id);
     }
