@@ -182,7 +182,7 @@ function Masthead() {
 
 function Lead() {
   return (
-    <section id="top" className="border-b border-border">
+    <section id="top" data-reveal className="reveal border-b border-border">
       <Container className="grid gap-10 py-16 sm:py-24 lg:grid-cols-12 lg:gap-16 lg:py-32">
         <div className="lg:col-span-8">
           <SectionNumber n="00" label="A workstation for dubbing" />
@@ -470,7 +470,7 @@ function ResumableJob() {
   const allDone = JOB_STAGES.every((s) => job.status[s.id] === "done");
 
   return (
-    <section id="resume" className="border-b border-border bg-background">
+    <section id="resume" data-reveal className="reveal border-b border-border bg-background">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -761,7 +761,7 @@ function statusLabel(s: JobStageStatus, pct: number): string {
 
 function ProductPlate() {
   return (
-    <section className="border-b border-border">
+    <section data-reveal className="reveal border-b border-border">
       <Container className="py-14 sm:py-20">
         <div className="animate-fade-up">
           <WorkstationMock />
@@ -965,7 +965,7 @@ function WorkstationMock() {
 function TrustStrip() {
   const items = ["Local by default", "Deterministic runs", "Cross-platform", "Open manifest", "No account required"];
   return (
-    <section className="border-b border-border bg-surface">
+    <section data-reveal className="reveal border-b border-border bg-surface">
       <Container className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 py-6 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
         {items.map((t, i) => (
           <span key={t} className="flex items-center gap-8">
@@ -1033,7 +1033,7 @@ const STAGES = [
 
 function PipelineFeature() {
   return (
-    <section id="pipeline" className="border-b border-border">
+    <section id="pipeline" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
@@ -1178,7 +1178,7 @@ function Walkthrough() {
     Object.values(stale).reduce((n, m) => n + (m?.[s] ? 1 : 0), 0);
 
   return (
-    <section id="walkthrough" className="border-b border-border bg-surface">
+    <section id="walkthrough" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -1568,7 +1568,7 @@ function FakeWaveform({ seed, color, busy }: { seed: number; color: string; busy
 
 function StageChapters() {
   return (
-    <section className="border-b border-border bg-surface">
+    <section data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="03" label="Each stage, in detail" />
         <div className="mt-14 space-y-16">
@@ -1788,7 +1788,7 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
 
 function Control() {
   return (
-    <section id="control" className="border-b border-border">
+    <section id="control" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="03" label="You can fix anything, and only that thing" />
         <div className="mt-8 grid gap-10 lg:grid-cols-12 lg:gap-16">
@@ -1861,7 +1861,7 @@ function ControlPlate({
 
 function Performance() {
   return (
-    <section id="performance" className="border-b border-border bg-surface">
+    <section id="performance" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -1928,7 +1928,7 @@ function WhatYouGet() {
     ["Cross-platform", "Windows, macOS, Linux. Same project format. Same output."],
   ];
   return (
-    <section className="border-b border-border">
+    <section data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="05" label="What you get" />
         <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -1961,7 +1961,7 @@ function ComparedTo() {
     ["No account required", "Yes", "No", "No"],
   ];
   return (
-    <section className="border-b border-border bg-surface">
+    <section data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="06" label="Compared to" />
         <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -2041,7 +2041,7 @@ function Pricing() {
     },
   ];
   return (
-    <section id="pricing" className="border-b border-border">
+    <section id="pricing" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="07" label="Pricing" />
         <h2 className="mt-6 max-w-2xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -2124,7 +2124,7 @@ function FAQ() {
     },
   ];
   return (
-    <section id="faq" className="border-b border-border bg-surface">
+    <section id="faq" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -2168,7 +2168,7 @@ function FAQ() {
 
 function Endnote() {
   return (
-    <section className="border-b border-border">
+    <section data-reveal className="reveal border-b border-border">
       <Container className="py-24 sm:py-36 text-center">
         <SectionNumber n="09" label="End" />
         <p className="mx-auto mt-8 max-w-3xl font-serif text-4xl leading-[1.12] tracking-tight text-foreground sm:text-5xl">
@@ -2356,7 +2356,7 @@ function Privacy() {
   ];
 
   return (
-    <section id="privacy" className="border-b border-border bg-surface">
+    <section id="privacy" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -2539,7 +2539,7 @@ function Architecture() {
   ];
 
   return (
-    <section id="architecture" className="border-b border-border">
+    <section id="architecture" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -2711,7 +2711,7 @@ function SystemRequirements() {
   ];
 
   return (
-    <section id="requirements" className="border-b border-border bg-surface">
+    <section id="requirements" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
