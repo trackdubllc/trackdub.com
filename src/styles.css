@@ -63,37 +63,50 @@
   --color-surface-2: var(--surface-2);
   --color-ink: var(--ink);
   --color-hairline: var(--hairline);
-  --font-serif: "Inter Tight", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-sans: "Work Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: "Instrument Serif", "IBM Plex Serif", Georgia, ui-serif, serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 :root {
-  --radius: 0.375rem;
-  /* Trackdub — cool off-white, graphite ink, crisp signal blue accent */
-  --background: oklch(0.975 0.004 250);        /* #f6f7f9 */
-  --surface: oklch(0.945 0.006 250);           /* #eceef2 */
-  --surface-2: oklch(0.22 0.008 250);          /* graphite band */
-  --foreground: oklch(0.18 0.010 260);         /* near-black */
-  --ink: oklch(0.14 0.010 260);
-  --card: oklch(0.965 0.005 250);
-  --card-foreground: oklch(0.18 0.010 260);
-  --popover: oklch(0.98 0.004 250);
-  --popover-foreground: oklch(0.18 0.010 260);
-  --primary: oklch(0.18 0.010 260);
-  --primary-foreground: oklch(0.975 0.004 250);
-  --secondary: oklch(0.945 0.006 250);
-  --secondary-foreground: oklch(0.18 0.010 260);
-  --muted: oklch(0.945 0.006 250);
-  --muted-foreground: oklch(0.48 0.014 258);   /* cool gray ~#5a6370 */
-  --accent: oklch(0.60 0.19 258);              /* signal blue #2f6df6 */
-  --accent-foreground: oklch(0.975 0.004 250);
-  --destructive: oklch(0.55 0.2 27);
-  --destructive-foreground: oklch(0.975 0.004 250);
-  --border: oklch(0.90 0.006 250);             /* hairline #dfe3ea */
-  --hairline: oklch(0.90 0.006 250);
-  --input: oklch(0.92 0.006 250);
-  --ring: oklch(0.60 0.19 258);
+  --radius: 0.25rem;
+  /* Trackdub — Autumn Harvest: warm cream paper, charred ink, amber/gold accents */
+
+  /* Palette anchors (raw brand colors, reused by chapter themes) */
+  --paper:    oklch(0.955 0.024 78);   /* #f5ede0 warm cream */
+  --paper-2:  oklch(0.915 0.032 74);   /* deeper cream */
+  --ink-raw:  oklch(0.16 0.028 45);    /* #1a0f0a charred brown-black */
+  --ash:      oklch(0.235 0.028 46);   /* #2a1e18 warm graphite */
+  --burgundy: oklch(0.36 0.115 32);    /* #5c2018 deep wine */
+  --rust:     oklch(0.51 0.16 42);     /* #8a3a1c mid rust */
+  --amber:    oklch(0.72 0.17 62);     /* #d4842a warm amber */
+  --gold:     oklch(0.83 0.15 82);     /* #e8b84a soft gold */
+  --cream:    oklch(0.94 0.03 78);     /* text on dark chapters */
+
+  /* Default (paper) chapter — used by the page shell and any un-themed section */
+  --background: var(--paper);
+  --surface:    var(--paper-2);
+  --surface-2:  var(--ash);
+  --foreground: var(--ink-raw);
+  --ink:        var(--ink-raw);
+  --card:            color-mix(in oklch, var(--paper) 92%, var(--ink-raw) 8%);
+  --card-foreground: var(--ink-raw);
+  --popover:         var(--paper);
+  --popover-foreground: var(--ink-raw);
+  --primary:            var(--ink-raw);
+  --primary-foreground: var(--paper);
+  --secondary:            var(--paper-2);
+  --secondary-foreground: var(--ink-raw);
+  --muted:            var(--paper-2);
+  --muted-foreground: color-mix(in oklch, var(--ink-raw) 55%, var(--paper) 45%);
+  --accent:            var(--amber);
+  --accent-foreground: var(--ink-raw);
+  --destructive:            oklch(0.55 0.2 27);
+  --destructive-foreground: var(--paper);
+  --border:   color-mix(in oklch, var(--ink-raw) 18%, var(--paper) 82%);
+  --hairline: color-mix(in oklch, var(--ink-raw) 18%, var(--paper) 82%);
+  --input:    color-mix(in oklch, var(--ink-raw) 14%, var(--paper) 86%);
+  --ring:     var(--amber);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -153,7 +166,7 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv11";
+    font-feature-settings: "ss01";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -189,8 +202,9 @@
 }
 @utility font-serif {
   font-family: var(--font-serif);
-  font-feature-settings: "ss01", "cv11";
-  letter-spacing: -0.02em;
+  font-feature-settings: normal;
+  letter-spacing: -0.01em;
+  font-weight: 400;
 }
 @utility font-mono {
   font-family: var(--font-mono);
