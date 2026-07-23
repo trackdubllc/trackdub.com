@@ -1913,7 +1913,7 @@ function FAQ() {
     },
     {
       q: "What happens to my data if I uninstall?",
-      a: "Your projects, source media, and generated output live in folders you chose, so they stay where they are until you delete them. The app data directory — model cache, preferences, and logs — can be removed during uninstall or manually from %LOCALAPPDATA%\\Trackdub.",
+      a: "Your projects, source media, and generated output live in folders you chose, so they stay where they are until you delete them. The app data directory — model cache, preferences, and logs — can be removed during uninstall or manually from %LOCALAPPDATA%\\Trackdub. See the full privacy policy for the complete list.",
     },
     {
       q: "Can I use it commercially?",
