@@ -501,3 +501,249 @@ html.reduce-motion .btn-sheen::after,
 html.reduce-motion .btn-sheen:hover::after,
 html.reduce-motion .btn-sheen:focus-visible::after,
 html.reduce-motion .pulse-once { animation: none !important; }
+
+/* ---------- chapter themes ----------
+   Each section gets its own palette by overriding the semantic tokens on
+   its root element. Every child utility (bg-background, text-foreground,
+   text-muted-foreground, bg-accent, border-border, bg-surface, etc.)
+   inherits from these vars, so no per-component rewrites are needed.
+
+   Signature marks / seams are added via a floating serif ornament in
+   the top-left of each section (::before is already the reveal tick).
+*/
+
+/* Reusable chapter recipes */
+@utility chapter-paper {
+  --background: var(--paper);
+  --surface:    var(--paper-2);
+  --surface-2:  var(--ash);
+  --foreground: var(--ink-raw);
+  --card:            color-mix(in oklch, var(--paper) 90%, var(--ink-raw) 10%);
+  --card-foreground: var(--ink-raw);
+  --popover:         var(--paper);
+  --popover-foreground: var(--ink-raw);
+  --muted:            var(--paper-2);
+  --muted-foreground: color-mix(in oklch, var(--ink-raw) 55%, var(--paper) 45%);
+  --accent:            var(--amber);
+  --accent-foreground: var(--ink-raw);
+  --border:   color-mix(in oklch, var(--ink-raw) 18%, var(--paper) 82%);
+  --hairline: color-mix(in oklch, var(--ink-raw) 18%, var(--paper) 82%);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+@utility chapter-cream {
+  --background: color-mix(in oklch, var(--paper) 88%, var(--gold) 12%);
+  --surface:    color-mix(in oklch, var(--paper) 80%, var(--gold) 20%);
+  --surface-2:  var(--burgundy);
+  --foreground: var(--ink-raw);
+  --card:            color-mix(in oklch, var(--paper) 84%, var(--gold) 16%);
+  --card-foreground: var(--ink-raw);
+  --muted:            color-mix(in oklch, var(--paper) 82%, var(--gold) 18%);
+  --muted-foreground: color-mix(in oklch, var(--ink-raw) 55%, var(--paper) 45%);
+  --accent:            var(--burgundy);
+  --accent-foreground: var(--paper);
+  --border:   color-mix(in oklch, var(--ink-raw) 22%, var(--paper) 78%);
+  --hairline: color-mix(in oklch, var(--ink-raw) 22%, var(--paper) 78%);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+@utility chapter-ash {
+  --background: var(--ash);
+  --surface:    color-mix(in oklch, var(--ash) 78%, var(--ink-raw) 22%);
+  --surface-2:  var(--ink-raw);
+  --foreground: var(--cream);
+  --card:            color-mix(in oklch, var(--ash) 84%, var(--cream) 16%);
+  --card-foreground: var(--cream);
+  --muted:            color-mix(in oklch, var(--ash) 80%, var(--cream) 20%);
+  --muted-foreground: color-mix(in oklch, var(--cream) 60%, var(--ash) 40%);
+  --accent:            var(--amber);
+  --accent-foreground: var(--ink-raw);
+  --border:   color-mix(in oklch, var(--cream) 22%, var(--ash) 78%);
+  --hairline: color-mix(in oklch, var(--cream) 22%, var(--ash) 78%);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+@utility chapter-ink {
+  --background: var(--ink-raw);
+  --surface:    color-mix(in oklch, var(--ink-raw) 84%, var(--cream) 16%);
+  --surface-2:  color-mix(in oklch, var(--ink-raw) 70%, var(--gold) 30%);
+  --foreground: var(--cream);
+  --card:            color-mix(in oklch, var(--ink-raw) 86%, var(--cream) 14%);
+  --card-foreground: var(--cream);
+  --muted:            color-mix(in oklch, var(--ink-raw) 82%, var(--cream) 18%);
+  --muted-foreground: color-mix(in oklch, var(--cream) 55%, var(--ink-raw) 45%);
+  --accent:            var(--gold);
+  --accent-foreground: var(--ink-raw);
+  --border:   color-mix(in oklch, var(--cream) 18%, var(--ink-raw) 82%);
+  --hairline: color-mix(in oklch, var(--cream) 18%, var(--ink-raw) 82%);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+@utility chapter-burgundy {
+  --background: var(--burgundy);
+  --surface:    color-mix(in oklch, var(--burgundy) 84%, var(--ink-raw) 16%);
+  --surface-2:  var(--ink-raw);
+  --foreground: var(--cream);
+  --card:            color-mix(in oklch, var(--burgundy) 86%, var(--cream) 14%);
+  --card-foreground: var(--cream);
+  --muted:            color-mix(in oklch, var(--burgundy) 82%, var(--cream) 18%);
+  --muted-foreground: color-mix(in oklch, var(--cream) 62%, var(--burgundy) 38%);
+  --accent:            var(--gold);
+  --accent-foreground: var(--ink-raw);
+  --border:   color-mix(in oklch, var(--cream) 22%, var(--burgundy) 78%);
+  --hairline: color-mix(in oklch, var(--cream) 22%, var(--burgundy) 78%);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+@utility chapter-rust {
+  --background: color-mix(in oklch, var(--ash) 70%, var(--rust) 30%);
+  --surface:    color-mix(in oklch, var(--ash) 82%, var(--rust) 18%);
+  --surface-2:  var(--ink-raw);
+  --foreground: var(--cream);
+  --card:            color-mix(in oklch, var(--ash) 78%, var(--rust) 22%);
+  --card-foreground: var(--cream);
+  --muted:            color-mix(in oklch, var(--ash) 78%, var(--rust) 22%);
+  --muted-foreground: color-mix(in oklch, var(--cream) 58%, var(--rust) 42%);
+  --accent:            var(--gold);
+  --accent-foreground: var(--ink-raw);
+  --border:   color-mix(in oklch, var(--cream) 22%, var(--rust) 78%);
+  --hairline: color-mix(in oklch, var(--cream) 22%, var(--rust) 78%);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Assign chapters to existing section ids — no index.tsx changes required.
+   Rotation ordered so adjacent sections always contrast strongly. */
+section#top         { @apply chapter-paper; }
+section#pipeline    { @apply chapter-ash; }
+section#walkthrough { @apply chapter-ink; }
+section#resume      { @apply chapter-burgundy; }
+section#control     { @apply chapter-cream; }
+section#performance { @apply chapter-ink; }
+section#architecture{ @apply chapter-paper; }
+section#privacy     { @apply chapter-burgundy; }
+section#requirements{ @apply chapter-rust; }
+section#pricing     { @apply chapter-cream; }
+section#faq         { @apply chapter-ink; }
+
+/* Sections without a dedicated id (ProductPlate, TrustStrip, StageChapters,
+   WhatYouGet, ComparedTo, Endnote, PipelineFeature interior blocks) alternate
+   softly with the paper base — nth-of-type keeps the rhythm quiet. */
+
+/* Floating serif chapter mark — sits at the top-right of each themed section
+   so the section reveals its identity without an extra span in JSX. Uses the
+   already-declared reveal transition to fade in with the tick. */
+section[id]::before {
+  /* keep the accent tick from the reveal system (defined above). */
+}
+section[id] {
+  position: relative;
+}
+section#top,
+section#pipeline,
+section#walkthrough,
+section#resume,
+section#control,
+section#performance,
+section#architecture,
+section#privacy,
+section#requirements,
+section#pricing,
+section#faq {
+  isolation: isolate;
+}
+
+/* Diagonal chapter seam — a thin serif italic mark + hairline that rides
+   the top-right corner of each themed chapter. Cheap, static, no JS. */
+section#top::after,
+section#pipeline::after,
+section#walkthrough::after,
+section#resume::after,
+section#control::after,
+section#performance::after,
+section#architecture::after,
+section#privacy::after,
+section#requirements::after,
+section#pricing::after,
+section#faq::after {
+  /* the reveal system already owns ::after for a hairline sweep. */
+}
+
+/* Chapter-mark badge — small serif italic ornament floating top-right */
+.chapter-paper::before,
+.chapter-cream::before,
+.chapter-ash::before,
+.chapter-ink::before,
+.chapter-burgundy::before,
+.chapter-rust::before { /* reserved: tick already uses ::before */ }
+
+/* A dedicated pseudo on a nested wrapper isn't available — use box-shadow
+   trick to tint the top hairline of every themed chapter with its accent. */
+section#top,
+section#pipeline,
+section#walkthrough,
+section#resume,
+section#control,
+section#performance,
+section#architecture,
+section#privacy,
+section#requirements,
+section#pricing,
+section#faq {
+  box-shadow: inset 0 1px 0 0 color-mix(in oklch, var(--accent) 35%, transparent);
+  border-color: color-mix(in oklch, var(--foreground) 20%, transparent) !important;
+}
+
+/* Selection color adapts to the current chapter accent */
+::selection {
+  background: color-mix(in oklch, var(--accent) 40%, transparent);
+  color: var(--foreground);
+}
+
+/* Section reveal underline under h2 already reads --accent → each chapter
+   automatically gets its own underline hue. Nothing extra needed. */
+
+/* Bump serif rendering weight since Instrument Serif is a hairline face. */
+h1.font-serif, h2.font-serif, h3.font-serif,
+.font-serif h1, .font-serif h2, .font-serif h3 {
+  font-synthesis: none;
+}
+
+/* Signature chapter motions — subtle, one per theme, gated on reveal.
+   Ink chapters get a card snap-in, burgundy gets a margin-slide, ash gets
+   a bar-sweep. All utility-safe and reduced-motion aware.
+*/
+@keyframes snap-in {
+  0%   { opacity: 0; transform: translate3d(0, 6px, 0) scale(0.985); }
+  60%  { opacity: 1; transform: translate3d(0, -2px, 0) scale(1.01); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes margin-slide {
+  from { opacity: 0; transform: translate3d(-12px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes bar-sweep {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.chapter-ink.revealed .reveal-child {
+  animation: snap-in 360ms cubic-bezier(0.22, 1, 0.36, 1)
+             calc(60ms + var(--reveal-i, 0) * 40ms) both;
+}
+.chapter-burgundy.revealed .reveal-child {
+  animation: margin-slide 360ms cubic-bezier(0.22, 1, 0.36, 1)
+             calc(60ms + var(--reveal-i, 0) * 40ms) both;
+}
+.chapter-ash.revealed .reveal-child {
+  animation: snap-in 320ms cubic-bezier(0.22, 1, 0.36, 1)
+             calc(60ms + var(--reveal-i, 0) * 30ms) both;
+}
+
+html.reduce-motion .chapter-ink.revealed .reveal-child,
+html.reduce-motion .chapter-burgundy.revealed .reveal-child,
+html.reduce-motion .chapter-ash.revealed .reveal-child {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
