@@ -1,47 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import {
-  ArrowRight,
-  Check,
-  ChevronDown,
-  Cpu,
-  Download,
-  FileAudio,
-  Github,
-  Languages,
-  Layers,
-  Menu,
-  MonitorPlay,
-  Package,
-  Pause,
-  Play,
-  Radio,
-  RefreshCw,
-  ShieldCheck,
-  SlidersHorizontal,
-  Sparkles,
-  Users,
-  Volume2,
-  Waves,
-  Wrench,
-  X,
-  Zap,
-} from "lucide-react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Trackdub — Dub videos without giving up control" },
+      { title: "Trackdub — A desktop workstation for dubbing video" },
       {
         name: "description",
         content:
-          "Trackdub is a Windows desktop workstation for AI video dubbing. Translate, voice, and mix your video in one workflow — inspect every stage, fix what needs fixing, and keep the rest.",
+          "Trackdub is a local-first desktop workstation for dubbing video into other languages. Editable stages, deterministic runs, your media stays on your machine.",
       },
-      { property: "og:title", content: "Trackdub — Dub videos without giving up control" },
+      { property: "og:title", content: "Trackdub — A desktop workstation for dubbing video" },
       {
         property: "og:description",
         content:
-          "A desktop AI dubbing workstation with stage-by-stage control, local acceleration, and resumable jobs.",
+          "Local-first, stage-by-stage dubbing. Editable script, per-line voice, alignment, mix — all inspectable.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
@@ -51,1114 +24,1171 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+function Index() {
+  return (
+    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-accent/20 selection:text-ink">
+      <Masthead />
+      <main>
+        <Lead />
+        <ProductPlate />
+        <TrustStrip />
+        <PipelineFeature />
+        <StageChapters />
+        <Control />
+        <Performance />
+        <WhatYouGet />
+        <ComparedTo />
+        <Pricing />
+        <FAQ />
+        <Endnote />
+      </main>
+      <Colophon />
+    </div>
+  );
+}
+
+/* ---------------- shared bits ---------------- */
+
 const NAV = [
-  { href: "#product", label: "Product" },
-  { href: "#workflow", label: "Workflow" },
+  { href: "#pipeline", label: "Pipeline" },
+  { href: "#control", label: "Control" },
   { href: "#performance", label: "Performance" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ];
 
-function Index() {
+function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
+}
+
+function SectionNumber({ n, label }: { n: string; label: string }) {
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary/30 selection:text-foreground">
-      <TopNav />
-      <main>
-        <Hero />
-        <TrustStrip />
-        <Workflow />
-        <Control />
-        <Performance />
-        <Features />
-        <Comparison />
-        <Pricing />
-        <FAQ />
-        <FinalCTA />
-      </main>
-      <Footer />
+    <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+      <span className="text-accent">{n}</span>
+      <span className="mx-2 text-hairline">/</span>
+      <span>{label}</span>
     </div>
   );
 }
 
-/* ---------- Nav ---------- */
+function Rule({ className = "" }: { className?: string }) {
+  return <div className={`h-px w-full bg-border ${className}`} aria-hidden />;
+}
 
-function Wordmark({ className = "" }: { className?: string }) {
+function TextLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <a href="#top" className={`group flex items-center gap-2 ${className}`} aria-label="Trackdub home">
-      <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-secondary">
-        <svg viewBox="0 0 24 24" className="h-4 w-4 text-primary" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
-          <path d="M3 12h2M7 8v8M11 5v14M15 9v6M19 11v2M21 12h-2" />
-        </svg>
-      </span>
-      <span className="text-[15px] font-semibold tracking-tight">
-        trackdub<span className="text-primary">.</span>
-      </span>
+    <a
+      href={href}
+      className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 text-foreground transition-colors hover:border-accent hover:text-accent"
+    >
+      {children}
     </a>
   );
 }
 
-function TopNav() {
-  const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
+function InkButton({
+  href,
+  children,
+  variant = "primary",
+}: {
+  href: string;
+  children: React.ReactNode;
+  variant?: "primary" | "ghost";
+}) {
+  const base =
+    "inline-flex items-center gap-2 px-4 py-2 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+  const styles =
+    variant === "primary"
+      ? "bg-foreground text-background hover:bg-ink"
+      : "border border-foreground/70 text-foreground hover:border-foreground";
   return (
-    <header
-      id="top"
-      className={`sticky top-0 z-50 transition-colors ${
-        scrolled
-          ? "border-b border-border/80 bg-background/80 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
-      }`}
-    >
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Wordmark />
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+    <a href={href} className={`${base} ${styles}`}>
+      {children}
+    </a>
+  );
+}
+
+/* ---------------- masthead ---------------- */
+
+function Masthead() {
+  const [open, setOpen] = useState(false);
+  return (
+    <header className="border-b border-border bg-background">
+      <Container className="flex h-16 items-center justify-between">
+        <a href="#top" className="font-serif text-2xl leading-none tracking-tight text-foreground">
+          Trackdub<span className="text-accent">.</span>
+        </a>
+        <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
           {NAV.map((n) => (
             <a
               key={n.href}
               href={n.href}
-              className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
             >
               {n.label}
             </a>
           ))}
         </nav>
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-6 md:flex">
           <a
-            href="https://github.com/trackdub"
-            className="rounded-md p-2 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="GitHub"
+            href="mailto:hello@trackdub.com"
+            className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
           >
-            <Github className="h-4 w-4" />
+            Contact
           </a>
-          <CTAButton href="#pricing" size="sm">
-            Get Trackdub
-          </CTAButton>
+          <InkButton href="#pricing">Get Trackdub</InkButton>
         </div>
         <button
-          className="md:hidden rounded-md p-2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="md:hidden font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
           onClick={() => setOpen((o) => !o)}
-          aria-label="Toggle menu"
           aria-expanded={open}
+          aria-label="Toggle menu"
         >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {open ? "Close" : "Menu"}
         </button>
-      </div>
+      </Container>
       {open && (
         <div className="border-t border-border bg-background md:hidden">
-          <nav className="mx-auto flex max-w-7xl flex-col p-3" aria-label="Mobile">
+          <Container className="flex flex-col py-4">
             {NAV.map((n) => (
               <a
                 key={n.href}
                 href={n.href}
                 onClick={() => setOpen(false)}
-                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
+                className="py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
               >
                 {n.label}
               </a>
             ))}
-            <CTAButton href="#pricing" className="mt-2 justify-center">
-              Get Trackdub
-            </CTAButton>
-          </nav>
+            <InkButton href="#pricing">Get Trackdub</InkButton>
+          </Container>
         </div>
       )}
     </header>
   );
 }
 
-/* ---------- Buttons ---------- */
+/* ---------------- lead ---------------- */
 
-function CTAButton({
-  href,
-  children,
-  variant = "primary",
-  size = "md",
-  className = "",
-}: {
-  href: string;
-  children: React.ReactNode;
-  variant?: "primary" | "ghost";
-  size?: "sm" | "md";
-  className?: string;
-}) {
-  const base =
-    "inline-flex items-center gap-2 rounded-md font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-  const sizes = size === "sm" ? "px-3 py-1.5 text-sm" : "px-4 py-2.5 text-sm";
-  const variants =
-    variant === "primary"
-      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_0_1px_oklch(1_0_0_/_0.08)_inset,0_8px_24px_-12px_oklch(0.72_0.13_210_/_0.6)]"
-      : "border border-border bg-secondary/60 text-foreground hover:bg-secondary";
+function Lead() {
   return (
-    <a href={href} className={`${base} ${sizes} ${variants} ${className}`}>
-      {children}
-    </a>
-  );
-}
-
-/* ---------- Section helpers ---------- */
-
-function SectionHeader({
-  eyebrow,
-  title,
-  description,
-  align = "center",
-}: {
-  eyebrow?: string;
-  title: string;
-  description?: string;
-  align?: "center" | "left";
-}) {
-  return (
-    <div className={`max-w-2xl ${align === "center" ? "mx-auto text-center" : ""}`}>
-      {eyebrow && (
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-3 py-1 text-xs font-medium text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse-dot" />
-          {eyebrow}
-        </div>
-      )}
-      <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{title}</h2>
-      {description && (
-        <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">{description}</p>
-      )}
-    </div>
-  );
-}
-
-/* ---------- Hero ---------- */
-
-function Hero() {
-  return (
-    <section id="product" className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-hero" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.15]" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" aria-hidden />
-      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24 lg:pt-28">
-        <div className="grid items-center gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-6">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-3 py-1 text-xs text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse-dot" />
-              Windows desktop · in development
-            </div>
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Dub videos <span className="text-primary">without giving up control.</span>
-            </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Translate, voice, and mix your video in one desktop workflow. Inspect every stage, fix what
-              needs fixing, and keep the rest.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <CTAButton href="#pricing">
-                <Download className="h-4 w-4" />
-                Get Trackdub
-              </CTAButton>
-              <CTAButton href="#workflow" variant="ghost">
-                See how it works
-                <ArrowRight className="h-4 w-4" />
-              </CTAButton>
-            </div>
-            <dl className="mt-10 grid grid-cols-3 gap-6 border-t border-border pt-6 text-sm">
-              {[
-                ["6", "editable stages"],
-                ["Local", "acceleration"],
-                ["Resumable", "jobs"],
-              ].map(([k, v]) => (
-                <div key={v}>
-                  <dt className="text-lg font-semibold text-foreground">{k}</dt>
-                  <dd className="text-xs text-muted-foreground">{v}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-          <div className="lg:col-span-6">
-            <ProductMockup />
+    <section id="top" className="border-b border-border">
+      <Container className="grid gap-10 py-16 sm:py-24 lg:grid-cols-12 lg:gap-16 lg:py-32">
+        <div className="lg:col-span-8">
+          <SectionNumber n="00" label="A workstation for dubbing" />
+          <h1 className="mt-6 font-serif text-5xl leading-[1.02] tracking-tight text-foreground sm:text-6xl lg:text-7xl xl:text-[88px]">
+            Dub videos into other languages{" "}
+            <em className="text-accent">without giving up control.</em>
+          </h1>
+          <p className="mt-8 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+            Trackdub is a desktop workstation for translating, voicing, and mixing video. Every stage
+            of the pipeline is inspectable, editable, and rerunnable — from the transcript to the
+            final mix. Your media never leaves your machine unless you say so.
+          </p>
+          <div className="mt-10 flex flex-wrap items-center gap-6">
+            <InkButton href="#pricing">Download for Windows</InkButton>
+            <TextLink href="#pipeline">Read the pipeline →</TextLink>
           </div>
         </div>
-      </div>
+        <aside className="lg:col-span-4 lg:border-l lg:border-border lg:pl-10">
+          <dl className="space-y-5 font-mono text-[12px] text-muted-foreground">
+            {[
+              ["Version", "0.9.2 — preview"],
+              ["Platforms", "Windows · macOS · Linux"],
+              ["License", "Commercial · non-commercial"],
+              ["Runs on", "CPU · DirectML · CUDA · CoreML"],
+              ["Data", "Local by default"],
+            ].map(([k, v]) => (
+              <div key={k} className="flex justify-between gap-4 border-b border-hairline pb-3">
+                <dt className="uppercase tracking-[0.14em]">{k}</dt>
+                <dd className="text-right text-foreground">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </aside>
+      </Container>
     </section>
   );
 }
 
-/* ---------- Product Mockup ---------- */
+/* ---------------- product plate (single figure) ---------------- */
 
-function ProductMockup() {
+function ProductPlate() {
   return (
-    <div className="relative animate-fade-up">
-      <div className="absolute -inset-x-10 -top-10 bottom-10 rounded-[2rem] bg-primary/10 blur-3xl" aria-hidden />
-      <div className="relative overflow-hidden rounded-xl border border-border bg-card shadow-panel">
-        {/* Titlebar */}
-        <div className="flex items-center justify-between border-b border-border bg-secondary/50 px-3 py-2">
-          <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
-            <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
-            <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
+    <section className="border-b border-border">
+      <Container className="py-14 sm:py-20">
+        <div className="animate-fade-up">
+          <WorkstationMock />
+          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            Fig. 01 &nbsp;·&nbsp; Trackdub project view. German source dubbed to English; six stages
+            visible in the run column; line 42 open in the script editor.
+          </p>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function WorkstationMock() {
+  const bg = "oklch(0.16 0.010 250)";
+  const panel = "oklch(0.20 0.012 250)";
+  const inkText = "oklch(0.92 0.005 240)";
+  const dim = "oklch(0.62 0.02 245)";
+  return (
+    <figure
+      className="overflow-hidden border border-border shadow-panel"
+      style={{ backgroundColor: bg, color: inkText }}
+    >
+      {/* titlebar */}
+      <div
+        className="flex items-center justify-between border-b px-4 py-2 font-mono text-[11px]"
+        style={{ borderColor: "oklch(0.28 0.014 250)", backgroundColor: panel, color: dim }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="inline-flex gap-1.5">
+            <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.55 0.02 250)" }} />
+            <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.55 0.02 250)" }} />
+            <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.55 0.02 250)" }} />
+          </span>
+          <span>trackdub — interview_final_cut.mp4</span>
+        </div>
+        <span>DE → EN · project #1147</span>
+      </div>
+
+      <div className="grid grid-cols-12">
+        {/* left: stages */}
+        <div
+          className="col-span-3 border-r p-4"
+          style={{ borderColor: "oklch(0.28 0.014 250)" }}
+        >
+          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+            Run
           </div>
-          <div className="text-[11px] font-medium text-muted-foreground">
-            interview_final_cut.mp4 · Project: DE → EN
+          <ol className="space-y-1.5">
+            {[
+              ["01", "Ingest", "done"],
+              ["02", "Transcribe", "done"],
+              ["03", "Translate", "done"],
+              ["04", "Diarize", "active"],
+              ["05", "Voice", "queued"],
+              ["06", "Mix", "queued"],
+            ].map(([n, name, s]) => (
+              <li
+                key={n}
+                className="flex items-center gap-3 py-1 font-mono text-[12px]"
+                style={{ color: s === "queued" ? dim : inkText }}
+              >
+                <span style={{ color: dim }}>{n}</span>
+                <span className="flex-1">{name}</span>
+                <span
+                  style={{
+                    color:
+                      s === "done"
+                        ? "oklch(0.75 0.13 155)"
+                        : s === "active"
+                          ? "oklch(0.68 0.14 50)"
+                          : dim,
+                  }}
+                >
+                  {s === "done" ? "✓" : s === "active" ? "●" : "·"}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+            Provider
           </div>
-          <div className="w-10" />
+          <div className="mt-2 font-mono text-[12px]">DirectML · RTX 4070</div>
+          <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+            Manifest
+          </div>
+          <div className="mt-2 font-mono text-[12px]">bundled · commercial</div>
         </div>
 
-        {/* Video preview + pipeline sidebar */}
-        <div className="grid grid-cols-12 gap-0">
-          <div className="col-span-8 border-r border-border p-3">
-            <div className="relative aspect-video overflow-hidden rounded-md border border-border bg-[oklch(0.13_0.012_250)]">
-              <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_20%,oklch(0.28_0.04_220)_0%,oklch(0.13_0.012_250)_60%)]" />
-              {/* Silhouette */}
-              <svg viewBox="0 0 400 225" className="absolute inset-0 h-full w-full opacity-80">
-                <defs>
-                  <linearGradient id="halo" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0" stopColor="oklch(0.72 0.13 200)" stopOpacity="0.4" />
-                    <stop offset="1" stopColor="oklch(0.72 0.13 200)" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <ellipse cx="200" cy="230" rx="140" ry="90" fill="url(#halo)" />
-                <path
-                  d="M140 225 C 140 175, 170 150, 200 150 C 230 150, 260 175, 260 225 Z"
-                  fill="oklch(0.24 0.02 250)"
-                />
-                <circle cx="200" cy="120" r="30" fill="oklch(0.28 0.02 250)" />
-              </svg>
-              {/* Subtitle */}
-              <div className="absolute inset-x-4 bottom-3 rounded-md border border-white/10 bg-black/50 px-3 py-1.5 text-center text-[11px] font-medium text-white/90 backdrop-blur-sm">
-                "We rebuilt the pipeline so every stage stays editable."
-              </div>
-              {/* Play */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 backdrop-blur">
-                  <Play className="h-5 w-5 text-white" fill="currentColor" />
-                </div>
-              </div>
-              <div className="absolute right-2 top-2 rounded-md border border-border bg-black/50 px-2 py-0.5 text-[10px] font-medium text-white/80">
-                00:42 / 03:18
-              </div>
+        {/* center: script */}
+        <div
+          className="col-span-6 border-r p-5"
+          style={{ borderColor: "oklch(0.28 0.014 250)" }}
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <div className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+              Script · line 42
             </div>
-
-            {/* Subtitle rows */}
-            <div className="mt-3 space-y-1.5">
-              {[
-                { t: "00:38", de: "Wir haben die Pipeline neu gebaut,", en: "We rebuilt the pipeline", spk: "S1", active: false },
-                {
-                  t: "00:42",
-                  de: "damit jede Stufe editierbar bleibt.",
-                  en: "so every stage stays editable.",
-                  spk: "S1",
-                  active: true,
-                },
-                { t: "00:46", de: "Und wenn etwas nicht stimmt —", en: "And if something is off —", spk: "S2", active: false },
-              ].map((r) => (
-                <div
-                  key={r.t}
-                  className={`grid grid-cols-[48px_28px_1fr_1fr] items-center gap-2 rounded-md border px-2 py-1.5 text-[11px] ${
-                    r.active
-                      ? "border-primary/40 bg-primary/5"
-                      : "border-border/60 bg-background/40"
-                  }`}
+            <div className="font-mono text-[10px]" style={{ color: dim }}>
+              S1 Anna · 00:42.180
+            </div>
+          </div>
+          <div className="space-y-3">
+            {[
+              { t: "00:38", s: "S1", de: "Wir haben die Pipeline neu gebaut,", en: "We rebuilt the pipeline,", a: false },
+              { t: "00:42", s: "S1", de: "damit jede Stufe editierbar bleibt.", en: "so every stage stays editable.", a: true },
+              { t: "00:46", s: "S2", de: "Und wenn etwas nicht stimmt —", en: "And if something is off —", a: false },
+              { t: "00:49", s: "S2", de: "regenerierst du nur diese eine Zeile.", en: "you regenerate just that one line.", a: false },
+            ].map((r) => (
+              <div key={r.t} className="grid grid-cols-[52px_28px_1fr] gap-3 py-1">
+                <span className="font-mono text-[11px]" style={{ color: dim }}>
+                  {r.t}
+                </span>
+                <span
+                  className="font-mono text-[10px]"
+                  style={{ color: r.s === "S1" ? "oklch(0.68 0.14 50)" : "oklch(0.72 0.10 220)" }}
                 >
-                  <span className="font-mono text-muted-foreground">{r.t}</span>
-                  <span
-                    className={`rounded px-1.5 py-0.5 text-center font-mono text-[10px] ${
-                      r.spk === "S1" ? "bg-accent/20 text-accent" : "bg-primary/20 text-primary"
-                    }`}
+                  {r.s}
+                </span>
+                <div>
+                  <div className="text-[12px]" style={{ color: dim }}>
+                    {r.de}
+                  </div>
+                  <div
+                    className="font-serif text-[16px] leading-snug"
+                    style={{
+                      color: r.a ? "oklch(0.97 0.005 240)" : inkText,
+                      textDecoration: r.a ? "underline" : "none",
+                      textDecorationColor: "oklch(0.68 0.14 50)",
+                      textUnderlineOffset: 4,
+                    }}
                   >
-                    {r.spk}
-                  </span>
-                  <span className="truncate text-muted-foreground">{r.de}</span>
-                  <span className={`truncate ${r.active ? "text-foreground" : "text-foreground/80"}`}>
                     {r.en}
-                  </span>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
-          {/* Pipeline sidebar */}
-          <div className="col-span-4 p-3">
-            <div className="mb-2 flex items-center justify-between">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Pipeline
-              </div>
-              <button className="rounded p-1 text-muted-foreground hover:text-foreground" aria-label="Refresh">
-                <RefreshCw className="h-3 w-3" />
-              </button>
+          {/* waveform */}
+          <div className="mt-6">
+            <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+              <span>Waveform</span>
+              <span>−14.1 LUFS</span>
             </div>
-            <ol className="space-y-1">
-              {[
-                { n: "Ingest", s: "done" },
-                { n: "Transcribe", s: "done" },
-                { n: "Translate", s: "done" },
-                { n: "Diarize", s: "active" },
-                { n: "Voice", s: "queued" },
-                { n: "Mix", s: "queued" },
-              ].map((step, i) => (
-                <li
-                  key={step.n}
-                  className="flex items-center gap-2 rounded-md border border-border/60 bg-background/40 px-2 py-1.5 text-[11px]"
-                >
-                  <span className="w-4 text-right font-mono text-muted-foreground">{i + 1}</span>
-                  <span
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      step.s === "done"
-                        ? "bg-accent"
-                        : step.s === "active"
-                          ? "bg-primary animate-pulse-dot"
-                          : "bg-muted-foreground/40"
-                    }`}
+            <svg viewBox="0 0 600 60" className="h-14 w-full" preserveAspectRatio="none">
+              {Array.from({ length: 120 }).map((_, i) => {
+                const seed = Math.sin(i * 1.37) * Math.cos(i * 0.51);
+                const h = 8 + Math.abs(seed) * 42;
+                const isActive = i > 44 && i < 78;
+                return (
+                  <rect
+                    key={i}
+                    x={i * 5}
+                    y={30 - h / 2}
+                    width={2.2}
+                    height={h}
+                    fill={isActive ? "oklch(0.72 0.13 50)" : "oklch(0.55 0.03 240)"}
                   />
-                  <span className="flex-1 text-foreground/90">{step.n}</span>
-                  <span
-                    className={`font-mono text-[10px] ${
-                      step.s === "done"
-                        ? "text-accent"
-                        : step.s === "active"
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                    }`}
-                  >
-                    {step.s === "done" ? "✓" : step.s === "active" ? "…" : "—"}
-                  </span>
-                </li>
-              ))}
-            </ol>
-            <div className="mt-3 rounded-md border border-border/60 bg-background/40 p-2 text-[11px]">
-              <div className="mb-1 flex items-center justify-between text-muted-foreground">
-                <span>Job resumable</span>
-                <span className="font-mono">62%</span>
-              </div>
-              <div className="h-1 overflow-hidden rounded-full bg-secondary">
-                <div className="h-full w-[62%] bg-gradient-to-r from-primary to-accent" />
-              </div>
-            </div>
+                );
+              })}
+            </svg>
           </div>
         </div>
 
-        {/* Timeline / speaker tracks */}
-        <div className="border-t border-border bg-secondary/30 p-3">
-          <SpeakerTrack label="S1 · Anna" color="accent" />
-          <SpeakerTrack label="S2 · Mateo" color="primary" delay={0.15} />
-          <Waveform />
-          <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
-            <div className="flex items-center gap-3">
-              <button className="flex items-center gap-1 rounded border border-border bg-background/60 px-2 py-1 hover:text-foreground">
-                <Pause className="h-3 w-3" /> Pause
-              </button>
-              <span className="font-mono">00:42.318</span>
+        {/* right: speakers */}
+        <div className="col-span-3 p-4">
+          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+            Speakers
+          </div>
+          {[
+            { n: "Anna", lang: "de-DE → en-US", ref: "3.4s ref", color: "oklch(0.68 0.14 50)" },
+            { n: "Mateo", lang: "de-DE → en-US", ref: "5.1s ref", color: "oklch(0.72 0.10 220)" },
+          ].map((s) => (
+            <div key={s.n} className="mb-3 border-t pt-3 font-mono text-[11px]" style={{ borderColor: "oklch(0.28 0.014 250)" }}>
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
+                <span style={{ color: inkText }}>{s.n}</span>
+              </div>
+              <div className="mt-1" style={{ color: dim }}>
+                {s.lang}
+              </div>
+              <div style={{ color: dim }}>{s.ref}</div>
             </div>
-            <div className="flex items-center gap-1 font-mono">
-              <span className="rounded bg-secondary px-1.5 py-0.5">DirectML</span>
-              <span className="rounded bg-secondary px-1.5 py-0.5">RTX 4070</span>
-            </div>
+          ))}
+          <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+            Job
+          </div>
+          <div className="mt-2 font-mono text-[12px]">Resumable · 62%</div>
+          <div className="mt-2 h-[3px] w-full" style={{ background: "oklch(0.28 0.014 250)" }}>
+            <div className="h-full" style={{ width: "62%", background: "oklch(0.72 0.13 50)" }} />
           </div>
         </div>
       </div>
-    </div>
+    </figure>
   );
 }
 
-function SpeakerTrack({ label, color, delay = 0 }: { label: string; color: "primary" | "accent"; delay?: number }) {
-  const bg = color === "primary" ? "bg-primary/70" : "bg-accent/70";
-  return (
-    <div className="mb-1.5 flex items-center gap-2">
-      <div className="w-20 shrink-0 truncate text-[10px] font-medium text-muted-foreground">{label}</div>
-      <div className="relative h-3 flex-1 overflow-hidden rounded-sm border border-border bg-background/50">
-        <div
-          className={`absolute inset-y-0 left-[6%] w-[22%] ${bg} opacity-90`}
-          style={{ marginLeft: `${delay * 100}%` }}
-        />
-        <div className={`absolute inset-y-0 left-[38%] w-[16%] ${bg} opacity-70`} />
-        <div className={`absolute inset-y-0 left-[64%] w-[28%] ${bg} opacity-90`} />
-      </div>
-    </div>
-  );
-}
-
-function Waveform({ bars = 64 }: { bars?: number }) {
-  const heights = Array.from({ length: bars }, (_, i) => {
-    const v = Math.abs(Math.sin(i * 0.6) * 0.6 + Math.cos(i * 0.23) * 0.4);
-    return Math.max(0.15, Math.min(1, v));
-  });
-  return (
-    <div className="relative flex h-10 items-center gap-[2px] rounded-sm border border-border bg-background/50 px-1">
-      {heights.map((h, i) => (
-        <div
-          key={i}
-          className="w-[3px] origin-center rounded-sm bg-waveform-bar animate-wave"
-          style={{
-            height: `${h * 100}%`,
-            backgroundColor: "var(--waveform)",
-            animationDelay: `${(i % 12) * 0.08}s`,
-            opacity: 0.55 + (i % 5) * 0.08,
-          }}
-        />
-      ))}
-      <div className="pointer-events-none absolute inset-y-0 left-1/3 w-px bg-primary/80" />
-    </div>
-  );
-}
-
-/* ---------- Trust Strip ---------- */
+/* ---------------- trust strip ---------------- */
 
 function TrustStrip() {
-  const items = [
-    { icon: MonitorPlay, title: "Desktop-first", desc: "Windows-native workstation, built for real projects." },
-    { icon: SlidersHorizontal, title: "Stage-by-stage control", desc: "Inspect and edit each step, not just the final output." },
-    { icon: Cpu, title: "Local acceleration", desc: "DirectML and TensorRT RTX where your hardware supports it." },
-    { icon: RefreshCw, title: "Resumable jobs", desc: "Crashes and interruptions don't cost you finished work." },
-  ];
+  const items = ["Local by default", "Deterministic runs", "Cross-platform", "Open manifest", "No account required"];
   return (
-    <section className="border-y border-border bg-secondary/20">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-px overflow-hidden sm:grid-cols-2 lg:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.title} className="bg-background p-6">
-            <it.icon className="h-5 w-5 text-primary" strokeWidth={1.75} />
-            <div className="mt-3 text-sm font-semibold text-foreground">{it.title}</div>
-            <div className="mt-1 text-sm text-muted-foreground">{it.desc}</div>
-          </div>
+    <section className="border-b border-border bg-surface/50">
+      <Container className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 py-6 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+        {items.map((t, i) => (
+          <span key={t} className="flex items-center gap-8">
+            <span>{t}</span>
+            {i < items.length - 1 && <span className="text-hairline">·</span>}
+          </span>
         ))}
-      </div>
+      </Container>
     </section>
   );
 }
 
-/* ---------- Workflow ---------- */
+/* ---------------- pipeline feature ---------------- */
 
-function Workflow() {
-  const stages = [
-    {
-      n: "01",
-      icon: FileAudio,
-      name: "Media ingest",
-      desc: "Drop in MP4, MOV, MKV, or extracted audio. Trackdub extracts channels and prepares the project.",
-      edit: "Trim range · re-import source",
-    },
-    {
-      n: "02",
-      icon: Radio,
-      name: "Transcription",
-      desc: "ASR produces a timestamped transcript with word-level alignment you can review.",
-      edit: "Fix words · adjust timing",
-    },
-    {
-      n: "03",
-      icon: Languages,
-      name: "Translation",
-      desc: "Machine translation per line with source visible. Choose model, style, and glossary terms.",
-      edit: "Rewrite one line · lock terms",
-    },
-    {
-      n: "04",
-      icon: Users,
-      name: "Diarization",
-      desc: "Speakers are detected and grouped. Assign named voices to each speaker across the project.",
-      edit: "Reassign speaker · merge / split",
-    },
-    {
-      n: "05",
-      icon: Volume2,
-      name: "Voice generation",
-      desc: "TTS renders each line in the assigned voice. Preview, tweak prosody, and re-render selectively.",
-      edit: "Regenerate one clip · change voice",
-    },
-    {
-      n: "06",
-      icon: Waves,
-      name: "Mix & preview",
-      desc: "Combine dubbed voices with the original background stems and preview the final result.",
-      edit: "Rebalance stems · export mix",
-    },
-  ];
+const STAGES = [
+  {
+    n: "01",
+    name: "Ingest",
+    one: "Probe media. Detect scenes, silence, and speech.",
+    body:
+      "Point Trackdub at a file or folder. It reads the container, extracts audio, detects shot boundaries, and runs voice activity — building the frame every later stage will work against.",
+    detail: ["ffprobe media", "shot / silence detection", "loudness reference (LUFS)"],
+  },
+  {
+    n: "02",
+    name: "Transcribe",
+    one: "Time-accurate source transcript with speaker turns.",
+    body:
+      "Source-language ASR with word-level timestamps. The transcript is a real editable document, not an opaque intermediate — fix a word here and every downstream stage picks it up.",
+    detail: ["word timestamps", "editable transcript", "diarization-ready turns"],
+  },
+  {
+    n: "03",
+    name: "Translate",
+    one: "Human-editable target script, tied to timecode.",
+    body:
+      "Translation happens per line, not per file. Idioms, names, and jargon go in a project glossary; the target script preserves the source's timing so later stages can align to it.",
+    detail: ["per-line MT", "project glossary", "timecode preserved"],
+  },
+  {
+    n: "04",
+    name: "Diarize",
+    one: "Assign speakers. Attach a voice reference to each one.",
+    body:
+      "Trackdub clusters voices, then lets you name them, merge them, or split them. Each speaker gets a short reference clip that the voicing stage will match — one clone per person, not one voice for the whole video.",
+    detail: ["speaker clustering", "manual merge / split", "voice reference per speaker"],
+  },
+  {
+    n: "05",
+    name: "Voice",
+    one: "Zero-shot TTS. Regenerate any single line.",
+    body:
+      "Per-speaker voice cloning generates each line at its target duration. Prosody is editable — pace, emphasis, pause — and any line can be regenerated on its own without redoing the rest.",
+    detail: ["per-speaker cloning", "per-line prosody", "regen line 42 in isolation"],
+  },
+  {
+    n: "06",
+    name: "Mix",
+    one: "Align, duck under music, mux the final file.",
+    body:
+      "Dubbed lines snap to the original beats. Music and SFX from the source are preserved and ducked under dialogue. Export a muxed video, stems, or captions — deterministic given the same project manifest.",
+    detail: ["timeline alignment", "music / SFX ducking", "video + stems + captions"],
+  },
+];
+
+function PipelineFeature() {
   return (
-    <section id="workflow" className="relative">
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
-        <SectionHeader
-          eyebrow="Workflow"
-          title="A pipeline you can actually work inside"
-          description="Six stages, each one inspectable and editable. Fix one thing without invalidating the rest."
-        />
-        <div className="mt-14 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {stages.map((s) => (
+    <section id="pipeline" className="border-b border-border">
+      <Container className="py-20 sm:py-28">
+        <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-5">
+            <SectionNumber n="01" label="The pipeline" />
+            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+              Six stages. Each one editable, each one rerunnable.
+            </h2>
+            <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted-foreground">
+              A dubbed video is not a single button. It's a chain of decisions — what someone said,
+              what it should say in the target language, whose voice says it, and how it sits in the
+              mix. Trackdub exposes that chain, so you can inspect any link and change it in place.
+            </p>
+            <p className="mt-4 max-w-md text-[17px] leading-relaxed text-muted-foreground">
+              Every stage declares what it needs from the previous one. If you edit the transcript,
+              the translation knows to invalidate. If you change a speaker's voice reference, only
+              their lines regenerate. Nothing rebuilds that doesn't have to.
+            </p>
+          </div>
+          <ol className="lg:col-span-7">
+            {STAGES.map((s, i) => (
+              <li key={s.n}>
+                {i > 0 && <Rule />}
+                <a
+                  href={`#stage-${s.n}`}
+                  className="group grid grid-cols-[64px_1fr_auto] items-baseline gap-4 py-6 transition-colors hover:bg-surface/60"
+                >
+                  <span className="font-mono text-[13px] text-accent">{s.n}</span>
+                  <div>
+                    <div className="font-serif text-2xl text-foreground">{s.name}</div>
+                    <div className="mt-1 font-mono text-[12px] text-muted-foreground">{s.one}</div>
+                  </div>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground group-hover:text-accent">
+                    Read →
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ---------------- stage chapters ---------------- */
+
+function StageChapters() {
+  return (
+    <section className="border-b border-border bg-surface/40">
+      <Container className="py-20 sm:py-28">
+        <SectionNumber n="02" label="Each stage, in detail" />
+        <div className="mt-14 space-y-16">
+          {STAGES.map((s, i) => (
             <article
               key={s.n}
-              className="group relative overflow-hidden rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/40"
+              id={`stage-${s.n}`}
+              className="grid gap-10 lg:grid-cols-12 lg:gap-16"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-muted-foreground">{s.n}</span>
-                <s.icon className="h-4 w-4 text-primary" strokeWidth={1.75} />
+              <header className="lg:col-span-5">
+                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
+                  {s.n} &nbsp;/&nbsp; {s.name}
+                </div>
+                <h3 className="mt-4 font-serif text-3xl leading-[1.1] tracking-tight text-foreground sm:text-4xl">
+                  {s.one}
+                </h3>
+                <p className="mt-5 text-[16px] leading-relaxed text-muted-foreground">{s.body}</p>
+                <ul className="mt-6 space-y-2 font-mono text-[12px] text-muted-foreground">
+                  {s.detail.map((d) => (
+                    <li key={d} className="flex gap-3">
+                      <span className="text-accent">—</span>
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+              </header>
+              <div className="lg:col-span-7">
+                <StageInset stage={s.name} index={i} />
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Fig. 0{i + 2} &nbsp;·&nbsp; {s.name} view
+                </p>
               </div>
-              <h3 className="mt-3 text-base font-semibold text-foreground">{s.name}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
-              <div className="mt-4 flex items-center gap-2 rounded-md border border-dashed border-border/70 bg-background/40 px-2.5 py-1.5 text-[11px] text-muted-foreground">
-                <Wrench className="h-3 w-3 text-accent" />
-                <span className="font-mono">Editable:</span>
-                <span className="text-foreground/90">{s.edit}</span>
-              </div>
-              <div
-                aria-hidden
-                className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
-              />
             </article>
           ))}
         </div>
-
-        {/* Flow diagram */}
-        <div className="mt-12 hidden overflow-hidden rounded-lg border border-border bg-card p-5 md:block">
-          <svg viewBox="0 0 900 80" className="h-16 w-full">
-            {["Ingest", "Transcribe", "Translate", "Diarize", "Voice", "Mix"].map((label, i) => {
-              const x = 60 + i * 155;
-              return (
-                <g key={label}>
-                  <circle cx={x} cy={40} r={16} fill="oklch(0.22 0.014 250)" stroke="oklch(0.72 0.13 210)" strokeWidth="1" />
-                  <text x={x} y={44} textAnchor="middle" fontSize="11" fill="oklch(0.72 0.13 210)" fontFamily="monospace">
-                    {String(i + 1).padStart(2, "0")}
-                  </text>
-                  <text x={x} y={72} textAnchor="middle" fontSize="11" fill="oklch(0.7 0.02 245)">
-                    {label}
-                  </text>
-                  {i < 5 && (
-                    <line
-                      x1={x + 18}
-                      y1={40}
-                      x2={x + 137}
-                      y2={40}
-                      stroke="oklch(0.72 0.13 210)"
-                      strokeOpacity="0.4"
-                      strokeDasharray="4 4"
-                    />
-                  )}
-                </g>
-              );
-            })}
-          </svg>
-        </div>
-      </div>
+      </Container>
     </section>
   );
 }
 
-/* ---------- Control ---------- */
+function StageInset({ stage, index }: { stage: string; index: number }) {
+  const bg = "oklch(0.16 0.010 250)";
+  const border = "oklch(0.28 0.014 250)";
+  const dim = "oklch(0.62 0.02 245)";
+  const ink = "oklch(0.94 0.005 240)";
 
-function Control() {
-  const rows = [
-    {
-      icon: Languages,
-      title: "Rewrite a single translation line",
-      before: "Wir haben die Pipeline neu gebaut,",
-      after: "We rebuilt the pipeline from scratch,",
-      note: "Only the touched line regenerates downstream.",
-    },
-    {
-      icon: Users,
-      title: "Reassign a speaker",
-      before: "S2 → Voice: Mateo",
-      after: "S2 → Voice: Ines (locked across project)",
-      note: "Voice rerenders only for that speaker's lines.",
-    },
-    {
-      icon: Volume2,
-      title: "Regenerate one voice clip",
-      before: "Clip 00:42 — prosody drifts",
-      after: "Clip 00:42 — re-rendered · 3 alternates",
-      note: "Neighboring clips and the mix stay untouched.",
-    },
-    {
-      icon: ShieldCheck,
-      title: "Preserve completed work",
-      before: "Cloud tool: re-run whole job",
-      after: "Trackdub: cached stages stay valid",
-      note: "Stage cache tracks inputs, not wall-clock.",
-    },
-  ];
-  return (
-    <section id="control" className="relative border-t border-border bg-secondary/10">
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
-        <SectionHeader
-          eyebrow="Not a black box"
-          title="Fix what needs fixing. Keep the rest."
-          description="Cloud dubbing hands you one output. Trackdub hands you every intermediate — and only rebuilds what actually changed."
-        />
-        <div className="mt-14 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {rows.map((r) => (
-            <div key={r.title} className="rounded-lg border border-border bg-card p-5">
-              <div className="flex items-center gap-2">
-                <r.icon className="h-4 w-4 text-primary" strokeWidth={1.75} />
-                <h3 className="text-sm font-semibold text-foreground">{r.title}</h3>
-              </div>
-              <div className="mt-4 space-y-2 font-mono text-[12px]">
-                <div className="flex items-start gap-2 rounded-md border border-border/70 bg-background/40 px-3 py-2 text-muted-foreground">
-                  <span className="mt-0.5 text-destructive">−</span>
-                  <span className="line-through decoration-destructive/60">{r.before}</span>
-                </div>
-                <div className="flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-foreground">
-                  <span className="mt-0.5 text-accent">+</span>
-                  <span>{r.after}</span>
-                </div>
-              </div>
-              <p className="mt-3 text-xs text-muted-foreground">{r.note}</p>
+  const content = () => {
+    switch (stage) {
+      case "Ingest":
+        return (
+          <div className="p-5 font-mono text-[12px]" style={{ color: dim }}>
+            <div className="mb-3 uppercase tracking-[0.14em] text-[10px]">Media probe</div>
+            <table className="w-full">
+              <tbody>
+                {[
+                  ["container", "mp4 / h264 / aac"],
+                  ["duration", "00:03:18.240"],
+                  ["fps", "23.976"],
+                  ["audio", "stereo · 48 kHz"],
+                  ["scenes", "42 detected"],
+                  ["speech", "84% (VAD)"],
+                  ["loudness", "−14.1 LUFS"],
+                ].map(([k, v]) => (
+                  <tr key={k}>
+                    <td className="border-b py-1.5 pr-6" style={{ borderColor: border }}>{k}</td>
+                    <td className="border-b py-1.5 text-right" style={{ borderColor: border, color: ink }}>{v}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      case "Transcribe":
+        return (
+          <div className="p-5 text-[12px]" style={{ color: ink }}>
+            <div className="mb-3 font-mono uppercase tracking-[0.14em] text-[10px]" style={{ color: dim }}>
+              Source transcript · de-DE
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- Performance ---------- */
-
-function Performance() {
-  return (
-    <section id="performance" className="relative">
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-5">
-            <SectionHeader
-              eyebrow="Performance"
-              title="Local acceleration, honest fallbacks"
-              description="Trackdub runs where your GPU lives. When acceleration isn't available, CPU fallback keeps the project moving — slower, but predictable."
-              align="left"
-            />
-            <ul className="mt-8 space-y-3 text-sm">
+            {[
+              ["00:38.120", "Wir haben die", "Pipeline", " neu gebaut,"],
+              ["00:42.180", "damit jede Stufe", "editierbar", " bleibt."],
+              ["00:46.900", "Und wenn etwas nicht", "stimmt", " —"],
+            ].map(([t, a, hi, b]) => (
+              <div key={t} className="flex gap-4 py-1.5">
+                <span className="font-mono" style={{ color: dim }}>{t}</span>
+                <span>
+                  {a} <span style={{ background: "oklch(0.68 0.14 50 / 0.25)", padding: "0 2px" }}>{hi}</span>{b}
+                </span>
+              </div>
+            ))}
+          </div>
+        );
+      case "Translate":
+        return (
+          <div className="p-5 text-[12px]" style={{ color: ink }}>
+            <div className="mb-3 grid grid-cols-2 gap-6 font-mono uppercase tracking-[0.14em] text-[10px]" style={{ color: dim }}>
+              <span>Source · de-DE</span><span>Target · en-US</span>
+            </div>
+            {[
+              ["Wir haben die Pipeline neu gebaut,", "We rebuilt the pipeline"],
+              ["damit jede Stufe editierbar bleibt.", "so every stage stays editable."],
+              ["Und wenn etwas nicht stimmt —", "And if something's off —"],
+            ].map(([a, b], i) => (
+              <div key={i} className="grid grid-cols-2 gap-6 border-b py-2" style={{ borderColor: border }}>
+                <span style={{ color: dim }}>{a}</span>
+                <span className="font-serif text-[15px]">{b}</span>
+              </div>
+            ))}
+            <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+              Glossary · 12 terms locked
+            </div>
+          </div>
+        );
+      case "Diarize":
+        return (
+          <div className="p-5 text-[12px]" style={{ color: ink }}>
+            <div className="mb-3 font-mono uppercase tracking-[0.14em] text-[10px]" style={{ color: dim }}>
+              Speakers detected
+            </div>
+            {[
+              { n: "Anna", turns: 24, c: "oklch(0.68 0.14 50)" },
+              { n: "Mateo", turns: 18, c: "oklch(0.72 0.10 220)" },
+              { n: "Speaker 3", turns: 2, c: "oklch(0.55 0.03 240)" },
+            ].map((s) => (
+              <div key={s.n} className="flex items-center justify-between border-b py-3" style={{ borderColor: border }}>
+                <div className="flex items-center gap-3">
+                  <span className="h-8 w-8 rounded-full" style={{ background: s.c }} />
+                  <div>
+                    <div>{s.n}</div>
+                    <div className="font-mono text-[10px]" style={{ color: dim }}>{s.turns} turns · 4.2s reference</div>
+                  </div>
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>Rename · Merge</span>
+              </div>
+            ))}
+          </div>
+        );
+      case "Voice":
+        return (
+          <div className="p-5 text-[12px]" style={{ color: ink }}>
+            <div className="mb-3 flex items-center justify-between font-mono uppercase tracking-[0.14em] text-[10px]" style={{ color: dim }}>
+              <span>Line 42 · Anna</span>
+              <span>duration 3.14s / target 3.20s</span>
+            </div>
+            <div className="font-serif text-[17px] leading-snug">
+              "so every stage stays <span style={{ borderBottom: "2px solid oklch(0.68 0.14 50)" }}>editable</span>."
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-3 font-mono text-[11px]">
               {[
-                "DirectML for broad Windows GPU support (AMD, Intel, NVIDIA).",
-                "TensorRT RTX path for compatible NVIDIA hardware.",
-                "CPU fallback so a project never gets stuck.",
-                "Local-first processing for media that shouldn't leave your machine.",
-                "Optional cloud steps are opt-in per stage, never silent.",
-              ].map((t) => (
-                <li key={t} className="flex items-start gap-2 text-muted-foreground">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span>{t}</span>
-                </li>
+                ["Pace", "0.98×"],
+                ["Emphasis", "editable"],
+                ["Pause after", "220 ms"],
+              ].map(([k, v]) => (
+                <div key={k} className="border p-2" style={{ borderColor: border }}>
+                  <div className="uppercase tracking-[0.14em] text-[9px]" style={{ color: dim }}>{k}</div>
+                  <div className="mt-1">{v}</div>
+                </div>
               ))}
-            </ul>
-            <p className="mt-6 rounded-md border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
-              We don't claim absolute privacy. We tell you which stages ran locally, which called out, and what
-              was sent — so you can make the call for your project.
-            </p>
+            </div>
+            <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+              [ Regenerate line ] &nbsp; [ Regenerate speaker ]
+            </div>
           </div>
-          <div className="lg:col-span-7">
-            <PerformancePanel />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PerformancePanel() {
-  const rows = [
-    { name: "DirectML", detail: "AMD · Intel · NVIDIA", state: "active", bar: 92 },
-    { name: "TensorRT RTX", detail: "RTX 30/40/50 series", state: "ready", bar: 78 },
-    { name: "CPU fallback", detail: "AVX2 · multi-thread", state: "standby", bar: 34 },
-  ];
-  return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-panel">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Zap className="h-4 w-4 text-primary" />
-          <div className="text-sm font-semibold">Compute targets</div>
-        </div>
-        <span className="rounded-md border border-border bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
-          detected · Windows 11
-        </span>
-      </div>
-      <div className="mt-5 space-y-4">
-        {rows.map((r) => (
-          <div key={r.name}>
-            <div className="flex items-center justify-between text-[12px]">
-              <div>
-                <div className="font-medium text-foreground">{r.name}</div>
-                <div className="font-mono text-[10px] text-muted-foreground">{r.detail}</div>
+        );
+      case "Mix":
+        return (
+          <div className="p-5 text-[12px]" style={{ color: ink }}>
+            <div className="mb-3 font-mono uppercase tracking-[0.14em] text-[10px]" style={{ color: dim }}>
+              Timeline
+            </div>
+            {[
+              ["Dialogue EN", "oklch(0.68 0.14 50)", [10, 22, 34, 55, 70, 82]],
+              ["Music", "oklch(0.55 0.06 220)", [5, 95]],
+              ["SFX", "oklch(0.55 0.03 240)", [40, 62]],
+            ].map(([label, color, pts]) => (
+              <div key={label as string} className="mb-3">
+                <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>{label as string}</div>
+                <div className="relative h-5 w-full" style={{ background: "oklch(0.20 0.012 250)" }}>
+                  {(pts as number[]).reduce<React.ReactNode[]>((acc, p, i, arr) => {
+                    if (i % 2 === 1) return acc;
+                    const next = arr[i + 1] ?? p + 8;
+                    acc.push(
+                      <span key={i} className="absolute top-0 h-full" style={{ left: `${p}%`, width: `${next - p}%`, background: color as string, opacity: 0.85 }} />
+                    );
+                    return acc;
+                  }, [])}
+                </div>
               </div>
-              <span
-                className={`rounded-md border px-2 py-0.5 font-mono text-[10px] ${
-                  r.state === "active"
-                    ? "border-primary/40 bg-primary/10 text-primary"
-                    : r.state === "ready"
-                      ? "border-accent/40 bg-accent/10 text-accent"
-                      : "border-border bg-secondary text-muted-foreground"
-                }`}
-              >
-                {r.state}
-              </span>
-            </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
-              <div
-                className={`h-full ${
-                  r.state === "active"
-                    ? "bg-gradient-to-r from-primary to-accent"
-                    : r.state === "ready"
-                      ? "bg-accent/70"
-                      : "bg-muted-foreground/40"
-                }`}
-                style={{ width: `${r.bar}%` }}
-              />
+            ))}
+            <div className="mt-4 grid grid-cols-3 gap-3 font-mono text-[11px]">
+              {[["Loudness", "−16 LUFS"], ["Duck", "−9 dB"], ["Export", "mp4 + stems"]].map(([k, v]) => (
+                <div key={k} className="border p-2" style={{ borderColor: border }}>
+                  <div className="uppercase tracking-[0.14em] text-[9px]" style={{ color: dim }}>{k}</div>
+                  <div className="mt-1">{v}</div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="border border-border shadow-panel" style={{ background: bg }}>
+      <div className="flex items-center justify-between border-b px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ borderColor: border, color: dim, background: "oklch(0.20 0.012 250)" }}>
+        <span>Trackdub · {stage.toLowerCase()}</span>
+        <span>{String(index + 1).padStart(2, "0")} of 06</span>
       </div>
-      <div className="mt-6 grid grid-cols-3 gap-2 border-t border-border pt-4 text-[11px]">
-        {[
-          ["Local", "Transcribe · Diarize · Mix"],
-          ["Opt-in cloud", "Translate · Voice models"],
-          ["Never uploaded", "Source media (default)"],
-        ].map(([k, v]) => (
-          <div key={k} className="rounded-md border border-border bg-background/40 p-2">
-            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{k}</div>
-            <div className="mt-1 text-[11px] text-foreground/90">{v}</div>
-          </div>
-        ))}
-      </div>
+      {content()}
     </div>
   );
 }
 
-/* ---------- Features ---------- */
+/* ---------------- control ---------------- */
 
-function Features() {
-  const items = [
-    { icon: Radio, title: "Transcription", desc: "Word-level ASR with alignment, punctuation, and per-line confidence." },
-    { icon: Languages, title: "Translation", desc: "Model choice, glossary locks, tone controls, and side-by-side review." },
-    { icon: Users, title: "Speaker mapping", desc: "Auto-diarize, then assign consistent voices across the whole project." },
-    { icon: Volume2, title: "Voice generation", desc: "Multiple TTS engines, per-clip prosody, and alternates before commit." },
-    { icon: Layers, title: "Stem separation", desc: "Optional vocal/background split to preserve the original mix bed." },
-    { icon: Waves, title: "Mix & preview", desc: "Balance dubbed voices against retained stems and export the final track." },
-    { icon: RefreshCw, title: "Project recovery", desc: "Resumable jobs. Crashes and restarts don't cost finished stages." },
-    { icon: ShieldCheck, title: "Inspectable errors", desc: "No fake progress. Real error messages with the stage and input at fault." },
-  ];
+function Control() {
   return (
-    <section className="relative border-t border-border bg-secondary/10">
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
-        <SectionHeader
-          eyebrow="What's in the box"
-          title="Everything the pipeline needs — nothing you can't reach"
-        />
-        <div className="mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((it) => (
-            <div key={it.title} className="group bg-card p-5 transition-colors hover:bg-secondary/60">
-              <it.icon className="h-4 w-4 text-primary" strokeWidth={1.75} />
-              <div className="mt-3 text-sm font-semibold text-foreground">{it.title}</div>
-              <div className="mt-1.5 text-sm text-muted-foreground">{it.desc}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- Comparison ---------- */
-
-function Comparison() {
-  const rows = [
-    ["Control", "One-shot output", "Six inspectable stages"],
-    ["Fix one line", "Re-run the whole job", "Regenerate just that line"],
-    ["Speaker voices", "Assigned by the service", "Assigned by you, locked per speaker"],
-    ["Resumable", "Rarely — pay per run", "Yes — stage cache survives restarts"],
-    ["Local processing", "Uploaded by default", "Local-first, opt-in cloud per stage"],
-    ["Errors", "Opaque failure", "Stage, input, and reason surfaced"],
-  ];
-  return (
-    <section className="relative">
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
-        <SectionHeader
-          eyebrow="Comparison"
-          title="Trackdub vs. one-click cloud dubbing"
-          description="Both exist for a reason. One-click services are fine for throwaway drafts. Trackdub is built for the projects you can't ship without reviewing."
-        />
-        <div className="mt-12 overflow-hidden rounded-lg border border-border bg-card">
-          <div className="grid grid-cols-3 border-b border-border bg-secondary/50 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            <div className="p-4">Dimension</div>
-            <div className="border-l border-border p-4">One-click cloud</div>
-            <div className="border-l border-border p-4 text-primary">Trackdub</div>
+    <section id="control" className="border-b border-border">
+      <Container className="py-20 sm:py-28">
+        <SectionNumber n="03" label="You can fix anything, and only that thing" />
+        <div className="mt-8 grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-5">
+            <h2 className="font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+              The transcript said <em>"Pipeline"</em>. You wanted <em>"pipe line"</em>.
+            </h2>
+            <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted-foreground">
+              Change it. The translation invalidates. The affected voice line queues for a regen.
+              Every other line stays exactly as it was — same take, same timing, same mix. That's
+              the whole idea.
+            </p>
           </div>
-          {rows.map(([dim, a, b], i) => (
-            <div
-              key={dim}
-              className={`grid grid-cols-3 text-sm ${
-                i < rows.length - 1 ? "border-b border-border" : ""
-              }`}
-            >
-              <div className="p-4 font-medium text-foreground">{dim}</div>
-              <div className="border-l border-border p-4 text-muted-foreground">{a}</div>
-              <div className="border-l border-border p-4 text-foreground">
-                <span className="inline-flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-primary" />
-                  {b}
-                </span>
-              </div>
-            </div>
-          ))}
+          <div className="lg:col-span-7 space-y-6">
+            <ControlPlate
+              tag="Before edit"
+              t="00:42.180"
+              text="so every stage stays editable."
+              hint="Auto-generated · pace 1.00× · pause 200 ms"
+            />
+            <ControlPlate
+              tag="After you tweaked prosody"
+              t="00:42.180"
+              text="so every stage stays editable."
+              hint="Regen · pace 0.94× · pause 320 ms · this line only"
+              accent
+            />
+          </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }
 
-/* ---------- Pricing ---------- */
+function ControlPlate({
+  tag,
+  t,
+  text,
+  hint,
+  accent = false,
+}: {
+  tag: string;
+  t: string;
+  text: string;
+  hint: string;
+  accent?: boolean;
+}) {
+  return (
+    <figure className="border border-border bg-card p-5">
+      <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+        <span className={accent ? "text-accent" : ""}>{tag}</span>
+        <span>{t}</span>
+      </div>
+      <div
+        className="mt-4 font-serif text-2xl leading-snug text-foreground"
+        style={{
+          textDecoration: accent ? "underline" : "none",
+          textDecorationColor: "var(--accent)",
+          textUnderlineOffset: 6,
+        }}
+      >
+        "{text}"
+      </div>
+      <figcaption className="mt-4 font-mono text-[11px] text-muted-foreground">{hint}</figcaption>
+    </figure>
+  );
+}
+
+/* ---------------- performance ---------------- */
+
+function Performance() {
+  return (
+    <section id="performance" className="border-b border-border bg-surface/40">
+      <Container className="py-20 sm:py-28">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-4">
+            <SectionNumber n="04" label="Performance" />
+            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+              Runs on the hardware you already have.
+            </h2>
+            <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
+              Trackdub ships execution providers for CPU, DirectML, CUDA, CoreML, and Windows ML.
+              Pick a policy or let it choose. Numbers below are for a ten-minute two-speaker source
+              on a fresh project, warm models.
+            </p>
+          </div>
+          <div className="lg:col-span-8">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                  <th className="border-b border-border py-3 pr-4 font-normal">Device</th>
+                  <th className="border-b border-border py-3 pr-4 font-normal">Provider</th>
+                  <th className="border-b border-border py-3 pr-4 text-right font-normal">Throughput</th>
+                  <th className="border-b border-border py-3 text-right font-normal">Wall time</th>
+                </tr>
+              </thead>
+              <tbody className="font-mono text-[13px]">
+                {[
+                  ["MacBook Pro · M3 Pro", "CoreML", "6.4× realtime", "1m 34s"],
+                  ["Windows · RTX 4070", "CUDA", "9.1× realtime", "1m 06s"],
+                  ["Windows · Iris Xe", "DirectML", "2.1× realtime", "4m 46s"],
+                  ["Linux · Ryzen 7 5800X", "CPU", "1.3× realtime", "7m 42s"],
+                  ["Windows · Arc A770", "DirectML", "3.7× realtime", "2m 42s"],
+                ].map(([d, p, thr, w]) => (
+                  <tr key={d} className="hover:bg-background/60">
+                    <td className="border-b border-border py-4 pr-4 text-foreground">{d}</td>
+                    <td className="border-b border-border py-4 pr-4 text-muted-foreground">{p}</td>
+                    <td className="border-b border-border py-4 pr-4 text-right text-foreground">{thr}</td>
+                    <td className="border-b border-border py-4 text-right text-muted-foreground">{w}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Tbl. 01 &nbsp;·&nbsp; End-to-end wall time, source→muxed export, bundled models.
+            </p>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ---------------- what you get ---------------- */
+
+function WhatYouGet() {
+  const items: [string, string][] = [
+    ["Local by default", "Media, transcripts, voice references, and generated audio stay on your disk. Cloud is opt-in per project, per stage."],
+    ["Deterministic runs", "Same project manifest + same models = same output. Every stage records what it consumed."],
+    ["Resumable jobs", "Kill the app mid-run. Reopen the project. Continue from the last completed stage."],
+    ["Per-line regen", "Regenerate one voice line, one speaker, or one stage. Never a full-project redo for a small fix."],
+    ["Editable script", "Transcript and translation are real documents with a glossary, not opaque intermediates."],
+    ["Voice cloning per speaker", "One short reference per speaker. No shared 'AI voice' for the whole video."],
+    ["Music & SFX preserved", "Source stems are kept and ducked under dialogue automatically. Or manually, if you prefer."],
+    ["Open model manifest", "Every bundled model, its license lane, and its checksum is declared in one JSON file."],
+    ["CLI and SDK", "The same pipeline the app runs is scriptable — for batch, CI, or on-prem automation."],
+    ["Cross-platform", "Windows, macOS, Linux. Same project format. Same output."],
+  ];
+  return (
+    <section className="border-b border-border">
+      <Container className="py-20 sm:py-28">
+        <SectionNumber n="05" label="What you get" />
+        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+          A workstation, not a wrapper around a model.
+        </h2>
+        <dl className="mt-14 grid gap-y-8 gap-x-12 md:grid-cols-2">
+          {items.map(([term, def]) => (
+            <div key={term} className="border-t border-border pt-5">
+              <dt className="font-serif text-[22px] text-foreground">{term}</dt>
+              <dd className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{def}</dd>
+            </div>
+          ))}
+        </dl>
+      </Container>
+    </section>
+  );
+}
+
+/* ---------------- compared to ---------------- */
+
+function ComparedTo() {
+  const rows: [string, string, string, string][] = [
+    ["Runs locally", "Yes", "No", "Partial"],
+    ["Editable transcript", "Yes", "Limited", "Yes"],
+    ["Per-line voice regen", "Yes", "No", "No"],
+    ["Speaker-aware voicing", "Yes", "Yes", "Manual"],
+    ["Deterministic runs", "Yes", "No", "No"],
+    ["Resumable jobs", "Yes", "N/A", "No"],
+    ["Scriptable via CLI/SDK", "Yes", "API only", "No"],
+    ["No account required", "Yes", "No", "No"],
+  ];
+  return (
+    <section className="border-b border-border bg-surface/40">
+      <Container className="py-20 sm:py-28">
+        <SectionNumber n="06" label="Compared to" />
+        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+          Trackdub, next to how dubbing usually gets done.
+        </h2>
+        <div className="mt-12 overflow-x-auto">
+          <table className="w-full min-w-[640px] border-collapse text-left">
+            <thead>
+              <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                <th className="border-b border-border py-4 pr-4 font-normal"></th>
+                <th className="border-b border-border py-4 pr-4 font-normal text-foreground">Trackdub</th>
+                <th className="border-b border-border py-4 pr-4 font-normal">Cloud dubbing SaaS</th>
+                <th className="border-b border-border py-4 font-normal">DIY (Whisper + TTS + DAW)</th>
+              </tr>
+            </thead>
+            <tbody className="font-mono text-[13px]">
+              {rows.map(([label, a, b, c]) => (
+                <tr key={label}>
+                  <td className="border-b border-border py-4 pr-4 font-serif text-[16px] font-normal text-foreground">{label}</td>
+                  <td className="border-b border-border py-4 pr-4 text-foreground">{a}</td>
+                  <td className="border-b border-border py-4 pr-4 text-muted-foreground">{b}</td>
+                  <td className="border-b border-border py-4 text-muted-foreground">{c}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ---------------- pricing ---------------- */
 
 function Pricing() {
-  const tiers = [
+  const plans = [
     {
-      name: "Free",
-      price: "$0",
-      priceSub: "no account required",
-      desc: "Try the full pipeline on short projects.",
-      cta: { label: "Join the launch list", href: "mailto:hello@trackdub.com?subject=Launch%20list" },
-      featured: false,
+      name: "Personal",
+      price: "Free",
+      note: "Non-commercial use",
       features: [
-        "Full six-stage pipeline",
-        "Projects up to 5 minutes",
-        "Watermark on export",
-        "Local acceleration where supported",
+        "Full desktop app",
+        "Local pipeline",
+        "Non-commercial model lane",
         "Community support",
       ],
+      cta: "Download",
+      href: "mailto:hello@trackdub.com?subject=Trackdub%20Personal",
     },
     {
-      name: "Desktop license",
-      price: "Pricing at launch",
-      priceSub: "one-time purchase",
-      desc: "For working creators and localization teams.",
-      cta: { label: "Get Trackdub", href: "mailto:hello@trackdub.com?subject=Desktop%20license" },
-      featured: true,
+      name: "Studio",
+      price: "$29",
+      unit: " / mo",
+      note: "Per seat, billed annually",
       features: [
-        "No project length limit",
-        "No watermark",
-        "Optional paid major upgrades",
-        "Priority local model updates",
-        "Direct support channel",
+        "Everything in Personal",
+        "Commercial model lane",
+        "CLI + SDK for automation",
+        "Priority email support",
       ],
+      cta: "Start Studio",
+      href: "mailto:hello@trackdub.com?subject=Trackdub%20Studio",
+      featured: true,
+    },
+    {
+      name: "On-prem",
+      price: "Contact",
+      note: "For teams and vendors",
+      features: [
+        "Everything in Studio",
+        "REST API + Worker",
+        "SSO and audit log",
+        "NDA-friendly deployment",
+      ],
+      cta: "Talk to us",
+      href: "mailto:hello@trackdub.com?subject=Trackdub%20On-prem",
     },
   ];
   return (
-    <section id="pricing" className="relative border-t border-border">
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
-        <SectionHeader
-          eyebrow="Pricing"
-          title="No subscription. Own your tools."
-          description="A free tier that actually runs the pipeline, and a one-time desktop license when you're ready to ship real work."
-        />
-        <div className="mx-auto mt-14 grid max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
-          {tiers.map((t) => (
-            <div
-              key={t.name}
-              className={`relative flex flex-col rounded-xl border p-6 ${
-                t.featured
-                  ? "border-primary/40 bg-card shadow-panel"
-                  : "border-border bg-card"
-              }`}
-            >
-              {t.featured && (
-                <div className="absolute -top-2 right-4 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                  Recommended
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                {t.featured ? <Package className="h-4 w-4 text-primary" /> : <Sparkles className="h-4 w-4 text-muted-foreground" />}
-                <h3 className="text-base font-semibold text-foreground">{t.name}</h3>
+    <section id="pricing" className="border-b border-border">
+      <Container className="py-20 sm:py-28">
+        <SectionNumber n="07" label="Pricing" />
+        <h2 className="mt-6 max-w-2xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+          Three ways to run it. All of them local-first.
+        </h2>
+        <div className="mt-14 grid divide-y divide-border border-y border-border md:grid-cols-3 md:divide-x md:divide-y-0">
+          {plans.map((p) => (
+            <div key={p.name} className="p-8">
+              <div className="flex items-center gap-3">
+                <div className="font-serif text-2xl text-foreground">{p.name}</div>
+                {p.featured && (
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
+                    Recommended
+                  </span>
+                )}
               </div>
-              <div className="mt-4 flex items-baseline gap-2">
-                <span className={`text-2xl font-semibold ${t.featured ? "text-foreground" : "text-foreground"}`}>{t.price}</span>
-                <span className="text-xs text-muted-foreground">{t.priceSub}</span>
+              <div className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}>
+                {p.price}
+                {p.unit && <span className="font-sans text-lg text-muted-foreground">{p.unit}</span>}
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">{t.desc}</p>
-              <ul className="mt-5 flex-1 space-y-2 text-sm">
-                {t.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-muted-foreground">
-                    <Check className={`mt-0.5 h-4 w-4 shrink-0 ${t.featured ? "text-primary" : "text-accent"}`} />
-                    <span className="text-foreground/90">{f}</span>
+              <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                {p.note}
+              </p>
+              <ul className="mt-8 space-y-3 text-[15px] text-foreground">
+                {p.features.map((f) => (
+                  <li key={f} className="flex gap-3">
+                    <span className="mt-2 h-px w-4 flex-none bg-accent" aria-hidden />
+                    <span>{f}</span>
                   </li>
                 ))}
               </ul>
-              <div className="mt-6">
-                <CTAButton href={t.cta.href} variant={t.featured ? "primary" : "ghost"} className="w-full justify-center">
-                  {t.cta.label}
-                </CTAButton>
+              <div className="mt-10">
+                {p.featured ? (
+                  <InkButton href={p.href}>{p.cta}</InkButton>
+                ) : (
+                  <a href={p.href} className="inline-flex items-baseline gap-1 border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent">
+                    {p.cta} →
+                  </a>
+                )}
               </div>
             </div>
           ))}
         </div>
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          No subscription. Buy once, keep the version you paid for. Major upgrades are optional and priced
-          separately.
-        </p>
-      </div>
+      </Container>
     </section>
   );
 }
 
-/* ---------- FAQ ---------- */
+/* ---------------- faq ---------------- */
 
 function FAQ() {
   const items = [
     {
-      q: "Which Windows versions are supported?",
-      a: "Trackdub targets Windows 10 (22H2) and Windows 11 on x64. ARM64 support is on the roadmap but not committed for launch.",
+      q: "Does my video get uploaded anywhere?",
+      a: "No. Trackdub runs the whole pipeline on your machine by default. Cloud endpoints exist for teams that want them, but they're opt-in per project and per stage — never implicit.",
+    },
+    {
+      q: "Can I use it commercially?",
+      a: "Yes, on the Studio and On-prem plans. Trackdub gates model use by license lane: research-only checkpoints are blocked from loading under a commercial context, so you don't ship a video with a model you weren't allowed to use.",
+    },
+    {
+      q: "How is the voice cloning handled?",
+      a: "Each detected speaker gets one short reference clip you can review or replace. The voicing stage uses that reference — one voice per person, not one 'AI voice' for the whole video. References stay on your disk.",
+    },
+    {
+      q: "What if the ASR gets a word wrong?",
+      a: "Fix it in the transcript. The translation for that line invalidates, the voicing for that line queues for a regen, and nothing else rebuilds. Every stage declares its inputs, so edits propagate exactly as far as they need to.",
     },
     {
       q: "Do I need a GPU?",
-      a: "No. A modern CPU with AVX2 will run the full pipeline via CPU fallback. A supported GPU (via DirectML, or TensorRT RTX on compatible NVIDIA cards) makes transcription, voice generation, and separation substantially faster.",
+      a: "No, but it helps. Trackdub runs on CPU, DirectML, CUDA, CoreML, or Windows ML. On integrated graphics you'll get roughly 2× realtime end-to-end; on a mid-range discrete GPU, 6–9×.",
     },
     {
-      q: "Local vs. cloud — what actually leaves my machine?",
-      a: "Media ingest, transcription, diarization, and mixing run locally by default. Translation and some higher-quality voice models can call cloud endpoints — these steps are opt-in per project and clearly labeled in the pipeline view.",
-    },
-    {
-      q: "Which languages are supported?",
-      a: "Language support depends on the ASR, translation, and voice models you enable. At launch we expect solid coverage for major European and East Asian languages; long-tail language quality varies by stage. We'll publish a live matrix rather than a marketing claim.",
-    },
-    {
-      q: "What voice options are available?",
-      a: "Trackdub ships with a curated set of local TTS voices and integrates with common third-party voice providers you configure with your own API keys. Voice cloning is not a launch feature.",
-    },
-    {
-      q: "Can I edit any stage of the pipeline?",
-      a: "Yes. Every stage — transcript, translation, speaker assignment, per-clip voice — is editable, and only downstream stages affected by your edit are recomputed. Your other work is preserved.",
-    },
-    {
-      q: "How does licensing work?",
-      a: "A one-time desktop license per user. No mandatory subscription. Major version upgrades are optional and priced separately. Exact pricing and license terms will be published at launch.",
+      q: "Can I automate it?",
+      a: "Yes. The Studio and On-prem plans include the Trackdub CLI and SDK. The same pipeline the app runs is scriptable for batch localization, CI, or an on-prem REST worker.",
     },
   ];
   return (
-    <section id="faq" className="relative border-t border-border bg-secondary/10">
-      <div className="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28">
-        <SectionHeader eyebrow="FAQ" title="Straight answers" />
-        <div className="mt-12 divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
-          {items.map((it, i) => (
-            <FAQItem key={it.q} q={it.q} a={it.a} defaultOpen={i === 0} />
-          ))}
+    <section id="faq" className="border-b border-border bg-surface/40">
+      <Container className="py-20 sm:py-28">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-4">
+            <SectionNumber n="08" label="Questions" />
+            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+              Straight answers.
+            </h2>
+            <p className="mt-6 text-[16px] leading-relaxed text-muted-foreground">
+              Not covered here? Write to{" "}
+              <TextLink href="mailto:hello@trackdub.com">hello@trackdub.com</TextLink>.
+            </p>
+          </div>
+          <dl className="lg:col-span-8">
+            {items.map((it, i) => (
+              <div key={it.q}>
+                {i > 0 && <Rule />}
+                <div className="grid gap-4 py-6 md:grid-cols-[220px_1fr] md:gap-8">
+                  <dt className="font-serif text-[20px] leading-snug text-foreground">{it.q}</dt>
+                  <dd className="text-[16px] leading-relaxed text-muted-foreground">{it.a}</dd>
+                </div>
+              </div>
+            ))}
+          </dl>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }
 
-function FAQItem({ q, a, defaultOpen = false }: { q: string; a: string; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <details
-      open={open}
-      onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
-      className="group"
-    >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-medium text-foreground transition-colors hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-        <span>{q}</span>
-        <ChevronDown
-          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180 text-primary" : ""}`}
-        />
-      </summary>
-      <div className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">{a}</div>
-    </details>
-  );
-}
+/* ---------------- endnote ---------------- */
 
-/* ---------- Final CTA ---------- */
-
-function FinalCTA() {
+function Endnote() {
   return (
-    <section className="relative overflow-hidden border-t border-border">
-      <div className="pointer-events-none absolute inset-0 bg-hero opacity-70" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.12]" aria-hidden />
-      <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 sm:py-28">
-        <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Ready to dub without giving up control?
-        </h2>
-        <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-          Trackdub is in active development. Join the launch list to get the first Windows build and honest
-          release notes.
+    <section className="border-b border-border">
+      <Container className="py-24 sm:py-36 text-center">
+        <SectionNumber n="09" label="End" />
+        <p className="mx-auto mt-8 max-w-3xl font-serif text-4xl leading-[1.12] tracking-tight text-foreground sm:text-5xl">
+          Dub this in Spanish. Keep the original music. Regenerate line 42 with slower prosody.
+          Ship it before lunch.
         </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <CTAButton href="mailto:hello@trackdub.com?subject=Launch%20list">
-            <Download className="h-4 w-4" />
-            Get Trackdub
-          </CTAButton>
-          <CTAButton href="#workflow" variant="ghost">
-            See how it works
-            <ArrowRight className="h-4 w-4" />
-          </CTAButton>
+        <div className="mt-12 flex flex-wrap justify-center gap-6">
+          <InkButton href="#pricing">Get Trackdub</InkButton>
+          <TextLink href="mailto:hello@trackdub.com">Talk to us →</TextLink>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }
 
-/* ---------- Footer ---------- */
+/* ---------------- colophon ---------------- */
 
-function Footer() {
-  const cols = [
-    {
-      title: "Product",
-      links: [
-        ["Workflow", "#workflow"],
+function Colophon() {
+  const cols: [string, [string, string][]][] = [
+    [
+      "Product",
+      [
+        ["Pipeline", "#pipeline"],
+        ["Control", "#control"],
         ["Performance", "#performance"],
         ["Pricing", "#pricing"],
-        ["FAQ", "#faq"],
       ],
-    },
-    {
-      title: "Resources",
-      links: [
-        ["Docs (coming soon)", "#"],
-        ["Changelog", "#"],
-        ["System requirements", "#"],
-        ["Language matrix", "#"],
+    ],
+    [
+      "Developers",
+      [
+        ["CLI", "mailto:hello@trackdub.com?subject=CLI"],
+        ["SDK", "mailto:hello@trackdub.com?subject=SDK"],
+        ["REST API", "mailto:hello@trackdub.com?subject=API"],
+        ["Model manifest", "mailto:hello@trackdub.com?subject=Manifest"],
       ],
-    },
-    {
-      title: "Legal",
-      links: [
-        ["Privacy", "#"],
-        ["Terms", "#"],
-        ["License", "#"],
+    ],
+    [
+      "Company",
+      [
         ["Contact", "mailto:hello@trackdub.com"],
+        ["Press", "mailto:press@trackdub.com"],
+        ["Security", "mailto:security@trackdub.com"],
+        ["Legal", "mailto:legal@trackdub.com"],
       ],
-    },
+    ],
   ];
   return (
-    <footer className="border-t border-border bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <div className="grid gap-10 md:grid-cols-12">
-          <div className="md:col-span-4">
-            <Wordmark />
-            <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-              A Windows desktop workstation for AI video dubbing. Built for creators who need to review, not
-              just receive.
-            </p>
-            <div className="mt-5 flex items-center gap-2">
-              <a
-                href="https://github.com/trackdub"
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-secondary/60 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <Github className="h-3.5 w-3.5" />
-                github.com/trackdub
-              </a>
-              <a
-                href="https://trackdub.com"
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-secondary/60 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-              >
-                trackdub.com
-              </a>
+    <footer className="bg-background">
+      <Container className="py-16">
+        <div className="grid gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <div className="font-serif text-3xl leading-none text-foreground">
+              Trackdub<span className="text-accent">.</span>
             </div>
+            <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-muted-foreground">
+              A desktop workstation for dubbing video. Local-first. Editable at every stage.
+            </p>
           </div>
-          {cols.map((c) => (
-            <div key={c.title} className="md:col-span-2">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {c.title}
-              </div>
-              <ul className="mt-4 space-y-2 text-sm">
-                {c.links.map(([label, href]) => (
+          {cols.map(([h, links]) => (
+            <div key={h} className="lg:col-span-2">
+              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{h}</div>
+              <ul className="mt-4 space-y-2 text-[14px]">
+                {links.map(([label, href]) => (
                   <li key={label}>
-                    <a
-                      href={href}
-                      className="text-foreground/80 transition-colors hover:text-foreground"
-                    >
+                    <a href={href} className="text-foreground hover:text-accent">
                       {label}
                     </a>
                   </li>
@@ -1166,21 +1196,21 @@ function Footer() {
               </ul>
             </div>
           ))}
-          <div className="md:col-span-2">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Status
-            </div>
-            <div className="mt-4 flex items-center gap-2 rounded-md border border-border bg-secondary/40 px-3 py-2 text-xs">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse-dot" />
-              <span className="text-foreground/90">In development</span>
-            </div>
+          <div className="lg:col-span-2">
+            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Build</div>
+            <ul className="mt-4 space-y-2 font-mono text-[12px] text-muted-foreground">
+              <li>v 0.9.2</li>
+              <li>rev 4c1a8f</li>
+              <li>2026-07-23</li>
+            </ul>
           </div>
         </div>
-        <div className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground">
-          <div>© {new Date().getFullYear()} Trackdub. All rights reserved.</div>
-          <div className="font-mono">v0.1 · pre-release</div>
+        <Rule className="mt-14" />
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          <span>© 2026 Trackdub</span>
+          <span>Set in Instrument Serif, Work Sans, JetBrains Mono</span>
         </div>
-      </div>
+      </Container>
     </footer>
   );
 }
