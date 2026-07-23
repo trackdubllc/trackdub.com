@@ -114,6 +114,45 @@ function SectionRail() {
   const hoverRafRef = useRef<number | null>(null);
   const navIds = useRef(new Set(NAV.map((n) => n.href.slice(1))));
   const activeRef = useRef<string>("");
+  const [scrubbing, setScrubbing] = useState(false);
+  const dragStartYRef = useRef(0);
+  const draggingRef = useRef(false);
+  const suppressClickRef = useRef(false);
+  const scrubRafRef = useRef<number | null>(null);
+  const pendingScrubYRef = useRef<number | null>(null);
+
+  const prefersReducedMotion = () =>
+    typeof document !== "undefined" &&
+    (document.documentElement.classList.contains("reduce-motion") ||
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+
+  const scrollToTargetId = (id: string) => {
+    const target = document.getElementById(id);
+    if (!target) return;
+    const top = target.getBoundingClientRect().top + window.scrollY;
+    const behavior: ScrollBehavior = prefersReducedMotion() ? "auto" : "smooth";
+    window.scrollTo({ top, behavior });
+  };
+
+  const applyScrubFromClientY = (clientY: number) => {
+    const list = listRef.current;
+    if (!list) return;
+    const box = list.getBoundingClientRect();
+    const f = Math.min(1, Math.max(0, (clientY - box.top) / Math.max(1, box.height)));
+    const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    window.scrollTo({ top: f * docMax, behavior: "auto" });
+  };
+
+  const scheduleScrub = (clientY: number) => {
+    pendingScrubYRef.current = clientY;
+    if (scrubRafRef.current !== null) return;
+    scrubRafRef.current = window.requestAnimationFrame(() => {
+      scrubRafRef.current = null;
+      const y = pendingScrubYRef.current;
+      pendingScrubYRef.current = null;
+      if (y !== null) applyScrubFromClientY(y);
+    });
+  };
   useEffect(() => {
     activeRef.current = active;
   }, [active]);
@@ -325,11 +364,58 @@ function SectionRail() {
     };
   }, [active, visible]);
 
+  const handleRailPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    dragStartYRef.current = e.clientY;
+    draggingRef.current = false;
+    suppressClickRef.current = false;
+    listRef.current?.setPointerCapture?.(e.pointerId);
+  };
+  const handleRailPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const list = listRef.current;
+    if (!list?.hasPointerCapture?.(e.pointerId)) return;
+    const dy = e.clientY - dragStartYRef.current;
+    if (!draggingRef.current && Math.abs(dy) < 4) return;
+    if (!draggingRef.current) {
+      draggingRef.current = true;
+      suppressClickRef.current = true;
+      setScrubbing(true);
+    }
+    e.preventDefault();
+    scheduleScrub(e.clientY);
+  };
+  const handleRailPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const list = listRef.current;
+    if (list?.hasPointerCapture?.(e.pointerId)) {
+      list.releasePointerCapture(e.pointerId);
+    }
+    if (draggingRef.current) {
+      // Reset next tick so the anchor click handler (fired after pointerup)
+      // still sees suppressClickRef=true and cancels the navigation.
+      window.setTimeout(() => {
+        draggingRef.current = false;
+        setScrubbing(false);
+      }, 0);
+    }
+  };
+
   return (
     <aside
       className={`pointer-events-none fixed left-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-2 transition-opacity duration-500 xl:flex ${visible ? "opacity-100" : "opacity-0"}`}
     >
-      <div ref={listRef} className="relative flex flex-col gap-2 pl-3">
+      <div
+        ref={listRef}
+        className={`pointer-events-auto relative flex flex-col gap-2 py-2 pl-3 pr-2 touch-none select-none ${scrubbing ? "cursor-grabbing" : "cursor-grab"}`}
+        onPointerDown={handleRailPointerDown}
+        onPointerMove={handleRailPointerMove}
+        onPointerUp={handleRailPointerUp}
+        onPointerCancel={handleRailPointerUp}
+        role="slider"
+        aria-label="Page scroll position"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress * 100)}
+      >
         {/* vertical track */}
         <span className="pointer-events-none absolute left-0 top-1 bottom-1 w-px bg-border/70" aria-hidden />
         {/* progress fill */}
@@ -337,7 +423,7 @@ function SectionRail() {
           className="pointer-events-none absolute left-0 top-1 w-px origin-top bg-foreground/40"
           style={{
             height: `calc((100% - 0.5rem) * ${progress})`,
-            transition: "height 240ms cubic-bezier(0.22, 1, 0.36, 1)",
+            transition: scrubbing ? "none" : "height 240ms cubic-bezier(0.22, 1, 0.36, 1)",
           }}
           aria-hidden
         />
@@ -370,6 +456,27 @@ function SectionRail() {
               onMouseLeave={() => setHovered((h) => (h === id ? null : h))}
               onFocus={() => setHovered(id)}
               onBlur={() => setHovered((h) => (h === id ? null : h))}
+              onClick={(e) => {
+                // Swallow the click if the user was scrubbing — pointerup
+                // fires before click, so draggingRef is still true here.
+                if (suppressClickRef.current || draggingRef.current) {
+                  e.preventDefault();
+                  suppressClickRef.current = false;
+                  return;
+                }
+                e.preventDefault();
+                // Update the URL hash without the browser's default jump so
+                // our smooth scroll owns the motion. Fall back to hash= if
+                // history is unavailable.
+                if (window.history?.pushState) {
+                  window.history.pushState(null, "", n.href);
+                  // hashchange doesn't fire for pushState, so sync manually.
+                  setActive(id);
+                } else {
+                  window.location.hash = n.href;
+                }
+                scrollToTargetId(id);
+              }}
             >
               <span
                 className={`h-px transition-all duration-300 ease-out ${isActive ? "w-6 bg-accent" : "w-3 bg-border group-hover:w-5 group-hover:bg-foreground/60"}`}
