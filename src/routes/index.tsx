@@ -358,6 +358,9 @@ function SectionRail() {
     if (!hovered) return;
     const target = document.getElementById(hovered);
     if (!target) return;
+    const anchor = itemsRef.current[hovered];
+    const bar = anchor?.querySelector<HTMLElement>("[data-rail-localbar]") ?? null;
+    const label = anchor?.querySelector<HTMLElement>("[data-rail-localpct]") ?? null;
 
     // Cache the section's document-space top/height so scroll frames only
     // touch window.scrollY (a cheap read) instead of forcing layout with
@@ -376,8 +379,6 @@ function SectionRail() {
       const pct = Math.min(1, Math.max(0, raw));
       if (Math.abs(pct - lastPct) > 0.005) {
         lastPct = pct;
-        const bar = localBarRef.current;
-        const label = localPctRef.current;
         if (bar) bar.style.width = `${(pct * 100).toFixed(1)}%`;
         if (label) label.textContent = `${Math.round(pct * 100)}%`;
       }
@@ -752,7 +753,7 @@ function SectionRail() {
                     className="relative block h-[3px] w-16 overflow-hidden bg-border/70"
                   >
                     <span
-                      ref={localBarRef}
+                      data-rail-localbar
                       className="absolute inset-y-0 left-0 bg-accent"
                       style={{
                         width: "0%",
@@ -761,7 +762,7 @@ function SectionRail() {
                     />
                   </span>
                   <span
-                    ref={localPctRef}
+                    data-rail-localpct
                     className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular-nums"
                   >
                     0%
