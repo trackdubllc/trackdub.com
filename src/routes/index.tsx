@@ -2454,19 +2454,6 @@ function Pricing() {
                       </a>
                     )}
                   </div>
-                  {/* Stretched link — makes the whole card a keyboard-reachable target
-                      through the visible CTA above (focus ring appears on the card
-                      via focus-within), while clicks anywhere in the card activate it. */}
-                  <a
-                    href={p.href}
-                    aria-hidden="true"
-                    tabIndex={-1}
-                    className="absolute inset-0 z-10"
-                  >
-                    <span className="sr-only">{`${p.cta} — ${p.name} plan`}</span>
-                  </a>
-                  {/* Ensure the visible CTA sits above the overlay so it receives focus/clicks first. */}
-                  <style>{`#${titleId} ~ div a, #${titleId} ~ div button { position: relative; z-index: 20; }`}</style>
                 </article>
               </li>
             );
