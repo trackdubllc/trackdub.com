@@ -304,6 +304,65 @@ html.reduce-motion section.reveal[data-reveal]::before {
   transform: none !important;
   transition: none !important;
 }
+
+/* trailing hairline — subtle second-beat accent that sweeps in after the
+   chapter tick to give each section a quiet motion signature without
+   introducing gradients or gimmicks. */
+section.reveal[data-reveal]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 112px;
+  height: 1px;
+  width: 0;
+  max-width: calc(100% - 112px);
+  background: color-mix(in oklch, var(--accent) 45%, transparent);
+  opacity: 0;
+  transition:
+    opacity 900ms cubic-bezier(0.16, 1, 0.3, 1) 260ms,
+    width 1100ms cubic-bezier(0.16, 1, 0.3, 1) 260ms;
+  pointer-events: none;
+}
+section.reveal[data-reveal].revealed::after {
+  opacity: 1;
+  width: 240px;
+}
+html.reduce-motion section.reveal[data-reveal]::after {
+  opacity: 1 !important;
+  width: 240px !important;
+  transition: none !important;
+}
+
+/* per-section heading sweep — the primary h2 in each revealed section
+   grows a thin accent underline in sync with the reveal, giving a
+   focused motion accent that doesn't rely on gradients or bounce. */
+section.reveal[data-reveal] h2 {
+  position: relative;
+}
+section.reveal[data-reveal] h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -10px;
+  height: 2px;
+  width: 0;
+  background: var(--accent);
+  opacity: 0;
+  transform-origin: left center;
+  transition:
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1) 320ms,
+    width 900ms cubic-bezier(0.16, 1, 0.3, 1) 320ms;
+  pointer-events: none;
+}
+section.reveal[data-reveal].revealed h2::after {
+  opacity: 1;
+  width: 72px;
+}
+html.reduce-motion section.reveal[data-reveal] h2::after {
+  opacity: 1 !important;
+  width: 72px !important;
+  transition: none !important;
+}
 @utility wave-bar {
   transform-origin: 50% 100%;
   animation: wave-drift 3.6s ease-in-out infinite;
