@@ -1185,7 +1185,7 @@ type StageId = (typeof STAGE_TABS)[number]["id"];
 const DIM = "oklch(0.62 0.02 245)";
 const INK = "oklch(0.94 0.005 240)";
 const LINE = "oklch(0.28 0.014 250)";
-const ACC = "oklch(0.72 0.14 55)";
+const ACC = "oklch(0.72 0.15 258)";
 const PANEL = "oklch(0.16 0.010 250)";
 const PANEL_HI = "oklch(0.20 0.012 250)";
 
