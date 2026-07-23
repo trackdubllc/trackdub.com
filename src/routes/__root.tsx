@@ -77,14 +77,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Trackdub — Dub videos without giving up control" },
+      { name: "description", content: "A Windows desktop workstation for AI video dubbing. Translate, voice, and mix your video in one workflow — inspect every stage, fix what needs fixing, and keep the rest." },
+      { name: "author", content: "Trackdub" },
+      { property: "og:title", content: "Trackdub — Dub videos without giving up control" },
+      { property: "og:description", content: "A Windows desktop workstation for AI video dubbing. Inspect every stage, fix what needs fixing, and keep the rest." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Trackdub — Dub videos without giving up control" },
+      { name: "twitter:description", content: "A Windows desktop workstation for AI video dubbing." },
     ],
     links: [
       {
