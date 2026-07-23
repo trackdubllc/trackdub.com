@@ -167,7 +167,7 @@ function SectionRail() {
     const now = performance.now();
     const distance = Math.abs(clamped - window.scrollY);
     // Scale duration modestly with distance, capped for snappiness.
-    smoothDurRef.current = Math.min(720, Math.max(320, 260 + distance * 0.35));
+    smoothDurRef.current = Math.min(280, Math.max(140, 120 + distance * 0.08));
     smoothStartRef.current = { y: window.scrollY, t: now };
     if (smoothRafRef.current !== null) return; // loop already running
     const step = () => {
@@ -656,7 +656,7 @@ function SectionRail() {
           className="pointer-events-none absolute left-0 top-1 w-0.5 origin-top bg-foreground/40"
           style={{
             height: `calc((100% - 0.5rem) * ${progress})`,
-            transition: scrubbing ? "none" : "height 240ms cubic-bezier(0.22, 1, 0.36, 1)",
+            transition: scrubbing ? "none" : "height 120ms linear",
           }}
           aria-hidden
         />
@@ -667,7 +667,7 @@ function SectionRail() {
             transform: `translateY(${indicator.top}px)`,
             height: `${indicator.height}px`,
             transition:
-              "transform 420ms cubic-bezier(0.22, 1, 0.36, 1), height 300ms ease-out",
+              "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), height 140ms ease-out",
           }}
           aria-hidden
         />
