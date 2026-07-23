@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
@@ -1913,7 +1913,7 @@ function FAQ() {
     },
     {
       q: "What happens to my data if I uninstall?",
-      a: "Your projects, source media, and generated output live in folders you chose, so they stay where they are until you delete them. The app data directory — model cache, preferences, and logs — can be removed during uninstall or manually from %LOCALAPPDATA%\\Trackdub.",
+      a: "Your projects, source media, and generated output live in folders you chose, so they stay where they are until you delete them. The app data directory — model cache, preferences, and logs — can be removed during uninstall or manually from %LOCALAPPDATA%\\Trackdub. See the full privacy policy for the complete list.",
     },
     {
       q: "Can I use it commercially?",
@@ -1948,6 +1948,16 @@ function FAQ() {
             <p className="mt-6 text-[16px] leading-relaxed text-muted-foreground">
               Not covered here? Write to{" "}
               <TextLink href="mailto:hello@trackdub.com">hello@trackdub.com</TextLink>.
+            </p>
+            <p className="mt-4 text-[14px] leading-relaxed text-muted-foreground">
+              Data handling questions are covered in full in the{" "}
+              <Link
+                to="/privacy"
+                className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 text-foreground transition-colors hover:border-accent hover:text-accent"
+              >
+                privacy policy
+              </Link>
+              .
             </p>
           </div>
           <dl className="lg:col-span-8">
@@ -2019,6 +2029,7 @@ function Colophon() {
         ["Contact", "mailto:hello@trackdub.com"],
         ["Press", "mailto:press@trackdub.com"],
         ["Security", "mailto:security@trackdub.com"],
+        ["Privacy policy", "/privacy"],
         ["Legal", "mailto:legal@trackdub.com"],
       ],
     ],
