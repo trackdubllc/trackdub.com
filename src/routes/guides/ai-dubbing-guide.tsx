@@ -390,6 +390,8 @@ function GuidePage() {
               <a
                 href={CHECKLIST_URL}
                 download
+                type="application/pdf"
+                aria-label="Download the Local-First Dubbing Workflow Checklist (PDF, 2 pages)"
                 className="inline-flex items-center gap-2 rounded-md border border-foreground bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
               >
                 Download the checklist (PDF)
@@ -398,6 +400,8 @@ function GuidePage() {
                 href={CHECKLIST_URL}
                 target="_blank"
                 rel="noopener"
+                type="application/pdf"
+                aria-label="Preview the checklist PDF in a new tab"
                 className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted/50"
               >
                 Preview in browser →
