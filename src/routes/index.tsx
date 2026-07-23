@@ -2285,9 +2285,13 @@ function WhatYouGet() {
         <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
           A workstation, not a wrapper around a model.
         </h2>
-        <dl className="mt-14 grid gap-y-8 gap-x-12 md:grid-cols-2">
+        <dl role="list" className="mt-14 grid gap-y-8 gap-x-12 md:grid-cols-2">
           {items.map(([term, def]) => (
-            <div key={term} className="card-lift group border-t border-border px-1 pt-5 hover:bg-surface/40">
+            <div
+              key={term}
+              role="listitem"
+              className="card-lift group border-t border-border px-1 pt-5 focus-within:bg-surface/40 hover:bg-surface/40"
+            >
               <dt className="font-serif text-[22px] text-foreground">{term}</dt>
               <dd className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{def}</dd>
             </div>
