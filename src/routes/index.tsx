@@ -112,6 +112,25 @@ function SectionRail() {
   const [hovered, setHovered] = useState<string | null>(null);
   const [localPct, setLocalPct] = useState(0);
   const hoverRafRef = useRef<number | null>(null);
+  const navIds = useRef(new Set(NAV.map((n) => n.href.slice(1))));
+  const activeRef = useRef<string>("");
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
+
+  // Sync with URL hash — deep links should highlight the right chapter.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const syncFromHash = () => {
+      const id = window.location.hash.slice(1);
+      if (id && navIds.current.has(id) && id !== activeRef.current) {
+        setActive(id);
+      }
+    };
+    syncFromHash();
+    window.addEventListener("hashchange", syncFromHash);
+    return () => window.removeEventListener("hashchange", syncFromHash);
+  }, []);
 
   useEffect(() => {
     if (!hovered) return;
