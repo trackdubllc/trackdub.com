@@ -38,6 +38,7 @@ function Index() {
         <Control />
         <Performance />
         <Architecture />
+        <SystemRequirements />
         <WhatYouGet />
         <ComparedTo />
         <Pricing />
