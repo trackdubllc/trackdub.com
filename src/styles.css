@@ -98,14 +98,14 @@
   --secondary:            var(--paper-2);
   --secondary-foreground: var(--ink-raw);
   --muted:            var(--paper-2);
-  --muted-foreground: color-mix(in oklch, var(--ink-raw) 55%, var(--paper) 45%);
+  --muted-foreground: color-mix(in oklch, var(--ink-raw) 72%, var(--paper) 28%);
   --accent:            var(--amber);
   --accent-foreground: var(--ink-raw);
   --destructive:            oklch(0.55 0.2 27);
   --destructive-foreground: var(--paper);
-  --border:   color-mix(in oklch, var(--ink-raw) 18%, var(--paper) 82%);
-  --hairline: color-mix(in oklch, var(--ink-raw) 18%, var(--paper) 82%);
-  --input:    color-mix(in oklch, var(--ink-raw) 14%, var(--paper) 86%);
+  --border:   color-mix(in oklch, var(--ink-raw) 28%, var(--paper) 72%);
+  --hairline: color-mix(in oklch, var(--ink-raw) 28%, var(--paper) 72%);
+  --input:    color-mix(in oklch, var(--ink-raw) 22%, var(--paper) 78%);
   --ring:     var(--amber);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
