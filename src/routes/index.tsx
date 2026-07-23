@@ -3004,12 +3004,94 @@ function Endnote() {
           Dub this in Spanish. Keep the original music. Regenerate line 42 with slower prosody.
           Ship it before lunch.
         </p>
-        <div className="mt-12 flex flex-wrap justify-center gap-6">
-          <InkButton href="#pricing">Get Trackdub</InkButton>
+        <WaitlistForm />
+        <div className="mt-8 flex flex-wrap justify-center gap-6">
           <TextLink href="mailto:hello@trackdub.com">Talk to us →</TextLink>
         </div>
       </Container>
     </section>
+  );
+}
+
+/* ---------------- waitlist ---------------- */
+
+const waitlistSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(3, "Enter your email")
+    .max(320, "Email is too long")
+    .email("That doesn't look like an email"),
+});
+
+function WaitlistForm() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (status === "loading") return;
+    const parsed = waitlistSchema.safeParse({ email });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Invalid email");
+      return;
+    }
+    setStatus("loading");
+    const { error } = await supabase
+      .from("waitlist_emails")
+      .insert({ email: parsed.data.email.toLowerCase() });
+    if (error) {
+      if (error.code === "23505") {
+        setStatus("done");
+        toast.success("You're already on the list.");
+        return;
+      }
+      setStatus("idle");
+      toast.error("Could not save your email. Try again in a moment.");
+      return;
+    }
+    setStatus("done");
+    toast.success("You're on the launch list.");
+  }
+
+  if (status === "done") {
+    return (
+      <p className="mx-auto mt-12 max-w-md font-mono text-[13px] uppercase tracking-[0.14em] text-accent">
+        On the list. We'll be in touch at launch.
+      </p>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={onSubmit}
+      className="mx-auto mt-12 flex w-full max-w-md flex-col gap-3 sm:flex-row"
+      noValidate
+    >
+      <label htmlFor="waitlist-email" className="sr-only">
+        Email address
+      </label>
+      <input
+        id="waitlist-email"
+        type="email"
+        required
+        autoComplete="email"
+        inputMode="email"
+        maxLength={320}
+        placeholder="you@studio.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={status === "loading"}
+        className="flex-1 rounded-sm border border-border bg-background px-4 py-3 text-[15px] text-foreground placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background disabled:opacity-60"
+      />
+      <button
+        type="submit"
+        disabled={status === "loading"}
+        className="inline-flex items-center justify-center rounded-sm bg-foreground px-6 py-3 font-mono text-[12px] uppercase tracking-[0.16em] text-background outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
+      >
+        {status === "loading" ? "Adding…" : "Join launch list"}
+      </button>
+    </form>
   );
 }
 
