@@ -804,3 +804,47 @@ html.reduce-motion section.reveal.revealed h2 {
   opacity: 1 !important;
   transform: none !important;
 }
+
+/* ---------------------------------------------------------------
+   Chapter-lead stagger: when a section becomes active, cascade its
+   header block — SectionNumber ([data-lead]), then subsequent
+   headings, paragraphs, and rail-detail siblings — in sync with the
+   per-chapter h2 intro animation. Purely CSS; no JSX/JS work per turn.
+   --------------------------------------------------------------- */
+section.reveal[data-reveal] [data-lead] {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+section.reveal[data-reveal].revealed [data-lead] {
+  opacity: 1;
+  transform: none;
+}
+
+section.reveal[data-reveal] [data-lead] ~ *:not(h1):not(h2) {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+section.reveal[data-reveal].revealed [data-lead] ~ *:not(h1):not(h2) {
+  opacity: 1;
+  transform: none;
+}
+/* stagger tuned to land after the chapter's h2 flourish (~180ms) */
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(2)  { transition-delay: 180ms; }
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(3)  { transition-delay: 240ms; }
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(4)  { transition-delay: 300ms; }
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(5)  { transition-delay: 360ms; }
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(6)  { transition-delay: 420ms; }
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(n+7){ transition-delay: 480ms; }
+
+html.reduce-motion section.reveal[data-reveal] [data-lead],
+html.reduce-motion section.reveal[data-reveal] [data-lead] ~ * {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
