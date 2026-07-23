@@ -35,6 +35,8 @@ const FAQS: { q: string; a: string }[] = [
   },
 ];
 
+const CHECKLIST_URL = "/downloads/trackdub-local-first-dubbing-checklist.pdf";
+
 export const Route = createFileRoute("/guides/ai-dubbing-guide")({
   head: () => ({
     meta: [
