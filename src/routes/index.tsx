@@ -2161,7 +2161,7 @@ function Pricing() {
         </h2>
         <div className="mt-14 grid divide-y divide-border border-y border-border md:grid-cols-3 md:divide-x md:divide-y-0">
           {plans.map((p) => (
-            <div key={p.name} className="p-8">
+            <div key={p.name} className="card-lift group relative p-8 hover:bg-surface/50">
               <div className="flex items-center gap-3">
                 <div className="font-serif text-2xl text-foreground">{p.name}</div>
                 {p.featured && (
