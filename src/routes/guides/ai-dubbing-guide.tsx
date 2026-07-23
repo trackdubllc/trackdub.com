@@ -36,6 +36,9 @@ const FAQS: { q: string; a: string }[] = [
 ];
 
 const CHECKLIST_URL = "/downloads/trackdub-local-first-dubbing-checklist.pdf";
+const CHECKLIST_ABSOLUTE_URL =
+  "https://www.trackdub.com/downloads/trackdub-local-first-dubbing-checklist.pdf";
+const CHECKLIST_ANCHOR_URL = `${URL}#checklist`;
 
 export const Route = createFileRoute("/guides/ai-dubbing-guide")({
   head: () => ({
@@ -110,6 +113,62 @@ export const Route = createFileRoute("/guides/ai-dubbing-guide")({
             { "@type": "ListItem", position: 2, name: "Guides", item: "https://www.trackdub.com/guides" },
             { "@type": "ListItem", position: 3, name: "Dubbing AI", item: URL },
           ],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "DigitalDocument",
+          "@id": CHECKLIST_ANCHOR_URL,
+          name: "Local-First Dubbing Workflow Checklist",
+          headline: "Local-First Dubbing Workflow Checklist",
+          description:
+            "A printable, stage-by-stage checklist for shipping AI-dubbed video without giving up control — ingest, ASR, translation, diarization, TTS, mix, reliability, and privacy.",
+          url: CHECKLIST_ANCHOR_URL,
+          contentUrl: CHECKLIST_ABSOLUTE_URL,
+          encodingFormat: "application/pdf",
+          fileFormat: "application/pdf",
+          numberOfPages: 2,
+          inLanguage: "en",
+          isAccessibleForFree: true,
+          datePublished: PUBLISHED,
+          dateModified: MODIFIED,
+          author: { "@type": "Organization", name: "Trackdub" },
+          publisher: {
+            "@type": "Organization",
+            name: "Trackdub",
+            url: "https://www.trackdub.com/",
+          },
+          license: "https://creativecommons.org/licenses/by/4.0/",
+          keywords:
+            "dubbing ai checklist, ai video dubbing workflow, local ai dubbing, ai dubbing pipeline",
+          isPartOf: { "@type": "Article", "@id": URL },
+          about: [
+            { "@type": "Thing", name: "AI video dubbing" },
+            { "@type": "Thing", name: "Local-first workflow" },
+            { "@type": "Thing", name: "Dubbing pipeline" },
+          ],
+          potentialAction: {
+            "@type": "DownloadAction",
+            name: "Download the Local-First Dubbing Workflow Checklist",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: CHECKLIST_ABSOLUTE_URL,
+              contentType: "application/pdf",
+              actionPlatform: [
+                "http://schema.org/DesktopWebPlatform",
+                "http://schema.org/MobileWebPlatform",
+              ],
+            },
+            expectsAcceptanceOf: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "USD",
+              eligibleRegion: { "@type": "Place", name: "Worldwide" },
+              category: "Free download",
+            },
+          },
         }),
       },
     ],
