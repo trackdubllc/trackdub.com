@@ -105,16 +105,19 @@ function Rule({ className = "" }: { className?: string }) {
 function SectionRail() {
   const [active, setActive] = useState<string>("");
   const [visible, setVisible] = useState(false);
-  const [progress, setProgress] = useState(0);
   const itemsRef = useRef<Record<string, HTMLAnchorElement | null>>({});
   const listRef = useRef<HTMLDivElement | null>(null);
-  const [indicator, setIndicator] = useState<{ top: number; height: number }>({ top: 0, height: 12 });
   const [hovered, setHovered] = useState<string | null>(null);
-  const [localPct, setLocalPct] = useState(0);
   const hoverRafRef = useRef<number | null>(null);
   const navIds = useRef(new Set(NAV.map((n) => n.href.slice(1))));
   const activeRef = useRef<string>("");
   const [scrubbing, setScrubbing] = useState(false);
+  // Direct DOM refs so scroll/pointer frames write straight to style,
+  // bypassing React re-renders and the reconciler.
+  const progressFillRef = useRef<HTMLSpanElement | null>(null);
+  const indicatorRef = useRef<HTMLSpanElement | null>(null);
+  const localBarRef = useRef<HTMLSpanElement | null>(null);
+  const localPctRef = useRef<HTMLSpanElement | null>(null);
   const dragStartYRef = useRef(0);
   const draggingRef = useRef(false);
   const suppressClickRef = useRef(false);
@@ -375,7 +378,10 @@ function SectionRail() {
       const pct = Math.min(1, Math.max(0, raw));
       if (Math.abs(pct - lastPct) > 0.005) {
         lastPct = pct;
-        setLocalPct(pct);
+        const bar = localBarRef.current;
+        const label = localPctRef.current;
+        if (bar) bar.style.width = `${(pct * 100).toFixed(1)}%`;
+        if (label) label.textContent = `${Math.round(pct * 100)}%`;
       }
     };
     remeasure();
@@ -477,10 +483,13 @@ function SectionRail() {
         setVisible(nextVisible);
       }
       const p = docMax > 0 ? Math.min(1, Math.max(0, y / docMax)) : 0;
-      // Only re-render when the fill would visibly move (~1/300 of the track).
-      if (Math.abs(p - lastProgress) > 0.003) {
+      // Direct DOM write — no React re-render on scroll.
+      if (Math.abs(p - lastProgress) > 0.002) {
         lastProgress = p;
-        setProgress(p);
+        const fill = progressFillRef.current;
+        if (fill) fill.style.transform = `scaleY(${p})`;
+        const list = listRef.current;
+        if (list) list.setAttribute("aria-valuenow", String(Math.round(p * 100)));
       }
     };
 
@@ -524,11 +533,11 @@ function SectionRail() {
     const measure = () => {
       const top = el.offsetTop;
       const height = el.offsetHeight;
-      setIndicator((prev) =>
-        Math.abs(prev.top - top) < 0.5 && Math.abs(prev.height - height) < 0.5
-          ? prev
-          : { top, height },
-      );
+      const ind = indicatorRef.current;
+      if (ind) {
+        ind.style.transform = `translateY(${top}px)`;
+        ind.style.height = `${height}px`;
+      }
     };
     // Defer to the next frame so we measure after the browser has settled
     // any layout the active-state change triggered.
@@ -647,25 +656,30 @@ function SectionRail() {
         aria-label="Page scroll position"
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={Math.round(progress * 100)}
+        aria-valuenow={0}
       >
         {/* vertical track */}
         <span className="pointer-events-none absolute left-0 top-1 bottom-1 w-0.5 bg-border/70" aria-hidden />
         {/* progress fill */}
         <span
+          ref={progressFillRef}
           className="pointer-events-none absolute left-0 top-1 w-0.5 origin-top bg-foreground/40"
           style={{
-            height: `calc((100% - 0.5rem) * ${progress})`,
-            transition: scrubbing ? "none" : "height 120ms linear",
+            height: "calc(100% - 0.5rem)",
+            transform: "scaleY(0)",
+            transformOrigin: "top",
+            willChange: "transform",
           }}
           aria-hidden
         />
         {/* active indicator */}
         <span
+          ref={indicatorRef}
           className="pointer-events-none absolute left-[-1px] w-[3px] rounded-full bg-accent"
           style={{
-            transform: `translateY(${indicator.top}px)`,
-            height: `${indicator.height}px`,
+            transform: "translateY(0px)",
+            height: "12px",
+            willChange: "transform, height",
             transition:
               "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), height 140ms ease-out",
           }}
@@ -740,15 +754,19 @@ function SectionRail() {
                     className="relative block h-[3px] w-16 overflow-hidden bg-border/70"
                   >
                     <span
+                      ref={localBarRef}
                       className="absolute inset-y-0 left-0 bg-accent"
                       style={{
-                        width: `${Math.round(localPct * 100)}%`,
+                        width: "0%",
                         transition: "width 160ms linear",
                       }}
                     />
                   </span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular-nums">
-                    {Math.round(localPct * 100)}%
+                  <span
+                    ref={localPctRef}
+                    className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular-nums"
+                  >
+                    0%
                   </span>
                 </span>
               </span>
