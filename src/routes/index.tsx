@@ -633,7 +633,7 @@ function SectionRail() {
     >
       <div
         ref={listRef}
-        className={`pointer-events-auto relative flex flex-col gap-2 py-2 pl-3 pr-2 touch-none select-none ${scrubbing ? "cursor-grabbing" : "cursor-grab"}`}
+        className={`pointer-events-auto relative flex min-h-[420px] flex-col py-2 pl-3 pr-2 touch-none select-none ${scrubbing ? "cursor-grabbing" : "cursor-grab"}`}
         onPointerDown={handleRailPointerDown}
         onPointerMove={handleRailPointerMove}
         onPointerUp={handleRailPointerUp}
@@ -645,10 +645,10 @@ function SectionRail() {
         aria-valuenow={Math.round(progress * 100)}
       >
         {/* vertical track */}
-        <span className="pointer-events-none absolute left-0 top-1 bottom-1 w-px bg-border/70" aria-hidden />
+        <span className="pointer-events-none absolute left-0 top-1 bottom-1 w-0.5 bg-border/70" aria-hidden />
         {/* progress fill */}
         <span
-          className="pointer-events-none absolute left-0 top-1 w-px origin-top bg-foreground/40"
+          className="pointer-events-none absolute left-0 top-1 w-0.5 origin-top bg-foreground/40"
           style={{
             height: `calc((100% - 0.5rem) * ${progress})`,
             transition: scrubbing ? "none" : "height 240ms cubic-bezier(0.22, 1, 0.36, 1)",
@@ -678,7 +678,7 @@ function SectionRail() {
               ref={(el) => {
                 itemsRef.current[id] = el;
               }}
-              className="pointer-events-auto group relative flex items-center gap-3 py-0.5 focus-visible:outline-none"
+              className="pointer-events-auto group relative flex flex-1 min-h-[32px] cursor-pointer items-center gap-3 rounded-sm px-1 transition-colors hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:bg-foreground/[0.04]"
               aria-label={`Jump to ${n.label}`}
               onMouseEnter={() => setHovered(id)}
               onMouseLeave={() => setHovered((h) => (h === id ? null : h))}
