@@ -285,7 +285,10 @@ function SectionRail() {
   // the wheel, touch, or keyboard — the animation should never fight input.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const cancel = () => cancelSmoothScroll();
+    const cancel = () => {
+      cancelSmoothScroll();
+      cancelInertia();
+    };
     const onKey = (e: KeyboardEvent) => {
       // Only cancel for keys that actually scroll.
       const scrollKeys = new Set([
@@ -302,6 +305,7 @@ function SectionRail() {
       window.removeEventListener("touchstart", cancel);
       window.removeEventListener("keydown", onKey);
       cancelSmoothScroll();
+      cancelInertia();
     };
   }, []);
 
