@@ -731,6 +731,8 @@ function statusColor(s: JobStageStatus): string {
       return "oklch(0.70 0.02 245)";
     case "stale":
       return ACC;
+    case "failed":
+      return "oklch(0.68 0.16 30)";
     case "queued":
     default:
       return "oklch(0.38 0.014 250)";
@@ -747,6 +749,8 @@ function statusLabel(s: JobStageStatus, pct: number): string {
       return `paused · ${pct}%`;
     case "stale":
       return "stale · requeued";
+    case "failed":
+      return `failed · ${pct}%`;
     case "queued":
     default:
       return "queued";
