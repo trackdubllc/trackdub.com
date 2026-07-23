@@ -305,6 +305,54 @@ function GuidePage() {
             </p>
           </section>
 
+          <section
+            id="checklist"
+            className="space-y-4 rounded-md border border-border bg-muted/30 p-6 md:p-8"
+          >
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Free download · PDF · 2 pages
+            </p>
+            <h2 className="font-serif text-2xl">
+              Local-First Dubbing Workflow Checklist
+            </h2>
+            <p>
+              A printable, stage-by-stage checklist for shipping AI-dubbed video
+              without giving up control. Eight sections covering ingest, ASR,
+              translation, diarization, TTS, mix, reliability, and privacy —
+              every item is a concrete thing to verify before you call a
+              pipeline production-ready.
+            </p>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+              <li>Audit an existing dubbing AI pipeline against a fixed spec.</li>
+              <li>Spec a new local AI dubbing workflow from scratch.</li>
+              <li>Free to share and adapt with attribution.</li>
+            </ul>
+            <div className="flex flex-wrap gap-3 pt-2">
+              <a
+                href={CHECKLIST_URL}
+                download
+                className="inline-flex items-center gap-2 rounded-md border border-foreground bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
+              >
+                Download the checklist (PDF)
+              </a>
+              <a
+                href={CHECKLIST_URL}
+                target="_blank"
+                rel="noopener"
+                className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted/50"
+              >
+                Preview in browser →
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Linking to this checklist? Point to{" "}
+              <code className="text-foreground">
+                trackdub.com/guides/ai-dubbing-guide#checklist
+              </code>
+              .
+            </p>
+          </section>
+
           <section className="space-y-4" id="faq">
             <h2 className="font-serif text-2xl">Dubbing AI FAQ</h2>
             <div className="divide-y divide-border border-t border-b border-border">
