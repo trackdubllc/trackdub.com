@@ -135,6 +135,12 @@ function SectionRail() {
   const smoothStartRef = useRef<{ y: number; t: number } | null>(null);
   const smoothDurRef = useRef(560);
 
+  // Single centralized rail-frame scheduler. All DOM writes for the rail
+  // (progress fill scaleY, active indicator translateY/height, aria-valuenow,
+  // visibility toggle) go through one ordered pass so scroll, resize,
+  // active-change, and pointer scrubs never race or double-write.
+  const scheduleRailFrameRef = useRef<() => void>(() => {});
+
   const prefersReducedMotion = () =>
     typeof document !== "undefined" &&
     (document.documentElement.classList.contains("reduce-motion") ||
@@ -214,6 +220,9 @@ function SectionRail() {
     // Scrubbing takes over from any in-flight smooth scroll.
     cancelSmoothScroll();
     window.scrollTo({ top: f * docMax, behavior: "auto" });
+    // Nudge the centralized rail scheduler so progress/indicator update on
+    // the same frame as the scroll write — don't wait for scroll event.
+    scheduleRailFrameRef.current();
   };
 
   // Resolve a pointer y to the nearest chapter anchor. Powers "click anywhere
@@ -468,42 +477,87 @@ function SectionRail() {
     // not inside the scroll handler (avoids forced reflow every frame).
     let docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
     let lastVisible = false;
-    let lastProgress = 0;
+    let lastProgress = -1;
+    let lastAria = -1;
+    let lastIndTop = Number.NaN;
+    let lastIndHeight = Number.NaN;
     let rafId: number | null = null;
     let ticking = false;
 
-    const compute = () => {
+    // Strict-ordered, redundant-write-free write pass. Reads first, then
+    // writes in a fixed order: visibility → progress fill → aria-valuenow →
+    // indicator geometry. Each property gates on a "changed enough" check
+    // so we never touch style or attributes when nothing moved.
+    const writeRailFrame = () => {
       ticking = false;
       rafId = null;
+
+      // 1) Reads (batched — no interleaved writes → no layout thrash)
       const y = window.scrollY;
+      const p = docMax > 0 ? Math.min(1, Math.max(0, y / docMax)) : 0;
+      const activeEl = itemsRef.current[activeRef.current];
+
+      // 2) Visibility
       const nextVisible = y > 480;
       if (nextVisible !== lastVisible) {
         lastVisible = nextVisible;
         setVisible(nextVisible);
       }
-      const p = docMax > 0 ? Math.min(1, Math.max(0, y / docMax)) : 0;
-      // Direct DOM write — no React re-render on scroll.
+
+      // 3) Progress fill
       if (Math.abs(p - lastProgress) > 0.002) {
         lastProgress = p;
         const fill = progressFillRef.current;
         if (fill) fill.style.transform = `scaleY(${p})`;
+      }
+
+      // 4) aria-valuenow — only when the rounded value flips
+      const ariaVal = Math.round(p * 100);
+      if (ariaVal !== lastAria) {
+        lastAria = ariaVal;
         const list = listRef.current;
-        if (list) list.setAttribute("aria-valuenow", String(Math.round(p * 100)));
+        if (list) list.setAttribute("aria-valuenow", String(ariaVal));
+      }
+
+      // 5) Active indicator — offsetTop/offsetHeight against offsetParent
+      //    (the rail list) is cheap, no full layout flush.
+      if (activeEl) {
+        const top = activeEl.offsetTop;
+        const height = activeEl.offsetHeight;
+        const ind = indicatorRef.current;
+        if (ind) {
+          if (top !== lastIndTop) {
+            lastIndTop = top;
+            ind.style.transform = `translateY(${top}px)`;
+          }
+          if (height !== lastIndHeight) {
+            lastIndHeight = height;
+            ind.style.height = `${height}px`;
+          }
+        }
       }
     };
 
     const schedule = () => {
       if (ticking) return;
       ticking = true;
-      rafId = window.requestAnimationFrame(compute);
+      rafId = window.requestAnimationFrame(writeRailFrame);
     };
+
+    // Expose so active-change effect and pointer scrubs funnel into the
+    // same scheduler — one rAF, one ordered write pass.
+    scheduleRailFrameRef.current = schedule;
 
     const onResize = () => {
       docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      // Rail height may have shifted even if active row didn't — force
+      // indicator geometry to re-write on the next frame.
+      lastIndTop = Number.NaN;
+      lastIndHeight = Number.NaN;
       schedule();
     };
 
-    compute();
+    writeRailFrame();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
 
@@ -518,40 +572,20 @@ function SectionRail() {
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", onResize);
       if (rafId !== null) window.cancelAnimationFrame(rafId);
+      scheduleRailFrameRef.current = () => {};
     };
   }, []);
 
   useEffect(() => {
-    const el = itemsRef.current[active];
     const list = listRef.current;
-    if (!el || !list) return;
-    // offsetTop/offsetHeight are cached layout values relative to the
-    // offsetParent — the rail list is that parent here, so we can measure
-    // without triggering a full getBoundingClientRect layout flush.
-    let raf = 0;
-    const measure = () => {
-      const top = el.offsetTop;
-      const height = el.offsetHeight;
-      const ind = indicatorRef.current;
-      if (ind) {
-        ind.style.transform = `translateY(${top}px)`;
-        ind.style.height = `${height}px`;
-      }
-    };
-    // Defer to the next frame so we measure after the browser has settled
-    // any layout the active-state change triggered.
-    raf = window.requestAnimationFrame(measure);
-    // Re-measure if the rail itself resizes (font swap, viewport change) so
-    // the indicator never drifts off its target.
-    const ro = new ResizeObserver(() => {
-      window.cancelAnimationFrame(raf);
-      raf = window.requestAnimationFrame(measure);
-    });
+    if (!list) return;
+    // Route active-state / visibility flips through the single rail-frame
+    // scheduler so the indicator write lands in the same ordered pass as
+    // the progress fill — no dueling rAFs, no split ordering.
+    scheduleRailFrameRef.current();
+    const ro = new ResizeObserver(() => scheduleRailFrameRef.current());
     ro.observe(list);
-    return () => {
-      ro.disconnect();
-      window.cancelAnimationFrame(raf);
-    };
+    return () => ro.disconnect();
   }, [active, visible]);
 
   const handleRailPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
