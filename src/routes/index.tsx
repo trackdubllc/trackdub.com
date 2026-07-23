@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,6 +34,7 @@ function Index() {
         <TrustStrip />
         <PipelineFeature />
         <Walkthrough />
+        <ResumableJob />
         <StageChapters />
         <Control />
         <Performance />
@@ -56,6 +57,7 @@ function Index() {
 const NAV = [
   { href: "#pipeline", label: "Pipeline" },
   { href: "#walkthrough", label: "Try it" },
+  { href: "#resume", label: "Resume" },
   { href: "#control", label: "Control" },
   { href: "#performance", label: "Performance" },
   { href: "#architecture", label: "Architecture" },
