@@ -224,7 +224,7 @@ function Lead() {
 /* ---------------- resumable job ---------------- */
 
 type JobStageId = "ingest" | "transcribe" | "translate" | "diarize" | "voice" | "mix";
-type JobStageStatus = "queued" | "running" | "paused" | "done" | "stale";
+type JobStageStatus = "queued" | "running" | "paused" | "done" | "stale" | "failed";
 
 const JOB_STAGES: {
   id: JobStageId;
@@ -264,9 +264,63 @@ function initialJobState(): JobState {
 
 type LogEntry = { t: string; msg: string; kind: "info" | "warn" | "ok" };
 
+type FailureKind = "gpu_oom" | "missing_codec" | "partial_ingest";
+
+type FailureInfo = {
+  kind: FailureKind;
+  stage: JobStageId;
+  code: string;
+  title: string;
+  detail: string;
+  recoverLabel: string;
+  recoveryNote: string;
+  fromCheckpoint: number; // resume progress fraction
+  applyRecovery?: () => Partial<Record<JobStageId, JobStageStatus>>;
+};
+
+const FAILURES: Record<FailureKind, Omit<FailureInfo, "applyRecovery">> = {
+  gpu_oom: {
+    kind: "gpu_oom",
+    stage: "voice",
+    code: "E_GPU_OOM",
+    title: "GPU ran out of memory during voice generation",
+    detail:
+      "The TensorRT RTX engine for the voice model needed 8.4 GB but 6.1 GB were free on the selected device (RTX 4070). Trackdub paused the job at line 63 of 128 and kept every finished line on disk.",
+    recoverLabel: "Retry on DirectML at half batch",
+    recoveryNote:
+      "Switching provider to DirectML (batch 4). Already-rendered lines 1–62 are reused from the checkpoint.",
+    fromCheckpoint: 0.49,
+  },
+  missing_codec: {
+    kind: "missing_codec",
+    stage: "ingest",
+    code: "E_MEDIA_CODEC",
+    title: "Ingest could not decode one audio track",
+    detail:
+      "FFmpeg opened interview_de.mp4 but track #2 uses an EAC3 stream that this build cannot decode. Video and track #1 were probed successfully; the file was not modified.",
+    recoverLabel: "Install decoder & rescan",
+    recoveryNote:
+      "Installed the missing EAC3 decoder. Re-probing the container — video and existing tracks are reused, only the audio scan re-runs.",
+    fromCheckpoint: 0.6,
+  },
+  partial_ingest: {
+    kind: "partial_ingest",
+    stage: "transcribe",
+    code: "E_TRUNCATED_STREAM",
+    title: "Source media ended mid-segment",
+    detail:
+      "The last 3.2s of interview_de.mp4 are missing packets — likely a truncated export. Trackdub transcribed 124 of 128 segments and saved them. Nothing was discarded.",
+    recoverLabel: "Continue with 124 saved segments",
+    recoveryNote:
+      "Accepted partial ingest. Downstream stages will run on the 124 valid segments; the truncated tail is flagged in the transcript for review.",
+    fromCheckpoint: 0.97,
+  },
+};
+
 function ResumableJob() {
   const [job, setJob] = useState<JobState>(initialJobState);
   const [running, setRunning] = useState(true);
+  const [failure, setFailure] = useState<FailureInfo | null>(null);
   const [log, setLog] = useState<LogEntry[]>([
     { t: "00:00", msg: "Job queued · interview_de.mp4 → en-US", kind: "info" },
     { t: "00:02", msg: "Ingest complete · media.probe.json", kind: "ok" },
@@ -283,7 +337,7 @@ function ResumableJob() {
   };
 
   useEffect(() => {
-    if (!running) return;
+    if (!running || failure) return;
     const dt = 0.12;
     const iv = window.setInterval(() => {
       clockRef.current += dt;
@@ -319,9 +373,10 @@ function ResumableJob() {
       });
     }, 120);
     return () => window.clearInterval(iv);
-  }, [running]);
+  }, [running, failure]);
 
   const togglePause = () => {
+    if (failure) return;
     setRunning((r) => {
       const next = !r;
       setJob((prev) => {
@@ -356,10 +411,54 @@ function ResumableJob() {
     // Prior stages (ingest, transcribe, diarize) remain done — not recomputed.
   };
 
+  const injectFailure = (kind: FailureKind) => {
+    const info = FAILURES[kind];
+    setJob((prev) => {
+      const s: JobState["status"] = { ...prev.status };
+      const p: JobState["progress"] = { ...prev.progress };
+      // Mark stages before the failing one as done; failing stage as failed.
+      let hit = false;
+      for (const st of JOB_STAGES) {
+        if (st.id === info.stage) {
+          hit = true;
+          s[st.id] = "failed";
+          p[st.id] = info.fromCheckpoint;
+          continue;
+        }
+        if (!hit) {
+          s[st.id] = "done";
+          p[st.id] = 1;
+        } else {
+          s[st.id] = "queued";
+          p[st.id] = 0;
+        }
+      }
+      return { status: s, progress: p };
+    });
+    setRunning(false);
+    setFailure(info);
+    addLog(`FAIL · ${info.code} · ${info.title.toLowerCase()}`, "warn");
+    addLog(`Paused · checkpoint saved at ${info.stage} ${(info.fromCheckpoint * 100).toFixed(0)}%`, "warn");
+  };
+
+  const recover = () => {
+    if (!failure) return;
+    const info = failure;
+    addLog(`Recovery · ${info.recoveryNote}`, "info");
+    setJob((prev) => {
+      const s = { ...prev.status };
+      s[info.stage] = "running";
+      return { ...prev, status: s };
+    });
+    setFailure(null);
+    setRunning(true);
+  };
+
   const reset = () => {
     clockRef.current = 9;
     setJob(initialJobState());
     setRunning(true);
+    setFailure(null);
     setLog([
       { t: "00:00", msg: "Job queued · interview_de.mp4 → en-US", kind: "info" },
       { t: "00:02", msg: "Ingest complete · media.probe.json", kind: "ok" },
@@ -409,7 +508,7 @@ function ResumableJob() {
                   <button
                     type="button"
                     onClick={togglePause}
-                    disabled={allDone}
+                    disabled={allDone || !!failure}
                     className="inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors disabled:opacity-40"
                     style={{
                       color: INK,
@@ -423,6 +522,7 @@ function ResumableJob() {
                   <button
                     type="button"
                     onClick={editTranslation}
+                    disabled={!!failure}
                     className="inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors"
                     style={{ color: INK, borderColor: LINE, background: PANEL_HI }}
                   >
@@ -438,6 +538,89 @@ function ResumableJob() {
                   </button>
                 </div>
               </div>
+
+              {/* failure simulator */}
+              <div
+                className="mb-5 flex flex-wrap items-center gap-2 border-t border-b py-3"
+                style={{ borderColor: LINE }}
+              >
+                <span
+                  className="mr-1 font-mono text-[10px] uppercase tracking-[0.14em]"
+                  style={{ color: DIM }}
+                >
+                  Simulate failure
+                </span>
+                {(
+                  [
+                    ["gpu_oom", "GPU OOM"],
+                    ["missing_codec", "Missing codec"],
+                    ["partial_ingest", "Partial ingest"],
+                  ] as [FailureKind, string][]
+                ).map(([k, label]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => injectFailure(k)}
+                    className="inline-flex items-center gap-2 border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors hover:border-accent"
+                    style={{ color: INK, borderColor: LINE, background: "transparent" }}
+                  >
+                    ⚠ {label}
+                  </button>
+                ))}
+              </div>
+
+              {failure && (
+                <div
+                  role="alert"
+                  className="mb-5 border p-4"
+                  style={{
+                    borderColor: "oklch(0.55 0.14 30)",
+                    background: "oklch(0.20 0.04 30 / 0.35)",
+                  }}
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-3">
+                    <div className="flex items-baseline gap-3">
+                      <span
+                        className="font-mono text-[10px] uppercase tracking-[0.14em]"
+                        style={{ color: "oklch(0.82 0.14 40)" }}
+                      >
+                        {failure.code}
+                      </span>
+                      <span className="font-serif text-[17px]" style={{ color: INK }}>
+                        {failure.title}
+                      </span>
+                    </div>
+                    <span
+                      className="font-mono text-[10px] uppercase tracking-[0.14em]"
+                      style={{ color: DIM }}
+                    >
+                      Stage · {failure.stage} · paused, checkpoint saved
+                    </span>
+                  </div>
+                  <p
+                    className="mt-3 text-[13px] leading-relaxed"
+                    style={{ color: "oklch(0.82 0.02 245)" }}
+                  >
+                    {failure.detail}
+                  </p>
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={recover}
+                      className="inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em]"
+                      style={{ color: INK, borderColor: ACC, background: PANEL_HI }}
+                    >
+                      ✓ {failure.recoverLabel}
+                    </button>
+                    <span
+                      className="font-mono text-[10px] uppercase tracking-[0.14em]"
+                      style={{ color: DIM }}
+                    >
+                      or reset · nothing on disk was destroyed
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* stage rows */}
               <ol className="divide-y" style={{ borderColor: LINE }}>
@@ -528,8 +711,8 @@ function ResumableJob() {
             </div>
 
             <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Fig. 02b &nbsp;·&nbsp; Simulated job runner. Progress and log are
-              client-side only.
+              Fig. 02b &nbsp;·&nbsp; Simulated job runner with failure injection.
+              Progress, errors, and log are client-side only.
             </p>
           </div>
         </div>
