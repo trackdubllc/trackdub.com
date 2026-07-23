@@ -870,7 +870,7 @@ function Masthead() {
   const [open, setOpen] = useState(false);
   return (
     <header className="border-b border-border bg-background">
-      <Container className="flex h-16 items-center justify-between gap-6">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-6 px-6 sm:px-10">
         <a href="#top" className="shrink-0 font-serif text-2xl leading-none tracking-tight text-foreground">
           Trackdub<span className="text-accent">.</span>
         </a>
@@ -889,12 +889,6 @@ function Masthead() {
         </nav>
         <div className="hidden shrink-0 items-center gap-4 md:flex lg:gap-5">
           <div className="hidden lg:block"><MotionToggle /></div>
-          <a
-            href="mailto:hello@trackdub.com"
-            className="hidden whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground xl:inline"
-          >
-            Contact
-          </a>
           <InkButton href="#pricing">Get Trackdub</InkButton>
         </div>
         <button
@@ -905,7 +899,7 @@ function Masthead() {
         >
           {open ? "Close" : "Menu"}
         </button>
-      </Container>
+      </div>
       {open && (
         <div className="border-t border-border bg-background md:hidden">
           <Container className="flex flex-col py-4">
