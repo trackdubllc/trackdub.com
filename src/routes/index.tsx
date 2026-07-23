@@ -109,6 +109,44 @@ function SectionRail() {
   const itemsRef = useRef<Record<string, HTMLAnchorElement | null>>({});
   const listRef = useRef<HTMLDivElement | null>(null);
   const [indicator, setIndicator] = useState<{ top: number; height: number }>({ top: 0, height: 12 });
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [localPct, setLocalPct] = useState(0);
+  const hoverRafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!hovered) return;
+    const target = document.getElementById(hovered);
+    if (!target) return;
+
+    const measure = () => {
+      const rect = target.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // Anchor "read position" at the middle of the viewport so the value
+      // matches what the reader actually has in focus.
+      const anchor = vh / 2;
+      const raw = (anchor - rect.top) / Math.max(1, rect.height);
+      setLocalPct(Math.min(1, Math.max(0, raw)));
+    };
+
+    measure();
+
+    let ticking = false;
+    const schedule = () => {
+      if (ticking) return;
+      ticking = true;
+      hoverRafRef.current = window.requestAnimationFrame(() => {
+        ticking = false;
+        measure();
+      });
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (hoverRafRef.current !== null) window.cancelAnimationFrame(hoverRafRef.current);
+    };
+  }, [hovered]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -225,7 +263,6 @@ function SectionRail() {
 
   return (
     <aside
-      aria-hidden
       className={`pointer-events-none fixed left-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-2 transition-opacity duration-500 xl:flex ${visible ? "opacity-100" : "opacity-0"}`}
     >
       <div ref={listRef} className="relative flex flex-col gap-2 pl-3">
@@ -254,6 +291,8 @@ function SectionRail() {
         {NAV.map((n, i) => {
           const id = n.href.slice(1);
           const isActive = active === id;
+          const isHovered = hovered === id;
+          const showTip = isHovered;
           return (
             <a
               key={id}
@@ -261,15 +300,53 @@ function SectionRail() {
               ref={(el) => {
                 itemsRef.current[id] = el;
               }}
-              className="pointer-events-auto group flex items-center gap-3 py-0.5"
+              className="pointer-events-auto group relative flex items-center gap-3 py-0.5 focus-visible:outline-none"
+              aria-label={`Jump to ${n.label}`}
+              onMouseEnter={() => setHovered(id)}
+              onMouseLeave={() => setHovered((h) => (h === id ? null : h))}
+              onFocus={() => setHovered(id)}
+              onBlur={() => setHovered((h) => (h === id ? null : h))}
             >
               <span
                 className={`h-px transition-all duration-300 ease-out ${isActive ? "w-6 bg-accent" : "w-3 bg-border group-hover:w-5 group-hover:bg-foreground/60"}`}
               />
               <span
+                aria-hidden
                 className={`font-mono text-[10px] uppercase tracking-[0.14em] transition-all duration-300 ${isActive ? "text-accent opacity-100 translate-x-0" : "text-muted-foreground opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0"}`}
               >
                 {String(i + 1).padStart(2, "0")} · {n.label}
+              </span>
+              {/* quiet hover/focus tooltip */}
+              <span
+                role="tooltip"
+                aria-hidden={!showTip}
+                className={`pointer-events-none absolute left-full top-1/2 ml-5 flex -translate-y-1/2 items-center gap-3 whitespace-nowrap border border-border bg-background/95 px-3 py-1.5 backdrop-blur-sm transition-all duration-200 ease-out ${
+                  showTip
+                    ? "opacity-100 translate-x-0"
+                    : "opacity-0 -translate-x-1"
+                }`}
+              >
+                <span className="font-serif text-[13px] leading-none tracking-tight text-foreground">
+                  {n.label}
+                </span>
+                <span className="h-3 w-px bg-border" aria-hidden />
+                <span className="flex items-center gap-2">
+                  <span
+                    aria-hidden
+                    className="relative block h-[3px] w-16 overflow-hidden bg-border/70"
+                  >
+                    <span
+                      className="absolute inset-y-0 left-0 bg-accent"
+                      style={{
+                        width: `${Math.round(localPct * 100)}%`,
+                        transition: "width 160ms linear",
+                      }}
+                    />
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular-nums">
+                    {Math.round(localPct * 100)}%
+                  </span>
+                </span>
               </span>
             </a>
           );
