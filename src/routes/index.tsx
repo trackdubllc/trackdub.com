@@ -38,6 +38,7 @@ function Index() {
         <Control />
         <Performance />
         <Architecture />
+        <SystemRequirements />
         <WhatYouGet />
         <ComparedTo />
         <Pricing />
@@ -57,6 +58,7 @@ const NAV = [
   { href: "#control", label: "Control" },
   { href: "#performance", label: "Performance" },
   { href: "#architecture", label: "Architecture" },
+  { href: "#requirements", label: "Requirements" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ];
@@ -1639,6 +1641,7 @@ function Colophon() {
         ["Control", "#control"],
         ["Performance", "#performance"],
         ["Architecture", "#architecture"],
+        ["Requirements", "#requirements"],
         ["Pricing", "#pricing"],
       ],
     ],
@@ -1890,6 +1893,180 @@ function Architecture() {
               Fallback is per-stage. A missing provider on one stage does not
               disable the rest of the pipeline.
             </p>
+          </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+/* ---------------- system requirements ---------------- */
+
+function SystemRequirements() {
+  const specs: {
+    item: string;
+    minimum: string;
+    recommended: string;
+    notes?: string;
+  }[] = [
+    {
+      item: "OS",
+      minimum: "Windows 10 22H2 (x64)",
+      recommended: "Windows 11 23H2 or later",
+      notes: "64-bit only. ARM64 Windows runs under emulation with CPU fallback.",
+    },
+    {
+      item: "CPU",
+      minimum: "x64 CPU with AVX2 (Intel 6th gen / AMD Ryzen 2000)",
+      recommended: "Intel 10th gen / AMD Ryzen 5000 or newer, 8 cores+",
+      notes: "Used for ingest, probe, VAD, and CPU fallback inference.",
+    },
+    {
+      item: "RAM",
+      minimum: "16 GB",
+      recommended: "32 GB",
+      notes: "Larger projects (20 min+, 4K source, many speakers) benefit from more RAM.",
+    },
+    {
+      item: "GPU",
+      minimum: "DirectX 12 capable GPU for DirectML",
+      recommended: "NVIDIA RTX 3060 / 4060 / 5060 or better",
+      notes: "TensorRT RTX requires RTX 30 series or newer. Intel Arc and AMD Radeon work via DirectML.",
+    },
+    {
+      item: "VRAM",
+      minimum: "4 GB",
+      recommended: "8 GB (1080p) · 12 GB+ (4K / long form)",
+      notes: "ASR and diarization models are the heaviest VRAM users. TTS is lighter per line.",
+    },
+    {
+      item: "Storage",
+      minimum: "10 GB for app + bundled models",
+      recommended: "SSD with 50 GB free for cache",
+      notes: "HDD is usable but ingest and model load times increase significantly.",
+    },
+  ];
+
+  const accelerators: {
+    name: string;
+    requirement: string;
+    speedup: string;
+    caveat: string;
+  }[] = [
+    {
+      name: "TensorRT RTX",
+      requirement: "NVIDIA RTX 30 / 40 / 50 series · 8 GB+ VRAM",
+      speedup: "Fastest on supported hardware",
+      caveat: "First run compiles an engine cache per model. Cache is portable across projects.",
+    },
+    {
+      name: "DirectML",
+      requirement: "Any DirectX 12 GPU · 4 GB+ VRAM",
+      speedup: "2–4× realtime end-to-end on modern integrated/discrete GPUs",
+      caveat: "Not every model is equally optimized. Falls back to CPU per-stage if a model fails.",
+    },
+    {
+      name: "CPU fallback",
+      requirement: "Any AVX2-capable x64 CPU",
+      speedup: "0.8–1.5× realtime depending on model and core count",
+      caveat: "Always available. No GPU required to complete a project.",
+    },
+  ];
+
+  return (
+    <section id="requirements" className="border-b border-border bg-surface/40">
+      <Container className="py-20 sm:py-28">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-4">
+            <SectionNumber n="04b" label="System requirements" />
+            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+              Runs on a wide range of Windows hardware.
+            </h2>
+            <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
+              Trackdub is built for the machines creators already own. A discrete
+              GPU speeds things up, but it is not required — every stage has a CPU
+              fallback.
+            </p>
+            <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
+              Specifics below are for the Windows desktop app. macOS and Linux
+              builds have similar tiers and are documented in the release notes.
+            </p>
+          </div>
+
+          <div className="lg:col-span-8">
+            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Tbl. 02 &nbsp;·&nbsp; Minimum and recommended specs
+            </div>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[640px] border-collapse text-left">
+                <thead>
+                  <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                    <th className="border-b border-border py-3 pr-4 font-normal">Component</th>
+                    <th className="border-b border-border py-3 pr-4 font-normal">Minimum</th>
+                    <th className="border-b border-border py-3 pr-4 font-normal">Recommended</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {specs.map((s) => (
+                    <tr key={s.item} className="hover:bg-background/60">
+                      <td className="border-b border-border py-4 pr-4 align-top font-serif text-[20px] text-foreground">
+                        {s.item}
+                      </td>
+                      <td className="border-b border-border py-4 pr-4 align-top font-mono text-[13px] text-foreground">
+                        {s.minimum}
+                      </td>
+                      <td className="border-b border-border py-4 pr-4 align-top font-mono text-[13px] text-muted-foreground">
+                        {s.recommended}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-8 space-y-4 border-t border-border pt-6">
+              {specs.map(
+                (s) =>
+                  s.notes && (
+                    <div key={`${s.item}-note`} className="grid gap-2 md:grid-cols-[140px_1fr]">
+                      <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                        {s.item}
+                      </div>
+                      <p className="text-[15px] leading-relaxed text-muted-foreground">{s.notes}</p>
+                    </div>
+                  )
+              )}
+            </div>
+
+            <div className="mt-14 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Tbl. 03 &nbsp;·&nbsp; Acceleration notes
+            </div>
+            <div className="mt-3 grid gap-px bg-border md:grid-cols-3">
+              {accelerators.map((a) => (
+                <div key={a.name} className="bg-background p-5">
+                  <div className="font-serif text-[22px] text-foreground">{a.name}</div>
+                  <dl className="mt-4 space-y-3">
+                    <div>
+                      <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                        Requirement
+                      </dt>
+                      <dd className="mt-1 text-[14px] leading-relaxed text-foreground">{a.requirement}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                        Speedup
+                      </dt>
+                      <dd className="mt-1 text-[14px] leading-relaxed text-foreground">{a.speedup}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                        Caveat
+                      </dt>
+                      <dd className="mt-1 text-[14px] leading-relaxed text-muted-foreground">{a.caveat}</dd>
+                    </div>
+                  </dl>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </Container>
