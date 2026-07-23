@@ -815,20 +815,6 @@ function SectionRail() {
               >
                 {String(i + 1).padStart(2, "0")} · {n.label}
               </span>
-              {/* quiet hover/focus tooltip */}
-              <span
-                role="tooltip"
-                aria-hidden={!showTip}
-                className={`pointer-events-none absolute left-full top-1/2 ml-5 flex -translate-y-1/2 items-center gap-3 whitespace-nowrap border border-border bg-background/95 px-3 py-1.5 backdrop-blur-sm transition-all duration-200 ease-out ${
-                  showTip
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 -translate-x-1"
-                }`}
-              >
-                <span className="font-serif text-[13px] leading-none tracking-tight text-foreground">
-                  {n.label}
-                </span>
-              </span>
             </a>
           );
         })}
