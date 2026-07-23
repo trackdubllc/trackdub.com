@@ -79,10 +79,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Trackdub — Dub videos without giving up control" },
-      { name: "description", content: "A Windows desktop workstation for AI video dubbing. Translate, voice, and mix your video in one workflow — inspect every stage, fix what needs fixing, and keep the rest." },
+      { name: "description", content: "A Windows desktop workstation for AI video dubbing. Translate, voice, and mix in one workflow — inspect every stage and fix what needs fixing." },
       { name: "author", content: "Trackdub" },
       { property: "og:title", content: "Trackdub — Dub videos without giving up control" },
-      { property: "og:description", content: "A Windows desktop workstation for AI video dubbing. Inspect every stage, fix what needs fixing, and keep the rest." },
+      { property: "og:description", content: "A Windows desktop workstation for AI video dubbing. Inspect every stage and fix what needs fixing." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Trackdub — Dub videos without giving up control" },
@@ -99,6 +99,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Trackdub",
+          url: "https://www.trackdub.com",
+          description:
+            "Local-first desktop workstation for AI video dubbing.",
+        }),
       },
     ],
   }),

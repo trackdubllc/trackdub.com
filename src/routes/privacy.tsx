@@ -7,13 +7,13 @@ export const Route = createFileRoute("/privacy")({
       {
         name: "description",
         content:
-          "How Trackdub handles your media, transcripts, voice references, and cloud opt-ins. Local-first by default, plain-language rules for what stays on your machine and what only leaves when you say so.",
+          "How Trackdub handles your media, transcripts, and voice references. Local-first by default; cloud is strictly opt-in per project and per stage.",
       },
       { property: "og:title", content: "Privacy Policy — Trackdub" },
       {
         property: "og:description",
         content:
-          "Local-first privacy rules for the Trackdub desktop workstation. What is stored, what never leaves your machine, and what is strictly opt-in.",
+          "Local-first privacy rules for the Trackdub desktop workstation. What is stored, what never leaves your machine, and what is opt-in.",
       },
       { property: "og:type", content: "article" },
       { property: "og:url", content: "/privacy" },
