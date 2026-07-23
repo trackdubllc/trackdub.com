@@ -1561,6 +1561,10 @@ function FAQ() {
       a: "No. Trackdub runs the whole pipeline on your machine by default. Cloud endpoints exist for teams that want them, but they're opt-in per project and per stage — never implicit.",
     },
     {
+      q: "What happens to my data if I uninstall?",
+      a: "Your projects, source media, and generated output live in folders you chose, so they stay where they are until you delete them. The app data directory — model cache, preferences, and logs — can be removed during uninstall or manually from %LOCALAPPDATA%\\Trackdub.",
+    },
+    {
       q: "Can I use it commercially?",
       a: "Yes, on the Studio and On-prem plans. Trackdub gates model use by license lane: research-only checkpoints are blocked from loading under a commercial context, so you don't ship a video with a model you weren't allowed to use.",
     },
