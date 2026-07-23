@@ -337,9 +337,11 @@ function SectionRail() {
       ]);
       if (scrollKeys.has(e.key)) cancel();
     };
+    // All three are read-only w.r.t. the event (never preventDefault) — mark
+    // passive so the browser can start scrolling without waiting on this JS.
     window.addEventListener("wheel", cancel, { passive: true });
     window.addEventListener("touchstart", cancel, { passive: true });
-    window.addEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, { passive: true });
     return () => {
       window.removeEventListener("wheel", cancel);
       window.removeEventListener("touchstart", cancel);
