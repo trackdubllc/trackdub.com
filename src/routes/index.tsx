@@ -57,6 +57,7 @@ const NAV = [
   { href: "#control", label: "Control" },
   { href: "#performance", label: "Performance" },
   { href: "#architecture", label: "Architecture" },
+  { href: "#requirements", label: "Requirements" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ];
