@@ -1,0 +1,10 @@
+# Trackdub
+
+> Local-first Windows desktop workstation for AI video dubbing. Translate, voice, and mix video into other languages with every stage inspectable and editable.
+
+Trackdub runs the entire dubbing pipeline — ASR, translation, diarization, TTS voice cloning, alignment, and mix — on the user's machine by default. Cloud endpoints are strictly opt-in per project and per stage. Acceleration via DirectML, TensorRT RTX, CUDA, CoreML, Windows ML, or CPU fallback.
+
+## Pages
+
+- [Home](/): Product overview, pipeline, performance, pricing, and FAQ.
+- [Privacy](/privacy): What Trackdub stores, what stays on your machine, and what is opt-in.
