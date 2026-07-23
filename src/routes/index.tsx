@@ -958,7 +958,7 @@ function MotionToggle() {
           ? "Reduced motion is on. Click to enable animations."
           : "Full motion is on. Click to reduce animations."
       }
-      className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+      className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
     >
       <span
         aria-hidden="true"
