@@ -38,6 +38,7 @@ function Index() {
         <Control />
         <Performance />
         <Architecture />
+        <Privacy />
         <SystemRequirements />
         <WhatYouGet />
         <ComparedTo />
@@ -58,6 +59,7 @@ const NAV = [
   { href: "#control", label: "Control" },
   { href: "#performance", label: "Performance" },
   { href: "#architecture", label: "Architecture" },
+  { href: "#privacy", label: "Privacy" },
   { href: "#requirements", label: "Requirements" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
@@ -1559,6 +1561,10 @@ function FAQ() {
       a: "No. Trackdub runs the whole pipeline on your machine by default. Cloud endpoints exist for teams that want them, but they're opt-in per project and per stage — never implicit.",
     },
     {
+      q: "What happens to my data if I uninstall?",
+      a: "Your projects, source media, and generated output live in folders you chose, so they stay where they are until you delete them. The app data directory — model cache, preferences, and logs — can be removed during uninstall or manually from %LOCALAPPDATA%\\Trackdub.",
+    },
+    {
       q: "Can I use it commercially?",
       a: "Yes, on the Studio and On-prem plans. Trackdub gates model use by license lane: research-only checkpoints are blocked from loading under a commercial context, so you don't ship a video with a model you weren't allowed to use.",
     },
@@ -1641,6 +1647,7 @@ function Colophon() {
         ["Control", "#control"],
         ["Performance", "#performance"],
         ["Architecture", "#architecture"],
+        ["Privacy", "#privacy"],
         ["Requirements", "#requirements"],
         ["Pricing", "#pricing"],
       ],
@@ -1706,6 +1713,186 @@ function Colophon() {
         </div>
       </Container>
     </footer>
+  );
+}
+
+/* ---------------- privacy ---------------- */
+
+function Privacy() {
+  const local: {
+    item: string;
+    what: string;
+    retention: string;
+  }[] = [
+    {
+      item: "Project files",
+      what: "SQLite project state, manifests, and stage snapshots.",
+      retention: "Kept in the project folder you choose. Deleted when you delete the project.",
+    },
+    {
+      item: "Source media",
+      what: "Original video/audio, proxies, and extracted stems.",
+      retention: "Never uploaded. You choose the folder and can wipe it at any time.",
+    },
+    {
+      item: "Transcripts & translations",
+      what: "Editable script documents, glossaries, and speaker mappings.",
+      retention: "Stored as local files. No cloud sync unless you configure it.",
+    },
+    {
+      item: "Voice references",
+      what: "Short speaker clips used for voice cloning.",
+      retention: "Stay on disk. Never used to train a shared model.",
+    },
+    {
+      item: "Generated audio",
+      what: "Per-line TTS output, mix stems, and exported deliverables.",
+      retention: "Written to your project output folder. You own and control them.",
+    },
+    {
+      item: "Model cache",
+      what: "Downloaded ONNX models and compiled engine caches.",
+      retention: "Stored in the app data directory. Can be cleared in Preferences.",
+    },
+  ];
+
+  const never: {
+    item: string;
+    why: string;
+  }[] = [
+    {
+      item: "Source video or audio",
+      why: "Decoding, analysis, and export happen locally.",
+    },
+    {
+      item: "Transcripts and translations",
+      why: "Local MT runs against your editable script by default.",
+    },
+    {
+      item: "Voice references",
+      why: "Speaker clips are used only for per-project voicing.",
+    },
+    {
+      item: "Generated output",
+      why: "Final mix and stems are written to your disk.",
+    },
+  ];
+
+  const optin: {
+    item: string;
+    what: string;
+    how: string;
+  }[] = [
+    {
+      item: "Cloud translation",
+      what: "Source text for the lines you route to a hosted provider.",
+      how: "Off by default. Enabled per project, per stage, in Settings.",
+    },
+    {
+      item: "Cloud voice generation",
+      what: "Target text and optional speaker reference for hosted TTS.",
+      how: "Off by default. Enabled per project, per stage, in Settings.",
+    },
+    {
+      item: "Telemetry",
+      what: "Anonymous crash reports and usage counters.",
+      how: "Disabled on install. Turn on in Preferences if you want to help.",
+    },
+    {
+      item: "Update checks",
+      what: "App version and OS info to the update server.",
+      how: "Checks on launch unless disabled. No media or project data is sent.",
+    },
+  ];
+
+  return (
+    <section id="privacy" className="border-b border-border bg-surface/40">
+      <Container className="py-20 sm:py-28">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-4">
+            <SectionNumber n="04b" label="Privacy & retention" />
+            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+              Your media is yours. Full stop.
+            </h2>
+            <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
+              Trackdub is built local-first. That is not a feature — it is the default.
+              The app stores project data where you tell it to, and it does not send
+              your media, transcripts, or voice references anywhere unless you
+              explicitly opt in.
+            </p>
+            <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
+              When you do opt in, only the minimum data needed for that stage leaves
+              your machine. Everything else stays local.
+            </p>
+          </div>
+
+          <div className="lg:col-span-8 space-y-14">
+            <div>
+              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                Tbl. 04 &nbsp;·&nbsp; Stored locally
+              </div>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full min-w-[640px] border-collapse text-left">
+                  <thead>
+                    <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      <th className="border-b border-border py-3 pr-4 font-normal">Data</th>
+                      <th className="border-b border-border py-3 pr-4 font-normal">What it is</th>
+                      <th className="border-b border-border py-3 font-normal">Retention</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {local.map((l) => (
+                      <tr key={l.item} className="hover:bg-background/60">
+                        <td className="border-b border-border py-4 pr-4 align-top font-serif text-[18px] text-foreground">
+                          {l.item}
+                        </td>
+                        <td className="border-b border-border py-4 pr-4 align-top text-[14px] leading-relaxed text-muted-foreground">
+                          {l.what}
+                        </td>
+                        <td className="border-b border-border py-4 align-top font-mono text-[12px] text-foreground">
+                          {l.retention}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="grid gap-10 md:grid-cols-2">
+              <div>
+                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Fig. 04b-i &nbsp;·&nbsp; Never leaves the machine
+                </div>
+                <ul className="mt-3 space-y-3 border-t border-border pt-4">
+                  {never.map((n) => (
+                    <li key={n.item} className="grid gap-1">
+                      <div className="font-serif text-[18px] text-foreground">{n.item}</div>
+                      <div className="text-[14px] leading-relaxed text-muted-foreground">{n.why}</div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Fig. 04b-ii &nbsp;·&nbsp; Opt-in only
+                </div>
+                <ul className="mt-3 space-y-4 border-t border-border pt-4">
+                  {optin.map((o) => (
+                    <li key={o.item} className="grid gap-1">
+                      <div className="font-serif text-[18px] text-foreground">{o.item}</div>
+                      <div className="text-[14px] leading-relaxed text-muted-foreground">{o.what}</div>
+                      <div className="font-mono text-[11px] leading-relaxed text-accent">{o.how}</div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </section>
   );
 }
 
@@ -1978,7 +2165,7 @@ function SystemRequirements() {
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
-            <SectionNumber n="04b" label="System requirements" />
+            <SectionNumber n="04c" label="System requirements" />
             <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
               Runs on a wide range of Windows hardware.
             </h2>
