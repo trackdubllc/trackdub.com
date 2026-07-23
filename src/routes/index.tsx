@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useReveal } from "@/hooks/use-reveal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,9 +26,11 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  useReveal();
   return (
     <div className="min-h-screen bg-background text-foreground antialiased selection:bg-accent/20 selection:text-ink">
       <Masthead />
+      <SectionRail />
       <main>
         <Lead />
         <ProductPlate />
