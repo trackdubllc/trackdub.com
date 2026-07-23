@@ -75,13 +75,13 @@
   /* Palette anchors (raw brand colors, reused by chapter themes) */
   --paper:    oklch(0.955 0.024 78);   /* #f5ede0 warm cream */
   --paper-2:  oklch(0.915 0.032 74);   /* deeper cream */
-  --ink-raw:  oklch(0.16 0.028 45);    /* #1a0f0a charred brown-black */
-  --ash:      oklch(0.235 0.028 46);   /* #2a1e18 warm graphite */
-  --burgundy: oklch(0.36 0.115 32);    /* #5c2018 deep wine */
-  --rust:     oklch(0.51 0.16 42);     /* #8a3a1c mid rust */
-  --amber:    oklch(0.72 0.17 62);     /* #d4842a warm amber */
-  --gold:     oklch(0.83 0.15 82);     /* #e8b84a soft gold */
-  --cream:    oklch(0.94 0.03 78);     /* text on dark chapters */
+  --ink-raw:  oklch(0.14 0.028 45);    /* charred brown-black — deeper for contrast */
+  --ash:      oklch(0.215 0.028 46);   /* warm graphite — slightly deeper */
+  --burgundy: oklch(0.32 0.115 32);    /* deep wine — darker for text contrast */
+  --rust:     oklch(0.44 0.14 42);     /* mid rust — darker so cream sits above 4.5:1 */
+  --amber:    oklch(0.74 0.17 62);     /* warm amber accent */
+  --gold:     oklch(0.86 0.15 82);     /* soft gold accent */
+  --cream:    oklch(0.965 0.024 78);   /* text on dark chapters — brighter */
 
   /* Default (paper) chapter — used by the page shell and any un-themed section */
   --background: var(--paper);
