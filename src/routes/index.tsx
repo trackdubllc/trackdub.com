@@ -1647,6 +1647,7 @@ function Colophon() {
       [
         ["Pipeline", "#pipeline"],
         ["Control", "#control"],
+        ["Resumable jobs", "#resume"],
         ["Performance", "#performance"],
         ["Architecture", "#architecture"],
         ["Privacy", "#privacy"],
