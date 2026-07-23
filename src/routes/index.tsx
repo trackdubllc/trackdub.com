@@ -2008,7 +2008,7 @@ function SystemRequirements() {
                 <tbody>
                   {specs.map((s) => (
                     <tr key={s.item} className="hover:bg-background/60">
-                      <td className="border-b border-border py-4 pr-4 align-top font-serif text-[18hsl(0,0%,100%)] text-[20px] text-foreground">
+                      <td className="border-b border-border py-4 pr-4 align-top font-serif text-[20px] text-foreground">
                         {s.item}
                       </td>
                       <td className="border-b border-border py-4 pr-4 align-top font-mono text-[13px] text-foreground">
