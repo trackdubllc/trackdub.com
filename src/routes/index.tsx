@@ -879,17 +879,19 @@ function Masthead() {
             <a
               key={n.href}
               href={n.href}
-              className="whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+              className={`whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground ${
+                NAV_PRIMARY.has(n.href) ? "" : "hidden xl:inline"
+              }`}
             >
               {n.label}
             </a>
           ))}
         </nav>
         <div className="hidden shrink-0 items-center gap-4 md:flex lg:gap-5">
-          <MotionToggle />
+          <div className="hidden lg:block"><MotionToggle /></div>
           <a
             href="mailto:hello@trackdub.com"
-            className="whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+            className="hidden whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground xl:inline"
           >
             Contact
           </a>
