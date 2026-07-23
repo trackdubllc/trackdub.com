@@ -93,6 +93,10 @@ function Rule({ className = "" }: { className?: string }) {
 function SectionRail() {
   const [active, setActive] = useState<string>("");
   const [visible, setVisible] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const itemsRef = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const [indicator, setIndicator] = useState<{ top: number; height: number }>({ top: 0, height: 12 });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -113,7 +117,13 @@ function SectionRail() {
     );
     targets.forEach((t) => io.observe(t));
 
-    const onScroll = () => setVisible(window.scrollY > 480);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setVisible(y > 480);
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      setProgress(max > 0 ? Math.min(1, Math.max(0, y / max)) : 0);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
@@ -122,31 +132,67 @@ function SectionRail() {
     };
   }, []);
 
+  useEffect(() => {
+    const el = itemsRef.current[active];
+    const list = listRef.current;
+    if (!el || !list) return;
+    const listBox = list.getBoundingClientRect();
+    const box = el.getBoundingClientRect();
+    setIndicator({ top: box.top - listBox.top, height: box.height });
+  }, [active, visible]);
+
   return (
     <aside
       aria-hidden
       className={`pointer-events-none fixed left-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-2 transition-opacity duration-500 xl:flex ${visible ? "opacity-100" : "opacity-0"}`}
     >
-      {NAV.map((n, i) => {
-        const id = n.href.slice(1);
-        const isActive = active === id;
-        return (
-          <a
-            key={id}
-            href={n.href}
-            className="pointer-events-auto group flex items-center gap-3"
-          >
-            <span
-              className={`h-px transition-all duration-300 ${isActive ? "w-8 bg-accent" : "w-3 bg-border group-hover:w-5 group-hover:bg-foreground/60"}`}
-            />
-            <span
-              className={`font-mono text-[10px] uppercase tracking-[0.14em] transition-colors ${isActive ? "text-accent" : "text-muted-foreground/0 group-hover:text-muted-foreground"}`}
+      <div ref={listRef} className="relative flex flex-col gap-2 pl-3">
+        {/* vertical track */}
+        <span className="pointer-events-none absolute left-0 top-1 bottom-1 w-px bg-border/70" aria-hidden />
+        {/* progress fill */}
+        <span
+          className="pointer-events-none absolute left-0 top-1 w-px origin-top bg-foreground/40"
+          style={{
+            height: `calc((100% - 0.5rem) * ${progress})`,
+            transition: "height 240ms cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+          aria-hidden
+        />
+        {/* active indicator */}
+        <span
+          className="pointer-events-none absolute left-[-1px] w-[3px] rounded-full bg-accent"
+          style={{
+            transform: `translateY(${indicator.top}px)`,
+            height: `${indicator.height}px`,
+            transition:
+              "transform 420ms cubic-bezier(0.22, 1, 0.36, 1), height 300ms ease-out",
+          }}
+          aria-hidden
+        />
+        {NAV.map((n, i) => {
+          const id = n.href.slice(1);
+          const isActive = active === id;
+          return (
+            <a
+              key={id}
+              href={n.href}
+              ref={(el) => {
+                itemsRef.current[id] = el;
+              }}
+              className="pointer-events-auto group flex items-center gap-3 py-0.5"
             >
-              {String(i + 1).padStart(2, "0")} · {n.label}
-            </span>
-          </a>
-        );
-      })}
+              <span
+                className={`h-px transition-all duration-300 ease-out ${isActive ? "w-6 bg-accent" : "w-3 bg-border group-hover:w-5 group-hover:bg-foreground/60"}`}
+              />
+              <span
+                className={`font-mono text-[10px] uppercase tracking-[0.14em] transition-all duration-300 ${isActive ? "text-accent opacity-100 translate-x-0" : "text-muted-foreground opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0"}`}
+              >
+                {String(i + 1).padStart(2, "0")} · {n.label}
+              </span>
+            </a>
+          );
+        })}
+      </div>
     </aside>
   );
 }
