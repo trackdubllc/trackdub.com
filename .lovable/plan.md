@@ -1,62 +1,72 @@
-## Problems with the current rail
+# Autumn Harvest — Full Chapter Swap Redesign
 
-1. **Tiny hit targets.** Each chapter is an `<a>` with `py-0.5` around a 1px dash, so the only clickable pixels are ~4px tall. Clicks that land between chapters hit the rail column but no anchor, so on release nothing happens — the page doesn't jump.
-2. **Mouse drag feels indirect.** Every pointer move funnels through a `requestAnimationFrame`-coalesced `scheduleScrub`, adding a frame of latency, and mouse users share the same code path built around touch (velocity sampling, inertia hooks, `touch-action: none`). It doesn't feel "attached" to the cursor.
-3. **No feedback in gaps.** The column between chapter dashes has no hover affordance, so users can't tell it's interactive.
+Move the site away from its current cool neutral look into a warm, dark, editorial world where **every chapter is its own spread**. Shared spine (nav, rail, footer, type system) — but background, accent, layout rhythm, and one signature motion cue change per chapter.
 
-## Goal
+## Design foundation
 
-The rail should feel like a precise chapter picker for mouse and like a scrubbable scrollbar for touch — the two input types get purpose-built behaviors instead of sharing one compromise path.
+**Palette (locked tokens in `src/styles.css`)**
+- `--ink` `#1a0f0a` — near-black charred brown, primary text on light chapters, base bg on dark chapters
+- `--paper` `#f5ede0` — warm cream, base bg on light chapters
+- `--burgundy` `#5c2018` — deep chapter background
+- `--amber` `#d4842a` — primary accent
+- `--gold` `#e8b84a` — secondary accent / highlights
+- `--rust` `#8a3a1c` — mid-tone divider / hover
+- `--ash` `#2a1e18` — deep neutral for dark chapters
+- Semantic tokens (`--background`, `--foreground`, `--accent`, `--muted`, etc.) mapped through `@theme inline` so shadcn components inherit correctly.
 
-## Interaction model
+**Typography**
+- Headings: **Instrument Serif** (loaded via `<link>` in `__root.tsx`), used large and airy with tight tracking.
+- Body / UI: **IBM Plex Sans** (loaded via `<link>` in `__root.tsx`).
+- Mono (kept for spec strips, pipeline labels, rail readouts): existing JetBrains Mono.
+- Type scale is *shared* across chapters; only weight/size emphasis shifts.
 
-**Mouse / trackpad / pen**
-- Each chapter row expands to fill its vertical slice of the rail (no gaps). Clicking anywhere between two chapter labels resolves to the nearest chapter and smooth-scrolls to it.
-- Dragging with the mouse is 1:1 position-mapped and applied synchronously in `pointermove` — no rAF coalescing, no easing, no inertia. The page tracks the cursor frame-for-frame like a native scrollbar thumb.
-- Threshold to promote a press into a drag stays 4px so short clicks always resolve as chapter jumps.
-- Hover on any row shows the existing tooltip and highlights the row's full slice, so the hit area is discoverable.
+## Per-chapter treatments
 
-**Touch**
-- Keeps today's behavior: position-based scrubbing with a rolling velocity buffer and inertial release, 8px activation threshold.
-- Short taps (below threshold) resolve to the nearest chapter on release, just like a mouse click — fixes taps that currently land in gaps.
+Each chapter (`#hero`, `#try`, `#control`, `#pipeline`, `#performance`, `#compare`, `#pricing`, `#faq`) becomes its own scene with a distinct background, accent, layout personality, and one signature motion.
 
-**Reduced motion**
-- Chapter jumps use instant `scrollTo` (already implemented via `prefersReducedMotion`).
-- No inertia, no smooth animation on drag or click.
+```text
+01 HERO       cream paper       amber accent   asymmetric editorial     slow drift on hero mock
+02 TRY IT     ink black         gold accent    filmstrip / bento        snap-in cards on reveal
+03 CONTROL    burgundy          cream text     annotated diagram        margin-note slide-in
+04 PIPELINE   ash               amber+gold     numbered vertical spine  pipeline nodes fill L→R
+05 PERFORMANCE deep ash+grain   rust           split spec table         bars sweep from 0
+06 COMPARE    paper (inverted) burgundy on cream  two-column ledger    row-by-row check marks
+07 PRICING    warm cream       amber           tall card + ticket stub  gold underline draw
+08 FAQ        ink black        gold            simple stack, mono index accordion crossfade
+```
 
-## Visual changes
+Chapter root wrapper sets its own `--chapter-bg`, `--chapter-fg`, `--chapter-accent`, `--chapter-muted` via a data attribute (`data-chapter="pipeline"`), so every child element (borders, buttons, links, code blocks, section rail dot) inherits without per-component overrides.
 
-- Bump the track from 1px to 2px so it reads as an interactive control.
-- Each chapter row gets a taller pressable area (min ~28px, flex-distributed so the rail height stays fixed). The visible dash + label stays small; only the hit box grows.
-- On hover of a row, subtly tint the row background to signal the hit area.
-- Cursor: `pointer` over rows, `grab` over the empty top/bottom padding (drag-only zones), `grabbing` while scrubbing.
+## Chapter-to-chapter transitions
 
-## Technical details
+Chapters are stacked full-bleed. Between adjacent chapters we get a quirky-but-smooth handoff:
 
-File: `src/routes/index.tsx` (the `SectionRail` component, roughly lines 105-660).
+- **Color wipe seam**: a 96–160px band at the join where the outgoing chapter's background diagonally clips into the incoming one (SVG mask, static — no scroll math required).
+- **Serif "chapter mark"** floating at each seam: `— 03 —` in Instrument Serif italic, half-in / half-out of both chapters.
+- **Scroll-linked reveal on first fold of each chapter**: heading rises + accent underline draws (200–320ms, `cubic-bezier(0.22, 1, 0.36, 1)`), plus the signature motion listed above.
+- All motion respects `prefers-reduced-motion` and the existing MotionToggle.
 
-1. **Row layout.** Replace `flex flex-col gap-2 py-2` with a fixed-height flex column where each `<a>` is `flex-1 min-h-[28px]` and internally uses `flex items-center` so the dash + tooltip stay centered on the same visual line as today. Remove `gap-2`. The list keeps its role as a slider container but individual rows become the primary hit targets.
-2. **Nearest-chapter resolver.** Add a helper `nearestChapterId(clientY)` that iterates `itemsRef.current`, picks the anchor whose vertical center is closest to `clientY`, and returns its id. Reuse on:
-   - Mouse click that lands on the list background rather than an anchor (edge case now that rows fill the list, mostly a safety net).
-   - Touch tap release below the drag threshold.
-3. **Split drag path by pointer type.**
-   - Keep `pointerTypeRef` (already exists).
-   - In `handleRailPointerMove`, branch on `pointerTypeRef.current`:
-     - `"mouse"` / `"pen"`: call `applyScrubFromClientY(e.clientY)` directly (synchronous). Do not push velocity samples. Do not call `scheduleScrub`.
-     - `"touch"`: keep `pushSample` + `scheduleScrub` path.
-4. **Release behavior.**
-   - If not dragging: for mouse, allow the anchor's own `onClick` to run (existing path). For touch below threshold, call `nearestChapterId` on the release point and invoke the same smooth-scroll used by anchor clicks.
-   - If dragging on mouse: stop where released (already the case; just skip inertia branch, which is already touch-gated).
-   - If dragging on touch: keep the flush + `startInertia(releaseVelocity())`.
-5. **Remove now-unused work on mouse path.** `scrubSamplesRef` push/reset only runs when `pointerType === "touch"`. `scrubRafRef` / `pendingScrubYRef` are only touched on the touch path.
-6. **Track thickness.** Change `w-px` to `w-0.5` (2px) for the background track and progress fill; keep the accent indicator at 3px.
-7. **Hover affordance.** Add a `group-hover:bg-foreground/[0.03]` on each `<a>` row so the full slice lights up on hover. Keep the existing dash and tooltip visuals unchanged.
-8. **A11y.** The list keeps `role="slider"` with live `aria-valuenow`. Each row stays an anchor with `aria-label="Jump to <label>"`. Focus-visible ring stays on the row so keyboard tab still highlights the full slice.
+## Spine components (shared, adaptive)
 
-Nothing outside `SectionRail` needs to change; smooth-scroll retargeting, hash sync, tooltip, active indicator, and reduced-motion handling remain as-is.
+- **TopNav**: becomes a thin hairline bar; text color and hover accent read from current chapter tokens via `mix-blend-mode: difference` fallback + explicit swap on scroll spy.
+- **SectionRail**: keeps recent snappy overhaul intact. Ticks, active indicator, and progress fill read from `--chapter-accent`, so the rail visibly shifts hue as you cross chapters. No structural changes to scrubbing / capture / rAF logic.
+- **Footer**: settles into ink-black with gold rules.
+- **Buttons**: `InkButton` variants restyled — primary is amber fill on ink, ghost is hairline-outlined; both adapt to chapter tokens.
+
+## Files to touch
+
+- `src/styles.css` — replace token block, add `data-chapter` scoped custom properties, add wipe-seam utility, add signature motion keyframes (`drift`, `snap-in`, `bar-sweep`, `underline-draw`, `margin-slide`), keep existing `reveal` + rail utilities.
+- `src/routes/__root.tsx` — swap font `<link>`s to Instrument Serif + IBM Plex Sans, update SEO / OG copy tone if needed (no other structural change).
+- `src/routes/index.tsx` — wrap each existing chapter section in a `<Chapter id="…" theme="…" motion="…">` component that applies the data attribute, seam, and chapter mark. Rework internal composition per the table above (Hero asymmetric, Pipeline vertical spine, Compare ledger, Pricing ticket-stub, etc.). Restyle `InkButton`, mock UI, waveform, pipeline nodes to consume chapter tokens.
+- `src/routes/privacy.tsx` — inherits new base tokens; small pass to keep it readable on cream.
 
 ## Out of scope
 
-- No changes to page section anchors or the NAV array.
-- No changes to the mobile menu or masthead nav.
-- No new dependencies.
+- No new sections, no copy rewrite beyond section headings if they need to fit new layouts, no changes to the SectionRail interaction logic (scrub, capture, rAF pipeline stay as-is), no backend/data changes.
+
+## Technical notes
+
+- Tailwind v4: all tokens go in `@theme` / `@theme inline` in `src/styles.css`; chapter-scoped overrides use `[data-chapter="x"] { --chapter-accent: …; }` blocks, not JS.
+- Instrument Serif + IBM Plex Sans loaded via Google Fonts `<link>` in `__root.tsx` head (never `@import` a URL in `styles.css`).
+- Signature motion uses pure CSS keyframes triggered by the existing IntersectionObserver reveal system — no new JS scroll listeners, no layout thrash.
+- All new colors respect WCAG AA for body text; amber/gold reserved for accents ≥18px or ≥14px bold.
