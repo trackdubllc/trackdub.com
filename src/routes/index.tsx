@@ -37,6 +37,7 @@ function Index() {
         <StageChapters />
         <Control />
         <Performance />
+        <Architecture />
         <WhatYouGet />
         <ComparedTo />
         <Pricing />
@@ -55,6 +56,7 @@ const NAV = [
   { href: "#walkthrough", label: "Try it" },
   { href: "#control", label: "Control" },
   { href: "#performance", label: "Performance" },
+  { href: "#architecture", label: "Architecture" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ];
