@@ -14,16 +14,37 @@ export function useReveal() {
       return;
     }
     const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+    // Pre-index staggered children so their CSS delays are ready before reveal.
+    els.forEach((root) => {
+      const kids = root.querySelectorAll<HTMLElement>("[data-reveal-child]");
+      kids.forEach((k, i) => {
+        if (!k.style.getPropertyValue("--reveal-i")) {
+          k.style.setProperty("--reveal-i", String(i));
+        }
+      });
+    });
     const io = new IntersectionObserver(
       (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            (e.target as HTMLElement).classList.add("revealed");
-            io.unobserve(e.target);
-          }
-        }
+        // Cascade when several sections cross the threshold in one batch
+        // (fast scroll). Sort by document position so top-to-bottom feels natural.
+        const incoming = entries
+          .filter((e) => e.isIntersecting)
+          .map((e) => e.target as HTMLElement)
+          .sort((a, b) => {
+            const pos = a.compareDocumentPosition(b);
+            if (pos & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+            if (pos & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+            return 0;
+          });
+        incoming.forEach((el, idx) => {
+          const delay = incoming.length > 1 ? Math.min(idx * 90, 240) : 0;
+          el.style.setProperty("--reveal-delay", `${delay}ms`);
+          // next frame so the delay is committed before the class change animates
+          requestAnimationFrame(() => el.classList.add("revealed"));
+          io.unobserve(el);
+        });
       },
-      { rootMargin: "0px 0px -10% 0px", threshold: 0.05 },
+      { rootMargin: "0px 0px -12% 0px", threshold: [0, 0.08] },
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
