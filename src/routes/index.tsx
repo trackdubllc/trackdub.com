@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useReveal } from "@/hooks/use-reveal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,9 +26,11 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  useReveal();
   return (
     <div className="min-h-screen bg-background text-foreground antialiased selection:bg-accent/20 selection:text-ink">
       <Masthead />
+      <SectionRail />
       <main>
         <Lead />
         <ProductPlate />
@@ -83,6 +86,69 @@ function SectionNumber({ n, label }: { n: string; label: string }) {
 
 function Rule({ className = "" }: { className?: string }) {
   return <div className={`h-px w-full bg-border ${className}`} aria-hidden />;
+}
+
+/* ---------------- section rail (kinetic progress) ---------------- */
+
+function SectionRail() {
+  const [active, setActive] = useState<string>("");
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const ids = NAV.map((n) => n.href.slice(1));
+    const targets = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (!targets.length) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const vis = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (vis[0]) setActive(vis[0].target.id);
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 1] },
+    );
+    targets.forEach((t) => io.observe(t));
+
+    const onScroll = () => setVisible(window.scrollY > 480);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  return (
+    <aside
+      aria-hidden
+      className={`pointer-events-none fixed left-4 top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-2 transition-opacity duration-500 xl:flex ${visible ? "opacity-100" : "opacity-0"}`}
+    >
+      {NAV.map((n, i) => {
+        const id = n.href.slice(1);
+        const isActive = active === id;
+        return (
+          <a
+            key={id}
+            href={n.href}
+            className="pointer-events-auto group flex items-center gap-3"
+          >
+            <span
+              className={`h-px transition-all duration-300 ${isActive ? "w-8 bg-accent" : "w-3 bg-border group-hover:w-5 group-hover:bg-foreground/60"}`}
+            />
+            <span
+              className={`font-mono text-[10px] uppercase tracking-[0.14em] transition-colors ${isActive ? "text-accent" : "text-muted-foreground/0 group-hover:text-muted-foreground"}`}
+            >
+              {String(i + 1).padStart(2, "0")} · {n.label}
+            </span>
+          </a>
+        );
+      })}
+    </aside>
+  );
 }
 
 function TextLink({ href, children }: { href: string; children: React.ReactNode }) {
@@ -182,7 +248,7 @@ function Masthead() {
 
 function Lead() {
   return (
-    <section id="top" className="border-b border-border">
+    <section id="top" data-reveal className="reveal border-b border-border">
       <Container className="grid gap-10 py-16 sm:py-24 lg:grid-cols-12 lg:gap-16 lg:py-32">
         <div className="lg:col-span-8">
           <SectionNumber n="00" label="A workstation for dubbing" />
@@ -470,7 +536,7 @@ function ResumableJob() {
   const allDone = JOB_STAGES.every((s) => job.status[s.id] === "done");
 
   return (
-    <section id="resume" className="border-b border-border bg-background">
+    <section id="resume" data-reveal className="reveal border-b border-border bg-background">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -582,7 +648,7 @@ function ResumableJob() {
                     <div className="flex items-baseline gap-3">
                       <span
                         className="font-mono text-[10px] uppercase tracking-[0.14em]"
-                        style={{ color: "oklch(0.82 0.14 40)" }}
+                        style={{ color: "oklch(0.78 0.15 258)" }}
                       >
                         {failure.code}
                       </span>
@@ -761,7 +827,7 @@ function statusLabel(s: JobStageStatus, pct: number): string {
 
 function ProductPlate() {
   return (
-    <section className="border-b border-border">
+    <section data-reveal className="reveal border-b border-border">
       <Container className="py-14 sm:py-20">
         <div className="animate-fade-up">
           <WorkstationMock />
@@ -832,7 +898,7 @@ function WorkstationMock() {
                       s === "done"
                         ? "oklch(0.75 0.13 155)"
                         : s === "active"
-                          ? "oklch(0.68 0.14 50)"
+                          ? "oklch(0.68 0.15 258)"
                           : dim,
                   }}
                 >
@@ -877,7 +943,7 @@ function WorkstationMock() {
                 </span>
                 <span
                   className="font-mono text-[10px]"
-                  style={{ color: r.s === "S1" ? "oklch(0.68 0.14 50)" : "oklch(0.72 0.10 220)" }}
+                  style={{ color: r.s === "S1" ? "oklch(0.68 0.15 258)" : "oklch(0.70 0.12 190)" }}
                 >
                   {r.s}
                 </span>
@@ -890,7 +956,7 @@ function WorkstationMock() {
                     style={{
                       color: r.a ? "oklch(0.97 0.005 240)" : inkText,
                       textDecoration: r.a ? "underline" : "none",
-                      textDecorationColor: "oklch(0.68 0.14 50)",
+                      textDecorationColor: "oklch(0.68 0.15 258)",
                       textUnderlineOffset: 4,
                     }}
                   >
@@ -919,7 +985,7 @@ function WorkstationMock() {
                     y={30 - h / 2}
                     width={2.2}
                     height={h}
-                    fill={isActive ? "oklch(0.72 0.13 50)" : "oklch(0.55 0.03 240)"}
+                    fill={isActive ? "oklch(0.72 0.15 258)" : "oklch(0.55 0.03 240)"}
                   />
                 );
               })}
@@ -933,8 +999,8 @@ function WorkstationMock() {
             Speakers
           </div>
           {[
-            { n: "Anna", lang: "de-DE → en-US", ref: "3.4s ref", color: "oklch(0.68 0.14 50)" },
-            { n: "Mateo", lang: "de-DE → en-US", ref: "5.1s ref", color: "oklch(0.72 0.10 220)" },
+            { n: "Anna", lang: "de-DE → en-US", ref: "3.4s ref", color: "oklch(0.68 0.15 258)" },
+            { n: "Mateo", lang: "de-DE → en-US", ref: "5.1s ref", color: "oklch(0.70 0.12 190)" },
           ].map((s) => (
             <div key={s.n} className="mb-3 border-t pt-3 font-mono text-[11px]" style={{ borderColor: "oklch(0.28 0.014 250)" }}>
               <div className="flex items-center gap-2">
@@ -952,7 +1018,7 @@ function WorkstationMock() {
           </div>
           <div className="mt-2 font-mono text-[12px]">Resumable · 62%</div>
           <div className="mt-2 h-[3px] w-full" style={{ background: "oklch(0.28 0.014 250)" }}>
-            <div className="h-full" style={{ width: "62%", background: "oklch(0.72 0.13 50)" }} />
+            <div className="h-full" style={{ width: "62%", background: "oklch(0.72 0.15 258)" }} />
           </div>
         </div>
       </div>
@@ -965,7 +1031,7 @@ function WorkstationMock() {
 function TrustStrip() {
   const items = ["Local by default", "Deterministic runs", "Cross-platform", "Open manifest", "No account required"];
   return (
-    <section className="border-b border-border bg-surface/50">
+    <section data-reveal className="reveal border-b border-border bg-surface">
       <Container className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 py-6 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
         {items.map((t, i) => (
           <span key={t} className="flex items-center gap-8">
@@ -1033,7 +1099,7 @@ const STAGES = [
 
 function PipelineFeature() {
   return (
-    <section id="pipeline" className="border-b border-border">
+    <section id="pipeline" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
@@ -1095,8 +1161,8 @@ type Line = {
 };
 
 const INITIAL_SPEAKERS: Speaker[] = [
-  { id: "s1", name: "Anna", color: "oklch(0.68 0.14 50)", turns: 24 },
-  { id: "s2", name: "Mateo", color: "oklch(0.72 0.10 220)", turns: 18 },
+  { id: "s1", name: "Anna", color: "oklch(0.68 0.15 258)", turns: 24 },
+  { id: "s2", name: "Mateo", color: "oklch(0.70 0.12 190)", turns: 18 },
   { id: "s3", name: "Speaker 3", color: "oklch(0.55 0.03 240)", turns: 2 },
 ];
 
@@ -1119,7 +1185,7 @@ type StageId = (typeof STAGE_TABS)[number]["id"];
 const DIM = "oklch(0.62 0.02 245)";
 const INK = "oklch(0.94 0.005 240)";
 const LINE = "oklch(0.28 0.014 250)";
-const ACC = "oklch(0.72 0.14 55)";
+const ACC = "oklch(0.72 0.15 258)";
 const PANEL = "oklch(0.16 0.010 250)";
 const PANEL_HI = "oklch(0.20 0.012 250)";
 
@@ -1178,7 +1244,7 @@ function Walkthrough() {
     Object.values(stale).reduce((n, m) => n + (m?.[s] ? 1 : 0), 0);
 
   return (
-    <section id="walkthrough" className="border-b border-border bg-surface/40">
+    <section id="walkthrough" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -1568,7 +1634,7 @@ function FakeWaveform({ seed, color, busy }: { seed: number; color: string; busy
 
 function StageChapters() {
   return (
-    <section className="border-b border-border bg-surface/40">
+    <section data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="03" label="Each stage, in detail" />
         <div className="mt-14 space-y-16">
@@ -1689,8 +1755,8 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
               Speakers detected
             </div>
             {[
-              { n: "Anna", turns: 24, c: "oklch(0.68 0.14 50)" },
-              { n: "Mateo", turns: 18, c: "oklch(0.72 0.10 220)" },
+              { n: "Anna", turns: 24, c: "oklch(0.68 0.15 258)" },
+              { n: "Mateo", turns: 18, c: "oklch(0.70 0.12 190)" },
               { n: "Speaker 3", turns: 2, c: "oklch(0.55 0.03 240)" },
             ].map((s) => (
               <div key={s.n} className="flex items-center justify-between border-b py-3" style={{ borderColor: border }}>
@@ -1714,7 +1780,7 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
               <span>duration 3.14s / target 3.20s</span>
             </div>
             <div className="font-serif text-[17px] leading-snug">
-              "so every stage stays <span style={{ borderBottom: "2px solid oklch(0.68 0.14 50)" }}>editable</span>."
+              "so every stage stays <span style={{ borderBottom: "2px solid oklch(0.68 0.15 258)" }}>editable</span>."
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3 font-mono text-[11px]">
               {[
@@ -1740,7 +1806,7 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
               Timeline
             </div>
             {[
-              ["Dialogue EN", "oklch(0.68 0.14 50)", [10, 22, 34, 55, 70, 82]],
+              ["Dialogue EN", "oklch(0.68 0.15 258)", [10, 22, 34, 55, 70, 82]],
               ["Music", "oklch(0.55 0.06 220)", [5, 95]],
               ["SFX", "oklch(0.55 0.03 240)", [40, 62]],
             ].map(([label, color, pts]) => (
@@ -1788,7 +1854,7 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
 
 function Control() {
   return (
-    <section id="control" className="border-b border-border">
+    <section id="control" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="03" label="You can fix anything, and only that thing" />
         <div className="mt-8 grid gap-10 lg:grid-cols-12 lg:gap-16">
@@ -1861,7 +1927,7 @@ function ControlPlate({
 
 function Performance() {
   return (
-    <section id="performance" className="border-b border-border bg-surface/40">
+    <section id="performance" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -1928,7 +1994,7 @@ function WhatYouGet() {
     ["Cross-platform", "Windows, macOS, Linux. Same project format. Same output."],
   ];
   return (
-    <section className="border-b border-border">
+    <section data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="05" label="What you get" />
         <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -1961,7 +2027,7 @@ function ComparedTo() {
     ["No account required", "Yes", "No", "No"],
   ];
   return (
-    <section className="border-b border-border bg-surface/40">
+    <section data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="06" label="Compared to" />
         <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -2041,7 +2107,7 @@ function Pricing() {
     },
   ];
   return (
-    <section id="pricing" className="border-b border-border">
+    <section id="pricing" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="07" label="Pricing" />
         <h2 className="mt-6 max-w-2xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -2124,7 +2190,7 @@ function FAQ() {
     },
   ];
   return (
-    <section id="faq" className="border-b border-border bg-surface/40">
+    <section id="faq" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -2168,7 +2234,7 @@ function FAQ() {
 
 function Endnote() {
   return (
-    <section className="border-b border-border">
+    <section data-reveal className="reveal border-b border-border">
       <Container className="py-24 sm:py-36 text-center">
         <SectionNumber n="09" label="End" />
         <p className="mx-auto mt-8 max-w-3xl font-serif text-4xl leading-[1.12] tracking-tight text-foreground sm:text-5xl">
@@ -2356,7 +2422,7 @@ function Privacy() {
   ];
 
   return (
-    <section id="privacy" className="border-b border-border bg-surface/40">
+    <section id="privacy" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -2539,7 +2605,7 @@ function Architecture() {
   ];
 
   return (
-    <section id="architecture" className="border-b border-border">
+    <section id="architecture" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -2563,7 +2629,7 @@ function Architecture() {
             <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
               Fig. 04a-i &nbsp;·&nbsp; Data plane
             </div>
-            <div className="mt-3 rounded-none border border-border bg-surface/40">
+            <div className="mt-3 rounded-none border border-border bg-surface">
               <div className="grid grid-cols-12 border-b border-hairline px-5 py-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                 <div className="col-span-3">Where</div>
                 <div className="col-span-4">Stages</div>
@@ -2711,7 +2777,7 @@ function SystemRequirements() {
   ];
 
   return (
-    <section id="requirements" className="border-b border-border bg-surface/40">
+    <section id="requirements" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">

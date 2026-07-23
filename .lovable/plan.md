@@ -1,75 +1,99 @@
 ## Goal
 
-Rework the Trackdub marketing site so it reads like a serious, well-made tool — closer to an editorial spec sheet or an engineering journal than a 2020s AI-startup landing page. Keep the current information architecture (it's already good); change the visual and tonal register.
+Shift the marketing site from warm-paper editorial to a **light neutral, kinetic** feel: cool off-white base, crisp sans typography, strong sectioning via full-bleed alternating bands, and moderate motion (level 3/5). Keep all content, routes, SEO, and interactive components (Walkthrough, ResumableJob, Architecture, Privacy, System Requirements) intact — this is a visual and motion pass only.
 
 ## What changes
 
-### 1. Palette + surface — warm technical, light
+### 1. Palette + typography (`src/styles.css`)
 
-Replace the current dark graphite/cyan tokens in `src/styles.css` with:
+- Replace warm-paper tokens with cool neutrals:
+  - `--background`: cool off-white `#f6f7f9`
+  - `--surface`: `#eceef2` (band B)
+  - `--surface-2`: `#1a1d21` graphite (band C, used sparingly for one "dark studio" band + mockups)
+  - `--foreground`: near-black `#0f1115`
+  - `--muted-foreground`: cool gray `#5a6370`
+  - `--accent`: crisp signal blue `#2f6df6` (replaces amber; used for one accent per section)
+  - `--border` / `--hairline`: `#dfe3ea`
+- Fonts: swap Instrument Serif → **Inter Tight** (display) + keep Work Sans (body) + JetBrains Mono (spec). Update `<link>` in `__root.tsx` and `--font-*` tokens.
+- Kill remaining warm-paper amber references in components.
 
-- `--background`: warm off-white `#faf8f5`
-- `--surface`: `#efe9df` (paper/muted panels)
-- `--foreground`: near-black graphite `#1c1c1c`
-- `--muted-foreground`: warm gray around `#6b665e`
-- `--accent`: muted amber `#b8641f` — used sparingly (one accent per section max: an underline, a marker, an active state)
-- `--border`: warm hairline `#d9d3c7` at ~1px
-- Remove: hero radial gradients, cyan glow, dark card shadows, glassmorphism blurs, animated pulsing accent dots on decorative elements
+### 2. Full-bleed alternating bands
 
-Keep the dark palette only inside product mockup panels (the app is a dark UI) — so mockups look like real screenshots inset on a light page. This contrast alone stops the page feeling "AI-generic."
+Restructure `src/routes/index.tsx` so every top-level section is `w-screen` full-bleed with an inner `max-w-6xl` container. Band rotation:
 
-### 2. Typography — editorial serif + technical mono for spec bits
+```
+A (background)  → Hero
+B (surface)     → Trust strip
+A               → Pipeline overview
+C (dark)        → Try it (Walkthrough) — dark band feels like the app
+A               → Resumable jobs
+B               → Stage chapters
+A               → Architecture
+B               → Privacy
+A               → System requirements
+C (dark)        → Performance table — reads like a spec readout
+A               → What you get
+B               → Compared to
+A               → Pricing
+B               → FAQ
+A               → Endnote CTA
+```
 
-- Load Instrument Serif (headings), Work Sans (body), JetBrains Mono (metadata / spec numbers / captions) via `<link>` in `__root.tsx`; register in `@theme`.
-- Headline sizes go up (magazine lead: ~72–96px on desktop), weight stays regular. No all-caps hero.
-- Body at 17–18px, generous measure (~66ch), warm-gray secondary text.
-- Mono used for: pipeline stage labels, timecode, file sizes, latency numbers, footnotes/section numbers. This is the "spec sheet" tell.
-- Kill: gradient text, `text-transparent bg-clip-text`, oversized geometric sans headings.
+Bands are separated by a 1px hairline, no rounded corners on the band itself. Section numbers (`01`, `02`…) move to a small kicker inside each band.
 
-### 3. Layout — magazine
+### 3. Motion (level 3 — moderate, not showy)
 
-Restructure `src/routes/index.tsx` sections around an editorial grid (12-col on desktop, generous margins, hairline rules between sections, small numbered section headers like `01 / Ingest`).
+Introduce a small motion vocabulary, all respecting `prefers-reduced-motion`:
 
-Section order and treatment:
+- **Section reveal**: sections fade + translate-up 12px as they enter viewport (IntersectionObserver, once).
+- **Band handoff**: subtle 300ms background-color crossfade on the `<main>` element as the current band changes (tracked via IO), so scrolling feels like a continuous surface shifting tone rather than hard cuts.
+- **Pipeline flow**: the six-stage overview gets an animated connector — a thin line with a traveling dot looping through stages (2.5s, pauses on hover).
+- **Waveform drift**: the hero mockup's waveform bars gently animate amplitude (slow, 4s ease-in-out, staggered).
+- **Sticky mini-nav**: on scroll past the hero, a slim progress rail appears on the left showing the current section number and title; clicking jumps. Slides in/out.
+- **Hover**: link underline draw-in, button subtle lift (translate-y 1px + border color).
+- No parallax, no scroll-snap, no per-letter animation.
 
-1. **Masthead / nav** — thin, no pill. Wordmark left in serif, links in mono small-caps, single text CTA. No sticky glass background; solid paper.
-2. **Lead** — big serif headline, short standfirst, one primary link + one secondary. Right column: small metadata block in mono (version, platforms, license lane). No hero gradient, no floating orbs.
-3. **Product plate** — a single wide, honest screenshot-style mockup of the workstation (dark UI panel on paper background, thin border, small mono caption underneath like a figure). Replaces the current busy multi-panel hero collage.
-4. **Trust strip** — quiet row of small mono labels ("Local by default · Deterministic · Cross-platform · Open manifest"). No logo wall.
-5. **The pipeline** — magazine feature. Two-column: left = serif prose explaining the six stages philosophy; right = numbered list of stages (`01`–`06`) with 1-line mono descriptors and a hairline between rows. Each stage links to a deeper anchor.
-6. **Six stage chapters** — each stage becomes a short asymmetric spread: 60/40 columns, serif subhead, body copy, and one inset dark mockup showing that stage's UI (script editor, speaker tracks, alignment, etc.). Hairline rule + section number between chapters.
-7. **Control / editability** — a "before / after" pair rendered as two stacked plates with mono captions, not a slider gimmick.
-8. **Performance** — a spec-sheet table: device, provider, throughput, notes. Mono numbers, hairlines, no cards.
-9. **What you get** — feature list as a dense two-column definition list (`term` / `description`), not a card grid.
-10. **Compared to** — small comparison table with hairlines; check/dash marks in mono, no colored gradients.
-11. **Pricing** — three plans as three columns separated by hairlines on paper, not floating cards. Amber accent only on the recommended plan's price.
-12. **FAQ** — plain typographic Q&A, serif Q, sans A, hairline between.
-13. **Endnote CTA** — one line of serif text + one link. No full-bleed gradient panel.
-14. **Colophon / footer** — small mono, columns of links, version and build info at the bottom like a real tool's about page.
+Add a `useReveal()` hook and a `<Band variant="a|b|dark" number="03" label="Pipeline">…</Band>` wrapper to keep the sectioning consistent.
 
-### 4. Motion + decoration — subtract
+### 4. Component polish
 
-- Remove: animated waveform bars in decorative positions, pulsing dots, drifting gradients, `bg-hero` radial, `bg-grid` background overlays on decorative sections.
-- Keep: reduced fade-up on section entrance (already respects `prefers-reduced-motion`).
-- Add: subtle hairline dividers, small figure numbers, mono footnotes. That's the whole decorative vocabulary.
+- Nav: solid off-white, thin bottom hairline; active section highlights in accent blue.
+- Buttons: primary = ink fill, accent = blue outline that fills on hover.
+- Tables (Performance, Comparison, Requirements): keep hairlines, add zebra using `--surface` at 40% opacity, sticky header on tall tables.
+- Walkthrough tabs: pill-less, underline-driven with an animated underline that slides between tabs.
+- ResumableJob progress bars: animate width transitions with 400ms ease, stale badge pulses once on state change (not looping).
 
-### 5. Copy pass
+### 5. Copy — unchanged
 
-Tighten in Trackdub's voice: technical, direct, no "AI-powered / revolutionary / magic." Prefer concrete lines like "Regenerate line 42 with slower prosody" over benefit-speak. Keep CTAs as text links or thin buttons, not gradient blobs.
+No copy rewrites. Only visual + motion.
+
+## Technical notes
+
+- New file: `src/components/Band.tsx` (full-bleed wrapper, variant + number/label props).
+- New hook: `src/hooks/use-reveal.ts` (IntersectionObserver, `once: true`, adds `data-revealed`).
+- New hook: `src/hooks/use-active-section.ts` for the sticky progress rail.
+- `src/styles.css`: token swap, add `@utility band-a/b/dark`, `@keyframes flow-dot`, `@keyframes wave-drift`, `@utility reveal` (initial opacity 0 + translate, `[data-revealed] &` resets).
+- `src/routes/index.tsx`: refactor sections to `<Band>` wrapper; add `<SectionRail>` component; wire hero waveform + pipeline flow-dot animations.
+- `src/routes/__root.tsx`: swap font `<link>` to Inter Tight + Work Sans + JetBrains Mono.
+- `src/routes/privacy.tsx`: apply new tokens (inherits automatically) + wrap in `<Band>`.
 
 ## Files touched
 
-- `src/styles.css` — replace color tokens, remove hero/grid gradients + decorative keyframes we stop using, add `--color-surface`, `--font-serif`, `--font-sans`, `--font-mono` tokens, hairline border color, mono utility.
-- `src/routes/__root.tsx` — add Google Fonts `<link>` for Instrument Serif + Work Sans + JetBrains Mono; leave metadata as-is.
-- `src/routes/index.tsx` — restructure into the magazine sections above; delete the dark-hero collage in favor of a single figure; convert card grids to definition lists / tables; swap sticky glass nav for a solid paper masthead.
+- `src/styles.css`
+- `src/routes/__root.tsx`
+- `src/routes/index.tsx`
+- `src/routes/privacy.tsx`
+- `src/components/Band.tsx` (new)
+- `src/hooks/use-reveal.ts` (new)
+- `src/hooks/use-active-section.ts` (new)
 
 ## What stays
 
-- Same information (pipeline, features, comparison, pricing, FAQ, footer content).
-- Same route structure, same head metadata, same SEO copy targets.
-- No backend, no auth, no new dependencies beyond web fonts.
+- All content, section order, interactive components, route structure, SEO metadata, FAQ, footer links.
+- Dark UI mockup panels remain dark (they're supposed to look like the app inset into the page).
 
 ## Out of scope
 
-- Product screenshots from the real desktop app (we'll keep original CSS/SVG mockups, just fewer and more honest).
-- Dark-mode toggle for the marketing site — the site is intentionally light; only mockups are dark.
+- No new features, no backend, no copy rewrites.
+- No dark mode toggle for the site itself.
+- No replacement of the SVG mockups.
