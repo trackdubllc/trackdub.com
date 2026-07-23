@@ -2402,44 +2402,76 @@ function Pricing() {
         <h2 className="mt-6 max-w-2xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
           Three ways to run it. All of them local-first.
         </h2>
-        <div className="mt-14 grid divide-y divide-border border-y border-border md:grid-cols-3 md:divide-x md:divide-y-0">
-          {plans.map((p) => (
-            <div key={p.name} className="card-lift group relative p-8 hover:bg-surface/50">
-              <div className="flex items-center gap-3">
-                <div className="font-serif text-2xl text-foreground">{p.name}</div>
-                {p.featured && (
-                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
-                    Recommended
-                  </span>
-                )}
-              </div>
-              <div className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}>
-                {p.price}
-                {p.unit && <span className="font-sans text-lg text-muted-foreground">{p.unit}</span>}
-              </div>
-              <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                {p.note}
-              </p>
-              <ul className="mt-8 space-y-3 text-[15px] text-foreground">
-                {p.features.map((f) => (
-                  <li key={f} className="flex gap-3">
-                    <span className="mt-2 h-px w-4 flex-none bg-accent" aria-hidden />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-10">
-                {p.featured ? (
-                  <InkButton href={p.href}>{p.cta}</InkButton>
-                ) : (
-                  <a href={p.href} className="inline-flex items-baseline gap-1 border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent">
-                    {p.cta} →
+        <ul
+          role="list"
+          className="mt-14 grid list-none divide-y divide-border border-y border-border md:grid-cols-3 md:divide-x md:divide-y-0"
+        >
+          {plans.map((p) => {
+            const titleId = `plan-${p.name.toLowerCase().replace(/\s+/g, "-")}`;
+            return (
+              <li key={p.name} className="contents">
+                <article
+                  aria-labelledby={titleId}
+                  className="card-lift group relative p-8 transition-colors hover:bg-surface/50 focus-within:bg-surface/50 focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 focus-within:ring-offset-background"
+                >
+                  <header className="flex items-center gap-3">
+                    <h3 id={titleId} className="font-serif text-2xl text-foreground">
+                      {p.name}
+                    </h3>
+                    {p.featured && (
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
+                        Recommended
+                      </span>
+                    )}
+                  </header>
+                  <div className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}>
+                    {p.price}
+                    {p.unit && <span className="font-sans text-lg text-muted-foreground">{p.unit}</span>}
+                  </div>
+                  <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                    {p.note}
+                  </p>
+                  <ul className="mt-8 space-y-3 text-[15px] text-foreground">
+                    {p.features.map((f) => (
+                      <li key={f} className="flex gap-3">
+                        <span className="mt-2 h-px w-4 flex-none bg-accent" aria-hidden />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-10">
+                    {p.featured ? (
+                      <InkButton href={p.href} aria-label={`${p.cta} — ${p.name} plan`}>
+                        {p.cta}
+                      </InkButton>
+                    ) : (
+                      <a
+                        href={p.href}
+                        aria-label={`${p.cta} — ${p.name} plan`}
+                        className="inline-flex items-baseline gap-1 rounded-sm border-b border-foreground/40 pb-0.5 text-foreground outline-none hover:border-accent hover:text-accent focus-visible:outline-none"
+                      >
+                        {p.cta} <span aria-hidden>→</span>
+                      </a>
+                    )}
+                  </div>
+                  {/* Stretched link — makes the whole card a keyboard-reachable target
+                      through the visible CTA above (focus ring appears on the card
+                      via focus-within), while clicks anywhere in the card activate it. */}
+                  <a
+                    href={p.href}
+                    aria-hidden="true"
+                    tabIndex={-1}
+                    className="absolute inset-0 z-10"
+                  >
+                    <span className="sr-only">{`${p.cta} — ${p.name} plan`}</span>
                   </a>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+                  {/* Ensure the visible CTA sits above the overlay so it receives focus/clicks first. */}
+                  <style>{`#${titleId} ~ div a, #${titleId} ~ div button { position: relative; z-index: 20; }`}</style>
+                </article>
+              </li>
+            );
+          })}
+        </ul>
       </Container>
     </section>
   );
