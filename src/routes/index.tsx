@@ -540,7 +540,7 @@ function StageChapters() {
   return (
     <section className="border-b border-border bg-surface/40">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="02" label="Each stage, in detail" />
+        <SectionNumber n="03" label="Each stage, in detail" />
         <div className="mt-14 space-y-16">
           {STAGES.map((s, i) => (
             <article
