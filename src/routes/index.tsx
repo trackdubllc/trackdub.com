@@ -3037,27 +3037,37 @@ function WaitlistForm() {
       return;
     }
     setStatus("loading");
-    const { error } = await supabase
-      .from("waitlist_emails")
-      .insert({ email: parsed.data.email.toLowerCase() });
+    const normalized = parsed.data.email.toLowerCase();
+    // Random high-entropy password — the waitlist flow is email-confirmation only;
+    // users never sign in with a password. Confirming the email address is the point.
+    const throwawayPassword =
+      crypto.randomUUID() + crypto.randomUUID().replace(/-/g, "").toUpperCase() + "!";
+    const { error } = await supabase.auth.signUp({
+      email: normalized,
+      password: throwawayPassword,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: { source: "waitlist" },
+      },
+    });
     if (error) {
-      if (error.code === "23505") {
-        setStatus("done");
-        toast.success("You're already on the list.");
-        return;
-      }
       setStatus("idle");
-      toast.error("Could not save your email. Try again in a moment.");
+      toast.error(error.message || "Could not send confirmation. Try again in a moment.");
       return;
     }
+    // Mirror into waitlist_emails for the launch list; ignore duplicates.
+    await supabase
+      .from("waitlist_emails")
+      .insert({ email: normalized })
+      .then(() => undefined, () => undefined);
     setStatus("done");
-    toast.success("You're on the launch list.");
+    toast.success("Check your inbox to confirm your email.");
   }
 
   if (status === "done") {
     return (
       <p className="mx-auto mt-12 max-w-md font-mono text-[13px] uppercase tracking-[0.14em] text-accent">
-        On the list. We'll be in touch at launch.
+        Check your inbox — confirm your email to lock in your spot.
       </p>
     );
   }
