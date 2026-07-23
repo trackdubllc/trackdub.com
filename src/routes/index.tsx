@@ -1638,6 +1638,7 @@ function Colophon() {
         ["Pipeline", "#pipeline"],
         ["Control", "#control"],
         ["Performance", "#performance"],
+        ["Architecture", "#architecture"],
         ["Pricing", "#pricing"],
       ],
     ],
