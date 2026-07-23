@@ -137,17 +137,28 @@ function SectionRail() {
     const target = document.getElementById(hovered);
     if (!target) return;
 
-    const measure = () => {
+    // Cache the section's document-space top/height so scroll frames only
+    // touch window.scrollY (a cheap read) instead of forcing layout with
+    // getBoundingClientRect on every rAF.
+    let sectionTop = 0;
+    let sectionHeight = 1;
+    let lastPct = -1;
+    const remeasure = () => {
       const rect = target.getBoundingClientRect();
-      const vh = window.innerHeight;
-      // Anchor "read position" at the middle of the viewport so the value
-      // matches what the reader actually has in focus.
-      const anchor = vh / 2;
-      const raw = (anchor - rect.top) / Math.max(1, rect.height);
-      setLocalPct(Math.min(1, Math.max(0, raw)));
+      sectionTop = rect.top + window.scrollY;
+      sectionHeight = Math.max(1, rect.height);
     };
-
-    measure();
+    const compute = () => {
+      const anchor = window.scrollY + window.innerHeight / 2;
+      const raw = (anchor - sectionTop) / sectionHeight;
+      const pct = Math.min(1, Math.max(0, raw));
+      if (Math.abs(pct - lastPct) > 0.005) {
+        lastPct = pct;
+        setLocalPct(pct);
+      }
+    };
+    remeasure();
+    compute();
 
     let ticking = false;
     const schedule = () => {
@@ -155,14 +166,23 @@ function SectionRail() {
       ticking = true;
       hoverRafRef.current = window.requestAnimationFrame(() => {
         ticking = false;
-        measure();
+        compute();
       });
     };
+    const onResize = () => {
+      remeasure();
+      schedule();
+    };
+    // Section geometry can shift as reveals expand / fonts load — track it
+    // with a ResizeObserver rather than remeasuring on every scroll frame.
+    const ro = new ResizeObserver(onResize);
+    ro.observe(target);
     window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
     return () => {
+      ro.disconnect();
       window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
+      window.removeEventListener("resize", onResize);
       if (hoverRafRef.current !== null) window.cancelAnimationFrame(hoverRafRef.current);
     };
   }, [hovered]);
@@ -196,12 +216,23 @@ function SectionRail() {
       }
     };
 
+    // Coalesce IO callbacks + pickActive into a single rAF so a burst of
+    // entries during fast scrolls schedules exactly one setState.
+    let pickScheduled = false;
+    const schedulePick = () => {
+      if (pickScheduled) return;
+      pickScheduled = true;
+      window.requestAnimationFrame(() => {
+        pickScheduled = false;
+        pickActive();
+      });
+    };
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           ratios.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0);
         }
-        pickActive();
+        schedulePick();
       },
       { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 1] },
     );
@@ -265,19 +296,33 @@ function SectionRail() {
     const el = itemsRef.current[active];
     const list = listRef.current;
     if (!el || !list) return;
+    // offsetTop/offsetHeight are cached layout values relative to the
+    // offsetParent — the rail list is that parent here, so we can measure
+    // without triggering a full getBoundingClientRect layout flush.
+    let raf = 0;
+    const measure = () => {
+      const top = el.offsetTop;
+      const height = el.offsetHeight;
+      setIndicator((prev) =>
+        Math.abs(prev.top - top) < 0.5 && Math.abs(prev.height - height) < 0.5
+          ? prev
+          : { top, height },
+      );
+    };
     // Defer to the next frame so we measure after the browser has settled
     // any layout the active-state change triggered.
-    const raf = window.requestAnimationFrame(() => {
-      const listBox = list.getBoundingClientRect();
-      const box = el.getBoundingClientRect();
-      const top = box.top - listBox.top;
-      setIndicator((prev) =>
-        Math.abs(prev.top - top) < 0.5 && Math.abs(prev.height - box.height) < 0.5
-          ? prev
-          : { top, height: box.height },
-      );
+    raf = window.requestAnimationFrame(measure);
+    // Re-measure if the rail itself resizes (font swap, viewport change) so
+    // the indicator never drifts off its target.
+    const ro = new ResizeObserver(() => {
+      window.cancelAnimationFrame(raf);
+      raf = window.requestAnimationFrame(measure);
     });
-    return () => window.cancelAnimationFrame(raf);
+    ro.observe(list);
+    return () => {
+      ro.disconnect();
+      window.cancelAnimationFrame(raf);
+    };
   }, [active, visible]);
 
   return (
