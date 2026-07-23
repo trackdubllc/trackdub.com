@@ -707,10 +707,6 @@ function SectionRail() {
       <div
         ref={listRef}
         className={`pointer-events-auto relative flex min-h-[420px] flex-col py-2 pl-3 pr-2 touch-none select-none ${scrubbing ? "cursor-grabbing" : "cursor-grab"}`}
-        onPointerDown={handleRailPointerDown}
-        onPointerMove={handleRailPointerMove}
-        onPointerUp={handleRailPointerUp}
-        onPointerCancel={handleRailPointerUp}
         role="slider"
         aria-label="Page scroll position"
         aria-valuemin={0}
