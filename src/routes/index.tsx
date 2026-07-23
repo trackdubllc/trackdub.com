@@ -135,6 +135,12 @@ function SectionRail() {
   const smoothStartRef = useRef<{ y: number; t: number } | null>(null);
   const smoothDurRef = useRef(560);
 
+  // Single centralized rail-frame scheduler. All DOM writes for the rail
+  // (progress fill scaleY, active indicator translateY/height, aria-valuenow,
+  // visibility toggle) go through one ordered pass so scroll, resize,
+  // active-change, and pointer scrubs never race or double-write.
+  const scheduleRailFrameRef = useRef<() => void>(() => {});
+
   const prefersReducedMotion = () =>
     typeof document !== "undefined" &&
     (document.documentElement.classList.contains("reduce-motion") ||
