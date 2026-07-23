@@ -220,6 +220,9 @@ function SectionRail() {
     // Scrubbing takes over from any in-flight smooth scroll.
     cancelSmoothScroll();
     window.scrollTo({ top: f * docMax, behavior: "auto" });
+    // Nudge the centralized rail scheduler so progress/indicator update on
+    // the same frame as the scroll write — don't wait for scroll event.
+    scheduleRailFrameRef.current();
   };
 
   // Resolve a pointer y to the nearest chapter anchor. Powers "click anywhere
