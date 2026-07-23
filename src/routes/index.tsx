@@ -76,10 +76,22 @@ function Container({ children, className = "" }: { children: React.ReactNode; cl
 
 function SectionNumber({ n, label }: { n: string; label: string }) {
   return (
-    <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-      <span className="text-accent">{n}</span>
-      <span className="mx-2 text-hairline">/</span>
-      <span>{label}</span>
+    <div className="mb-10 sm:mb-14">
+      <div className="mb-4 flex items-center gap-3">
+        <span className="h-px w-8 bg-accent" aria-hidden />
+        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          Chapter
+        </span>
+      </div>
+      <div className="flex items-baseline gap-4 sm:gap-5">
+        <span className="font-mono text-2xl leading-none tracking-tight text-accent sm:text-3xl">
+          {n}
+        </span>
+        <span className="h-6 w-px self-center bg-border" aria-hidden />
+        <span className="font-serif text-[20px] leading-tight tracking-tight text-foreground sm:text-[24px]">
+          {label}
+        </span>
+      </div>
     </div>
   );
 }
