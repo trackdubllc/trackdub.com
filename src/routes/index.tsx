@@ -425,6 +425,8 @@ function SectionRail() {
 
   const handleRailPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0 && e.pointerType === "mouse") return;
+    // A fresh press on the rail always wins over any in-flight animation.
+    cancelSmoothScroll();
     dragStartYRef.current = e.clientY;
     draggingRef.current = false;
     suppressClickRef.current = false;
