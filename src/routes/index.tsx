@@ -121,6 +121,13 @@ function SectionRail() {
   const suppressClickRef = useRef(false);
   const scrubRafRef = useRef<number | null>(null);
   const pendingScrubYRef = useRef<number | null>(null);
+  // Track the active pointer id so global safety-net listeners (window
+  // pointercancel, blur, visibilitychange) can force-release capture even
+  // if the element-scoped pointerup/cancel never fires — e.g. the OS
+  // hijacks the gesture, the tab is backgrounded mid-drag, or a modal
+  // steals focus. Without this the drag stays "captured" forever and the
+  // rail desyncs from real scroll position on the next interaction.
+  const activePointerIdRef = useRef<number | null>(null);
   // Velocity tracking for touch inertia. We keep a short ring buffer of
   // recent pointer samples so release velocity reflects the last ~80ms of
   // motion, not the whole gesture — feels natural on touchscreens.
@@ -595,6 +602,11 @@ function SectionRail() {
     // A fresh press on the rail always wins over any in-flight animation.
     cancelSmoothScroll();
     cancelInertia();
+    // If a prior gesture never cleanly released (rare browser edge case),
+    // tear it down before starting a new one so state stays consistent.
+    if (activePointerIdRef.current !== null) {
+      finishScrub("pointercancel", null);
+    }
     pointerTypeRef.current = e.pointerType;
     // Velocity samples are only used for touch inertia.
     scrubSamplesRef.current =
@@ -604,7 +616,14 @@ function SectionRail() {
     dragStartYRef.current = e.clientY;
     draggingRef.current = false;
     suppressClickRef.current = false;
-    listRef.current?.setPointerCapture?.(e.pointerId);
+    // Try to capture — some browsers/pointer types (rare synthetic events)
+    // reject; either way, record the id so global cleanup can find it.
+    try {
+      listRef.current?.setPointerCapture?.(e.pointerId);
+    } catch {
+      /* capture unavailable — global safety net still handles cancel */
+    }
+    activePointerIdRef.current = e.pointerId;
   };
   const handleRailPointerMove = (e: PointerEvent) => {
     const list = listRef.current;
@@ -632,48 +651,73 @@ function SectionRail() {
       applyScrubFromClientY(e.clientY);
     }
   };
-  const handleRailPointerUp = (e: PointerEvent) => {
+  // Single teardown path for every scrub end (clean release, cancel, or
+  // global safety-net). `endType` mirrors PointerEvent.type semantics —
+  // "pointercancel" skips inertia and skips click/tap resolution; `clientY`
+  // is null when the global safety net triggered (no pointer coordinates).
+  const finishScrub = (endType: string, clientY: number | null) => {
     const list = listRef.current;
-    if (list?.hasPointerCapture?.(e.pointerId)) {
-      list.releasePointerCapture(e.pointerId);
+    const pid = activePointerIdRef.current;
+    // Always attempt to release capture — belt and braces against browsers
+    // that report hasPointerCapture=false while still holding it.
+    if (list && pid !== null) {
+      try {
+        if (list.hasPointerCapture?.(pid)) list.releasePointerCapture(pid);
+      } catch {
+        /* already released */
+      }
+    }
+    // Always flush any pending scrub rAF so scroll position is final before
+    // we decide what to do next — otherwise inertia (or the resync frame)
+    // starts from a stale y.
+    if (scrubRafRef.current !== null) {
+      window.cancelAnimationFrame(scrubRafRef.current);
+      scrubRafRef.current = null;
+      if (pendingScrubYRef.current !== null) {
+        applyScrubFromClientY(pendingScrubYRef.current);
+        pendingScrubYRef.current = null;
+      }
     }
     const isTouch = pointerTypeRef.current === "touch";
-    if (draggingRef.current) {
-      if (isTouch) {
-        // Flush any queued scrub frame so the release position is final
-        // before inertia takes over — otherwise the fling starts from a
-        // stale y.
-        if (scrubRafRef.current !== null) {
-          window.cancelAnimationFrame(scrubRafRef.current);
-          scrubRafRef.current = null;
-          if (pendingScrubYRef.current !== null) {
-            applyScrubFromClientY(pendingScrubYRef.current);
-            pendingScrubYRef.current = null;
-          }
-        }
-        if (e.type !== "pointercancel") {
-          startInertia(releaseVelocity());
-        }
+    const wasDragging = draggingRef.current;
+    if (wasDragging) {
+      if (isTouch && endType !== "pointercancel") {
+        startInertia(releaseVelocity());
       }
-      // Reset next tick so the anchor click handler (fired after pointerup)
-      // still sees suppressClickRef=true and cancels the navigation.
+      // Reset next tick so the anchor's own click handler (fired after
+      // pointerup) still sees suppressClickRef=true and cancels navigation.
       window.setTimeout(() => {
         draggingRef.current = false;
         setScrubbing(false);
       }, 0);
-    } else if (e.type !== "pointercancel") {
-      // Non-drag release = a click/tap on the rail. Resolve to the nearest
-      // chapter based on pointer Y so it works everywhere in the rail column
-      // — on ticks, on labels, on tooltips, and in the gaps between rows.
-      // Suppress the anchor's own click so we don't double-jump.
+    } else if (endType !== "pointercancel" && clientY !== null) {
+      // Non-drag release with real coordinates = a click/tap on the rail.
       suppressClickRef.current = true;
       window.setTimeout(() => {
         suppressClickRef.current = false;
       }, 0);
-      const id = nearestChapterId(e.clientY);
+      const id = nearestChapterId(clientY);
       if (id) jumpToChapter(id);
     }
     scrubSamplesRef.current = [];
+    activePointerIdRef.current = null;
+    // Force one final ordered write pass so progress fill and active
+    // indicator reflect the final scroll position immediately — don't
+    // wait for the next scroll event (which may never fire if the drag
+    // ended exactly on the current scroll pos).
+    scheduleRailFrameRef.current();
+  };
+
+  const handleRailPointerUp = (e: PointerEvent) => {
+    // Ignore stray up/cancel from pointers we didn't capture (e.g. a second
+    // finger releasing while the primary drag continues).
+    if (
+      activePointerIdRef.current !== null &&
+      e.pointerId !== activePointerIdRef.current
+    ) {
+      return;
+    }
+    finishScrub(e.type, e.clientY);
   };
 
   // Attach rail pointer listeners natively so we control passive flags:
@@ -692,11 +736,53 @@ function SectionRail() {
     list.addEventListener("pointermove", move, { passive: false });
     list.addEventListener("pointerup", up, { passive: true });
     list.addEventListener("pointercancel", up, { passive: true });
+    // Safety nets: if the OS/browser hijacks the gesture, the tab is
+    // backgrounded, or focus is stolen mid-drag, element-scoped
+    // pointerup/cancel may never arrive. Force cleanup so the rail can't
+    // get stuck in a captured/dragging state.
+    const onWindowCancel = (e: PointerEvent) => {
+      if (
+        activePointerIdRef.current !== null &&
+        e.pointerId === activePointerIdRef.current
+      ) {
+        finishScrub("pointercancel", null);
+      }
+    };
+    const onWindowUp = (e: PointerEvent) => {
+      // Only fires if the element handler missed it (e.g. pointer released
+      // outside a captured region on a browser that dropped capture).
+      if (
+        activePointerIdRef.current !== null &&
+        e.pointerId === activePointerIdRef.current
+      ) {
+        finishScrub(e.type, e.clientY);
+      }
+    };
+    const onLostCapture = () => {
+      if (activePointerIdRef.current !== null) {
+        finishScrub("pointercancel", null);
+      }
+    };
+    const onBlurOrHide = () => {
+      if (activePointerIdRef.current !== null) {
+        finishScrub("pointercancel", null);
+      }
+    };
+    window.addEventListener("pointercancel", onWindowCancel, { passive: true });
+    window.addEventListener("pointerup", onWindowUp, { passive: true });
+    list.addEventListener("lostpointercapture", onLostCapture, { passive: true });
+    window.addEventListener("blur", onBlurOrHide);
+    document.addEventListener("visibilitychange", onBlurOrHide);
     return () => {
       list.removeEventListener("pointerdown", down);
       list.removeEventListener("pointermove", move);
       list.removeEventListener("pointerup", up);
       list.removeEventListener("pointercancel", up);
+      window.removeEventListener("pointercancel", onWindowCancel);
+      window.removeEventListener("pointerup", onWindowUp);
+      list.removeEventListener("lostpointercapture", onLostCapture);
+      window.removeEventListener("blur", onBlurOrHide);
+      document.removeEventListener("visibilitychange", onBlurOrHide);
     };
   }, []);
 
