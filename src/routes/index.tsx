@@ -69,6 +69,14 @@ const NAV = [
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ];
+const NAV_PRIMARY = new Set([
+  "#pipeline",
+  "#walkthrough",
+  "#control",
+  "#performance",
+  "#pricing",
+  "#faq",
+]);
 
 function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
@@ -862,29 +870,25 @@ function Masthead() {
   const [open, setOpen] = useState(false);
   return (
     <header className="border-b border-border bg-background">
-      <Container className="flex h-16 items-center justify-between">
-        <a href="#top" className="font-serif text-2xl leading-none tracking-tight text-foreground">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-6 px-6 sm:px-10">
+        <a href="#top" className="shrink-0 font-serif text-2xl leading-none tracking-tight text-foreground">
           Trackdub<span className="text-accent">.</span>
         </a>
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
+        <nav className="hidden flex-1 items-center justify-center gap-x-6 gap-y-2 lg:gap-x-7 md:flex" aria-label="Primary">
           {NAV.map((n) => (
             <a
               key={n.href}
               href={n.href}
-              className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+              className={`whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground ${
+                NAV_PRIMARY.has(n.href) ? "" : "hidden xl:inline"
+              }`}
             >
               {n.label}
             </a>
           ))}
         </nav>
-        <div className="hidden items-center gap-6 md:flex">
-          <MotionToggle />
-          <a
-            href="mailto:hello@trackdub.com"
-            className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Contact
-          </a>
+        <div className="hidden shrink-0 items-center gap-4 md:flex lg:gap-5">
+          <div className="hidden lg:block"><MotionToggle /></div>
           <InkButton href="#pricing">Get Trackdub</InkButton>
         </div>
         <button
@@ -895,7 +899,7 @@ function Masthead() {
         >
           {open ? "Close" : "Menu"}
         </button>
-      </Container>
+      </div>
       {open && (
         <div className="border-t border-border bg-background md:hidden">
           <Container className="flex flex-col py-4">
@@ -958,7 +962,7 @@ function MotionToggle() {
           ? "Reduced motion is on. Click to enable animations."
           : "Full motion is on. Click to reduce animations."
       }
-      className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+      className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
     >
       <span
         aria-hidden="true"
