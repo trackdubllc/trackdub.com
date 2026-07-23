@@ -118,29 +118,89 @@ function SectionRail() {
       .filter((el): el is HTMLElement => Boolean(el));
     if (!targets.length) return;
 
+    // Track intersection ratios in a map so the "most visible" pick is O(n)
+    // over sections, not a resort of every entry batch.
+    const ratios = new Map<string, number>();
+    targets.forEach((t) => ratios.set(t.id, 0));
+    let currentActive = "";
+
+    const pickActive = () => {
+      let bestId = currentActive;
+      let bestRatio = -1;
+      ratios.forEach((r, id) => {
+        if (r > bestRatio) {
+          bestRatio = r;
+          bestId = id;
+        }
+      });
+      if (bestRatio > 0 && bestId !== currentActive) {
+        currentActive = bestId;
+        setActive(bestId);
+      }
+    };
+
     const io = new IntersectionObserver(
       (entries) => {
-        const vis = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (vis[0]) setActive(vis[0].target.id);
+        for (const e of entries) {
+          ratios.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0);
+        }
+        pickActive();
       },
       { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 1] },
     );
     targets.forEach((t) => io.observe(t));
 
-    const onScroll = () => {
+    // Cache scroll extent — recompute only when layout actually changes,
+    // not inside the scroll handler (avoids forced reflow every frame).
+    let docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    let lastVisible = false;
+    let lastProgress = 0;
+    let rafId: number | null = null;
+    let ticking = false;
+
+    const compute = () => {
+      ticking = false;
+      rafId = null;
       const y = window.scrollY;
-      setVisible(y > 480);
-      const doc = document.documentElement;
-      const max = doc.scrollHeight - window.innerHeight;
-      setProgress(max > 0 ? Math.min(1, Math.max(0, y / max)) : 0);
+      const nextVisible = y > 480;
+      if (nextVisible !== lastVisible) {
+        lastVisible = nextVisible;
+        setVisible(nextVisible);
+      }
+      const p = docMax > 0 ? Math.min(1, Math.max(0, y / docMax)) : 0;
+      // Only re-render when the fill would visibly move (~1/300 of the track).
+      if (Math.abs(p - lastProgress) > 0.003) {
+        lastProgress = p;
+        setProgress(p);
+      }
     };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+
+    const schedule = () => {
+      if (ticking) return;
+      ticking = true;
+      rafId = window.requestAnimationFrame(compute);
+    };
+
+    const onResize = () => {
+      docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      schedule();
+    };
+
+    compute();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
+
+    // Layout of the page changes as images/fonts load and reveals expand —
+    // keep docMax honest without polling.
+    const ro = new ResizeObserver(onResize);
+    ro.observe(document.documentElement);
+
     return () => {
       io.disconnect();
-      window.removeEventListener("scroll", onScroll);
+      ro.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", onResize);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
     };
   }, []);
 
@@ -148,9 +208,19 @@ function SectionRail() {
     const el = itemsRef.current[active];
     const list = listRef.current;
     if (!el || !list) return;
-    const listBox = list.getBoundingClientRect();
-    const box = el.getBoundingClientRect();
-    setIndicator({ top: box.top - listBox.top, height: box.height });
+    // Defer to the next frame so we measure after the browser has settled
+    // any layout the active-state change triggered.
+    const raf = window.requestAnimationFrame(() => {
+      const listBox = list.getBoundingClientRect();
+      const box = el.getBoundingClientRect();
+      const top = box.top - listBox.top;
+      setIndicator((prev) =>
+        Math.abs(prev.top - top) < 0.5 && Math.abs(prev.height - box.height) < 0.5
+          ? prev
+          : { top, height: box.height },
+      );
+    });
+    return () => window.cancelAnimationFrame(raf);
   }, [active, visible]);
 
   return (
