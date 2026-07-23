@@ -1,99 +1,62 @@
+## Problems with the current rail
+
+1. **Tiny hit targets.** Each chapter is an `<a>` with `py-0.5` around a 1px dash, so the only clickable pixels are ~4px tall. Clicks that land between chapters hit the rail column but no anchor, so on release nothing happens — the page doesn't jump.
+2. **Mouse drag feels indirect.** Every pointer move funnels through a `requestAnimationFrame`-coalesced `scheduleScrub`, adding a frame of latency, and mouse users share the same code path built around touch (velocity sampling, inertia hooks, `touch-action: none`). It doesn't feel "attached" to the cursor.
+3. **No feedback in gaps.** The column between chapter dashes has no hover affordance, so users can't tell it's interactive.
+
 ## Goal
 
-Shift the marketing site from warm-paper editorial to a **light neutral, kinetic** feel: cool off-white base, crisp sans typography, strong sectioning via full-bleed alternating bands, and moderate motion (level 3/5). Keep all content, routes, SEO, and interactive components (Walkthrough, ResumableJob, Architecture, Privacy, System Requirements) intact — this is a visual and motion pass only.
+The rail should feel like a precise chapter picker for mouse and like a scrubbable scrollbar for touch — the two input types get purpose-built behaviors instead of sharing one compromise path.
 
-## What changes
+## Interaction model
 
-### 1. Palette + typography (`src/styles.css`)
+**Mouse / trackpad / pen**
+- Each chapter row expands to fill its vertical slice of the rail (no gaps). Clicking anywhere between two chapter labels resolves to the nearest chapter and smooth-scrolls to it.
+- Dragging with the mouse is 1:1 position-mapped and applied synchronously in `pointermove` — no rAF coalescing, no easing, no inertia. The page tracks the cursor frame-for-frame like a native scrollbar thumb.
+- Threshold to promote a press into a drag stays 4px so short clicks always resolve as chapter jumps.
+- Hover on any row shows the existing tooltip and highlights the row's full slice, so the hit area is discoverable.
 
-- Replace warm-paper tokens with cool neutrals:
-  - `--background`: cool off-white `#f6f7f9`
-  - `--surface`: `#eceef2` (band B)
-  - `--surface-2`: `#1a1d21` graphite (band C, used sparingly for one "dark studio" band + mockups)
-  - `--foreground`: near-black `#0f1115`
-  - `--muted-foreground`: cool gray `#5a6370`
-  - `--accent`: crisp signal blue `#2f6df6` (replaces amber; used for one accent per section)
-  - `--border` / `--hairline`: `#dfe3ea`
-- Fonts: swap Instrument Serif → **Inter Tight** (display) + keep Work Sans (body) + JetBrains Mono (spec). Update `<link>` in `__root.tsx` and `--font-*` tokens.
-- Kill remaining warm-paper amber references in components.
+**Touch**
+- Keeps today's behavior: position-based scrubbing with a rolling velocity buffer and inertial release, 8px activation threshold.
+- Short taps (below threshold) resolve to the nearest chapter on release, just like a mouse click — fixes taps that currently land in gaps.
 
-### 2. Full-bleed alternating bands
+**Reduced motion**
+- Chapter jumps use instant `scrollTo` (already implemented via `prefersReducedMotion`).
+- No inertia, no smooth animation on drag or click.
 
-Restructure `src/routes/index.tsx` so every top-level section is `w-screen` full-bleed with an inner `max-w-6xl` container. Band rotation:
+## Visual changes
 
-```
-A (background)  → Hero
-B (surface)     → Trust strip
-A               → Pipeline overview
-C (dark)        → Try it (Walkthrough) — dark band feels like the app
-A               → Resumable jobs
-B               → Stage chapters
-A               → Architecture
-B               → Privacy
-A               → System requirements
-C (dark)        → Performance table — reads like a spec readout
-A               → What you get
-B               → Compared to
-A               → Pricing
-B               → FAQ
-A               → Endnote CTA
-```
+- Bump the track from 1px to 2px so it reads as an interactive control.
+- Each chapter row gets a taller pressable area (min ~28px, flex-distributed so the rail height stays fixed). The visible dash + label stays small; only the hit box grows.
+- On hover of a row, subtly tint the row background to signal the hit area.
+- Cursor: `pointer` over rows, `grab` over the empty top/bottom padding (drag-only zones), `grabbing` while scrubbing.
 
-Bands are separated by a 1px hairline, no rounded corners on the band itself. Section numbers (`01`, `02`…) move to a small kicker inside each band.
+## Technical details
 
-### 3. Motion (level 3 — moderate, not showy)
+File: `src/routes/index.tsx` (the `SectionRail` component, roughly lines 105-660).
 
-Introduce a small motion vocabulary, all respecting `prefers-reduced-motion`:
+1. **Row layout.** Replace `flex flex-col gap-2 py-2` with a fixed-height flex column where each `<a>` is `flex-1 min-h-[28px]` and internally uses `flex items-center` so the dash + tooltip stay centered on the same visual line as today. Remove `gap-2`. The list keeps its role as a slider container but individual rows become the primary hit targets.
+2. **Nearest-chapter resolver.** Add a helper `nearestChapterId(clientY)` that iterates `itemsRef.current`, picks the anchor whose vertical center is closest to `clientY`, and returns its id. Reuse on:
+   - Mouse click that lands on the list background rather than an anchor (edge case now that rows fill the list, mostly a safety net).
+   - Touch tap release below the drag threshold.
+3. **Split drag path by pointer type.**
+   - Keep `pointerTypeRef` (already exists).
+   - In `handleRailPointerMove`, branch on `pointerTypeRef.current`:
+     - `"mouse"` / `"pen"`: call `applyScrubFromClientY(e.clientY)` directly (synchronous). Do not push velocity samples. Do not call `scheduleScrub`.
+     - `"touch"`: keep `pushSample` + `scheduleScrub` path.
+4. **Release behavior.**
+   - If not dragging: for mouse, allow the anchor's own `onClick` to run (existing path). For touch below threshold, call `nearestChapterId` on the release point and invoke the same smooth-scroll used by anchor clicks.
+   - If dragging on mouse: stop where released (already the case; just skip inertia branch, which is already touch-gated).
+   - If dragging on touch: keep the flush + `startInertia(releaseVelocity())`.
+5. **Remove now-unused work on mouse path.** `scrubSamplesRef` push/reset only runs when `pointerType === "touch"`. `scrubRafRef` / `pendingScrubYRef` are only touched on the touch path.
+6. **Track thickness.** Change `w-px` to `w-0.5` (2px) for the background track and progress fill; keep the accent indicator at 3px.
+7. **Hover affordance.** Add a `group-hover:bg-foreground/[0.03]` on each `<a>` row so the full slice lights up on hover. Keep the existing dash and tooltip visuals unchanged.
+8. **A11y.** The list keeps `role="slider"` with live `aria-valuenow`. Each row stays an anchor with `aria-label="Jump to <label>"`. Focus-visible ring stays on the row so keyboard tab still highlights the full slice.
 
-- **Section reveal**: sections fade + translate-up 12px as they enter viewport (IntersectionObserver, once).
-- **Band handoff**: subtle 300ms background-color crossfade on the `<main>` element as the current band changes (tracked via IO), so scrolling feels like a continuous surface shifting tone rather than hard cuts.
-- **Pipeline flow**: the six-stage overview gets an animated connector — a thin line with a traveling dot looping through stages (2.5s, pauses on hover).
-- **Waveform drift**: the hero mockup's waveform bars gently animate amplitude (slow, 4s ease-in-out, staggered).
-- **Sticky mini-nav**: on scroll past the hero, a slim progress rail appears on the left showing the current section number and title; clicking jumps. Slides in/out.
-- **Hover**: link underline draw-in, button subtle lift (translate-y 1px + border color).
-- No parallax, no scroll-snap, no per-letter animation.
-
-Add a `useReveal()` hook and a `<Band variant="a|b|dark" number="03" label="Pipeline">…</Band>` wrapper to keep the sectioning consistent.
-
-### 4. Component polish
-
-- Nav: solid off-white, thin bottom hairline; active section highlights in accent blue.
-- Buttons: primary = ink fill, accent = blue outline that fills on hover.
-- Tables (Performance, Comparison, Requirements): keep hairlines, add zebra using `--surface` at 40% opacity, sticky header on tall tables.
-- Walkthrough tabs: pill-less, underline-driven with an animated underline that slides between tabs.
-- ResumableJob progress bars: animate width transitions with 400ms ease, stale badge pulses once on state change (not looping).
-
-### 5. Copy — unchanged
-
-No copy rewrites. Only visual + motion.
-
-## Technical notes
-
-- New file: `src/components/Band.tsx` (full-bleed wrapper, variant + number/label props).
-- New hook: `src/hooks/use-reveal.ts` (IntersectionObserver, `once: true`, adds `data-revealed`).
-- New hook: `src/hooks/use-active-section.ts` for the sticky progress rail.
-- `src/styles.css`: token swap, add `@utility band-a/b/dark`, `@keyframes flow-dot`, `@keyframes wave-drift`, `@utility reveal` (initial opacity 0 + translate, `[data-revealed] &` resets).
-- `src/routes/index.tsx`: refactor sections to `<Band>` wrapper; add `<SectionRail>` component; wire hero waveform + pipeline flow-dot animations.
-- `src/routes/__root.tsx`: swap font `<link>` to Inter Tight + Work Sans + JetBrains Mono.
-- `src/routes/privacy.tsx`: apply new tokens (inherits automatically) + wrap in `<Band>`.
-
-## Files touched
-
-- `src/styles.css`
-- `src/routes/__root.tsx`
-- `src/routes/index.tsx`
-- `src/routes/privacy.tsx`
-- `src/components/Band.tsx` (new)
-- `src/hooks/use-reveal.ts` (new)
-- `src/hooks/use-active-section.ts` (new)
-
-## What stays
-
-- All content, section order, interactive components, route structure, SEO metadata, FAQ, footer links.
-- Dark UI mockup panels remain dark (they're supposed to look like the app inset into the page).
+Nothing outside `SectionRail` needs to change; smooth-scroll retargeting, hash sync, tooltip, active indicator, and reduced-motion handling remain as-is.
 
 ## Out of scope
 
-- No new features, no backend, no copy rewrites.
-- No dark mode toggle for the site itself.
-- No replacement of the SVG mockups.
+- No changes to page section anchors or the NAV array.
+- No changes to the mobile menu or masthead nav.
+- No new dependencies.

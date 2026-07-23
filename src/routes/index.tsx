@@ -215,6 +215,36 @@ function SectionRail() {
     window.scrollTo({ top: f * docMax, behavior: "auto" });
   };
 
+  // Resolve a pointer y to the nearest chapter anchor. Powers "click anywhere
+  // on the rail" — clicks that don't land exactly on an anchor still jump to
+  // the closest chapter instead of doing nothing.
+  const nearestChapterId = (clientY: number): string | null => {
+    let bestId: string | null = null;
+    let bestDist = Infinity;
+    for (const [id, el] of Object.entries(itemsRef.current)) {
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      const center = rect.top + rect.height / 2;
+      const d = Math.abs(clientY - center);
+      if (d < bestDist) {
+        bestDist = d;
+        bestId = id;
+      }
+    }
+    return bestId;
+  };
+
+  const jumpToChapter = (id: string) => {
+    const href = `#${id}`;
+    if (window.history?.pushState) {
+      window.history.pushState(null, "", href);
+      setActive(id);
+    } else {
+      window.location.hash = href;
+    }
+    scrollToTargetId(id);
+  };
+
   // Convert a pointer sample into document scroll position, but only push
   // samples for velocity — the actual scroll happens via applyScrubFromClientY.
   const pushSample = (clientY: number) => {
@@ -522,7 +552,11 @@ function SectionRail() {
     cancelSmoothScroll();
     cancelInertia();
     pointerTypeRef.current = e.pointerType;
-    scrubSamplesRef.current = [{ y: window.scrollY, t: performance.now() }];
+    // Velocity samples are only used for touch inertia.
+    scrubSamplesRef.current =
+      e.pointerType === "touch"
+        ? [{ y: window.scrollY, t: performance.now() }]
+        : [];
     dragStartYRef.current = e.clientY;
     draggingRef.current = false;
     suppressClickRef.current = false;
@@ -532,9 +566,10 @@ function SectionRail() {
     const list = listRef.current;
     if (!list?.hasPointerCapture?.(e.pointerId)) return;
     const dy = e.clientY - dragStartYRef.current;
+    const isTouch = pointerTypeRef.current === "touch";
     // Touch pointers are less precise than a mouse — use a larger threshold
     // so a stationary tap doesn't get promoted to a drag by finger jitter.
-    const threshold = pointerTypeRef.current === "touch" ? 8 : 4;
+    const threshold = isTouch ? 8 : 4;
     if (!draggingRef.current && Math.abs(dy) < threshold) return;
     if (!draggingRef.current) {
       draggingRef.current = true;
@@ -542,29 +577,39 @@ function SectionRail() {
       setScrubbing(true);
     }
     e.preventDefault();
-    pushSample(e.clientY);
-    scheduleScrub(e.clientY);
+    if (isTouch) {
+      // Touch: rAF-coalesce writes and sample velocity so release can fling.
+      pushSample(e.clientY);
+      scheduleScrub(e.clientY);
+    } else {
+      // Mouse / pen: 1:1 with the cursor. Apply synchronously so the page
+      // tracks the pointer every frame, like a native scrollbar thumb —
+      // no rAF batching, no velocity buffering, no inertia on release.
+      applyScrubFromClientY(e.clientY);
+    }
   };
   const handleRailPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     const list = listRef.current;
     if (list?.hasPointerCapture?.(e.pointerId)) {
       list.releasePointerCapture(e.pointerId);
     }
+    const isTouch = pointerTypeRef.current === "touch";
     if (draggingRef.current) {
-      // Flush any queued scrub frame so the release position is final before
-      // inertia takes over — otherwise the fling starts from a stale y.
-      if (scrubRafRef.current !== null) {
-        window.cancelAnimationFrame(scrubRafRef.current);
-        scrubRafRef.current = null;
-        if (pendingScrubYRef.current !== null) {
-          applyScrubFromClientY(pendingScrubYRef.current);
-          pendingScrubYRef.current = null;
+      if (isTouch) {
+        // Flush any queued scrub frame so the release position is final
+        // before inertia takes over — otherwise the fling starts from a
+        // stale y.
+        if (scrubRafRef.current !== null) {
+          window.cancelAnimationFrame(scrubRafRef.current);
+          scrubRafRef.current = null;
+          if (pendingScrubYRef.current !== null) {
+            applyScrubFromClientY(pendingScrubYRef.current);
+            pendingScrubYRef.current = null;
+          }
         }
-      }
-      // Only fling on touch — mouse users expect the page to stop where they
-      // released the button, which matches native scrollbar drag behavior.
-      if (pointerTypeRef.current === "touch" && e.type !== "pointercancel") {
-        startInertia(releaseVelocity());
+        if (e.type !== "pointercancel") {
+          startInertia(releaseVelocity());
+        }
       }
       // Reset next tick so the anchor click handler (fired after pointerup)
       // still sees suppressClickRef=true and cancels the navigation.
@@ -572,6 +617,12 @@ function SectionRail() {
         draggingRef.current = false;
         setScrubbing(false);
       }, 0);
+    } else if (isTouch && e.type !== "pointercancel") {
+      // Short tap on touch: the browser won't synthesize a click reliably on
+      // the underlying anchor (especially in gap areas), so resolve to the
+      // nearest chapter ourselves.
+      const id = nearestChapterId(e.clientY);
+      if (id) jumpToChapter(id);
     }
     scrubSamplesRef.current = [];
   };
@@ -582,7 +633,7 @@ function SectionRail() {
     >
       <div
         ref={listRef}
-        className={`pointer-events-auto relative flex flex-col gap-2 py-2 pl-3 pr-2 touch-none select-none ${scrubbing ? "cursor-grabbing" : "cursor-grab"}`}
+        className={`pointer-events-auto relative flex min-h-[420px] flex-col py-2 pl-3 pr-2 touch-none select-none ${scrubbing ? "cursor-grabbing" : "cursor-grab"}`}
         onPointerDown={handleRailPointerDown}
         onPointerMove={handleRailPointerMove}
         onPointerUp={handleRailPointerUp}
@@ -594,10 +645,10 @@ function SectionRail() {
         aria-valuenow={Math.round(progress * 100)}
       >
         {/* vertical track */}
-        <span className="pointer-events-none absolute left-0 top-1 bottom-1 w-px bg-border/70" aria-hidden />
+        <span className="pointer-events-none absolute left-0 top-1 bottom-1 w-0.5 bg-border/70" aria-hidden />
         {/* progress fill */}
         <span
-          className="pointer-events-none absolute left-0 top-1 w-px origin-top bg-foreground/40"
+          className="pointer-events-none absolute left-0 top-1 w-0.5 origin-top bg-foreground/40"
           style={{
             height: `calc((100% - 0.5rem) * ${progress})`,
             transition: scrubbing ? "none" : "height 240ms cubic-bezier(0.22, 1, 0.36, 1)",
@@ -627,7 +678,7 @@ function SectionRail() {
               ref={(el) => {
                 itemsRef.current[id] = el;
               }}
-              className="pointer-events-auto group relative flex items-center gap-3 py-0.5 focus-visible:outline-none"
+              className="pointer-events-auto group relative flex flex-1 min-h-[32px] cursor-pointer items-center gap-3 rounded-sm px-1 transition-colors hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:bg-foreground/[0.04]"
               aria-label={`Jump to ${n.label}`}
               onMouseEnter={() => setHovered(id)}
               onMouseLeave={() => setHovered((h) => (h === id ? null : h))}
