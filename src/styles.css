@@ -197,8 +197,8 @@
 /* ---------- kinetic layer ---------- */
 
 @keyframes reveal-up {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translate3d(0, 18px, 0); filter: blur(6px); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0);    filter: blur(0); }
 }
 @keyframes wave-drift {
   0%, 100% { transform: scaleY(0.55); }
@@ -225,13 +225,36 @@
 
 @utility reveal {
   opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 700ms cubic-bezier(0.22,0.61,0.36,1), transform 700ms cubic-bezier(0.22,0.61,0.36,1);
-  will-change: opacity, transform;
+  transform: translate3d(0, 18px, 0);
+  filter: blur(6px);
+  transition:
+    opacity 900ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms),
+    transform 900ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms),
+    filter 700ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms);
+  will-change: opacity, transform, filter;
 }
 @utility revealed {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
+  filter: blur(0);
+}
+
+/* stagger children within a revealed container */
+@utility reveal-child {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  filter: blur(4px);
+  transition:
+    opacity 780ms cubic-bezier(0.16, 1, 0.3, 1) calc(120ms + var(--reveal-i, 0) * 70ms),
+    transform 780ms cubic-bezier(0.16, 1, 0.3, 1) calc(120ms + var(--reveal-i, 0) * 70ms),
+    filter 620ms cubic-bezier(0.16, 1, 0.3, 1) calc(120ms + var(--reveal-i, 0) * 70ms);
+  will-change: opacity, transform, filter;
+}
+.revealed .reveal-child,
+.revealed.reveal-child {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0);
 }
 @utility band-a {
   background-color: var(--background);
@@ -325,6 +348,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1 !important; transform: none !important; }
+  .reveal, .reveal-child {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
   .wave-bar { animation: none !important; }
 }
