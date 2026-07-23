@@ -590,7 +590,7 @@ function SectionRail() {
     return () => ro.disconnect();
   }, [active, visible]);
 
-  const handleRailPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleRailPointerDown = (e: PointerEvent) => {
     if (e.button !== 0 && e.pointerType === "mouse") return;
     // A fresh press on the rail always wins over any in-flight animation.
     cancelSmoothScroll();
@@ -606,7 +606,7 @@ function SectionRail() {
     suppressClickRef.current = false;
     listRef.current?.setPointerCapture?.(e.pointerId);
   };
-  const handleRailPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleRailPointerMove = (e: PointerEvent) => {
     const list = listRef.current;
     if (!list?.hasPointerCapture?.(e.pointerId)) return;
     const dy = e.clientY - dragStartYRef.current;
@@ -632,7 +632,7 @@ function SectionRail() {
       applyScrubFromClientY(e.clientY);
     }
   };
-  const handleRailPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleRailPointerUp = (e: PointerEvent) => {
     const list = listRef.current;
     if (list?.hasPointerCapture?.(e.pointerId)) {
       list.releasePointerCapture(e.pointerId);
@@ -675,6 +675,30 @@ function SectionRail() {
     }
     scrubSamplesRef.current = [];
   };
+
+  // Attach rail pointer listeners natively so we control passive flags:
+  // down/up/cancel are passive (never preventDefault → browser doesn't have
+  // to wait on JS before scrolling elsewhere on the page); move stays
+  // non-passive because a promoted drag calls preventDefault to suppress
+  // native text/scroll selection. React's synthetic delegation would attach
+  // all four as non-passive on the root — this avoids that overhead.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const down = (e: PointerEvent) => handleRailPointerDown(e);
+    const move = (e: PointerEvent) => handleRailPointerMove(e);
+    const up = (e: PointerEvent) => handleRailPointerUp(e);
+    list.addEventListener("pointerdown", down, { passive: true });
+    list.addEventListener("pointermove", move, { passive: false });
+    list.addEventListener("pointerup", up, { passive: true });
+    list.addEventListener("pointercancel", up, { passive: true });
+    return () => {
+      list.removeEventListener("pointerdown", down);
+      list.removeEventListener("pointermove", move);
+      list.removeEventListener("pointerup", up);
+      list.removeEventListener("pointercancel", up);
+    };
+  }, []);
 
   return (
     <aside
