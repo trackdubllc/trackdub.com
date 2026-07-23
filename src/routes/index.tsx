@@ -38,6 +38,7 @@ function Index() {
         <Control />
         <Performance />
         <Architecture />
+        <Privacy />
         <SystemRequirements />
         <WhatYouGet />
         <ComparedTo />
@@ -58,6 +59,7 @@ const NAV = [
   { href: "#control", label: "Control" },
   { href: "#performance", label: "Performance" },
   { href: "#architecture", label: "Architecture" },
+  { href: "#privacy", label: "Privacy" },
   { href: "#requirements", label: "Requirements" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
@@ -1641,6 +1643,7 @@ function Colophon() {
         ["Control", "#control"],
         ["Performance", "#performance"],
         ["Architecture", "#architecture"],
+        ["Privacy", "#privacy"],
         ["Requirements", "#requirements"],
         ["Pricing", "#pricing"],
       ],
