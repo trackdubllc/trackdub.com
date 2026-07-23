@@ -965,7 +965,7 @@ function WorkstationMock() {
 function TrustStrip() {
   const items = ["Local by default", "Deterministic runs", "Cross-platform", "Open manifest", "No account required"];
   return (
-    <section className="border-b border-border bg-surface/50">
+    <section className="border-b border-border bg-surface">
       <Container className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 py-6 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
         {items.map((t, i) => (
           <span key={t} className="flex items-center gap-8">
@@ -1178,7 +1178,7 @@ function Walkthrough() {
     Object.values(stale).reduce((n, m) => n + (m?.[s] ? 1 : 0), 0);
 
   return (
-    <section id="walkthrough" className="border-b border-border bg-surface/40">
+    <section id="walkthrough" className="border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -1568,7 +1568,7 @@ function FakeWaveform({ seed, color, busy }: { seed: number; color: string; busy
 
 function StageChapters() {
   return (
-    <section className="border-b border-border bg-surface/40">
+    <section className="border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="03" label="Each stage, in detail" />
         <div className="mt-14 space-y-16">
@@ -1861,7 +1861,7 @@ function ControlPlate({
 
 function Performance() {
   return (
-    <section id="performance" className="border-b border-border bg-surface/40">
+    <section id="performance" className="border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -1961,7 +1961,7 @@ function ComparedTo() {
     ["No account required", "Yes", "No", "No"],
   ];
   return (
-    <section className="border-b border-border bg-surface/40">
+    <section className="border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="06" label="Compared to" />
         <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -2124,7 +2124,7 @@ function FAQ() {
     },
   ];
   return (
-    <section id="faq" className="border-b border-border bg-surface/40">
+    <section id="faq" className="border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -2356,7 +2356,7 @@ function Privacy() {
   ];
 
   return (
-    <section id="privacy" className="border-b border-border bg-surface/40">
+    <section id="privacy" className="border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -2563,7 +2563,7 @@ function Architecture() {
             <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
               Fig. 04a-i &nbsp;·&nbsp; Data plane
             </div>
-            <div className="mt-3 rounded-none border border-border bg-surface/40">
+            <div className="mt-3 rounded-none border border-border bg-surface">
               <div className="grid grid-cols-12 border-b border-hairline px-5 py-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                 <div className="col-span-3">Where</div>
                 <div className="col-span-4">Stages</div>
@@ -2711,7 +2711,7 @@ function SystemRequirements() {
   ];
 
   return (
-    <section id="requirements" className="border-b border-border bg-surface/40">
+    <section id="requirements" className="border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
