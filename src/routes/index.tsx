@@ -120,18 +120,75 @@ function SectionRail() {
   const suppressClickRef = useRef(false);
   const scrubRafRef = useRef<number | null>(null);
   const pendingScrubYRef = useRef<number | null>(null);
+  // Custom smooth-scroll animation state so we can retarget or interrupt
+  // mid-flight (native window.scrollTo({behavior:'smooth'}) can't be cancelled
+  // or re-aimed without racing the browser).
+  const smoothRafRef = useRef<number | null>(null);
+  const smoothTargetRef = useRef<number | null>(null);
+  const smoothStartRef = useRef<{ y: number; t: number } | null>(null);
+  const smoothDurRef = useRef(560);
 
   const prefersReducedMotion = () =>
     typeof document !== "undefined" &&
     (document.documentElement.classList.contains("reduce-motion") ||
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 
+  const cancelSmoothScroll = () => {
+    if (smoothRafRef.current !== null) {
+      window.cancelAnimationFrame(smoothRafRef.current);
+      smoothRafRef.current = null;
+    }
+    smoothTargetRef.current = null;
+    smoothStartRef.current = null;
+  };
+
+  const easeOutExpo = (t: number) =>
+    t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+
+  const animateScrollTo = (targetY: number) => {
+    const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const clamped = Math.min(docMax, Math.max(0, targetY));
+    // If a scroll is in flight, retarget it: keep the current position as the
+    // new start and restart the clock so easing stays continuous.
+    smoothTargetRef.current = clamped;
+    const now = performance.now();
+    const distance = Math.abs(clamped - window.scrollY);
+    // Scale duration modestly with distance, capped for snappiness.
+    smoothDurRef.current = Math.min(720, Math.max(320, 260 + distance * 0.35));
+    smoothStartRef.current = { y: window.scrollY, t: now };
+    if (smoothRafRef.current !== null) return; // loop already running
+    const step = () => {
+      const start = smoothStartRef.current;
+      const target = smoothTargetRef.current;
+      if (start === null || target === null) {
+        smoothRafRef.current = null;
+        return;
+      }
+      const elapsed = performance.now() - start.t;
+      const p = Math.min(1, elapsed / smoothDurRef.current);
+      const y = start.y + (target - start.y) * easeOutExpo(p);
+      window.scrollTo(0, y);
+      if (p < 1) {
+        smoothRafRef.current = window.requestAnimationFrame(step);
+      } else {
+        smoothRafRef.current = null;
+        smoothTargetRef.current = null;
+        smoothStartRef.current = null;
+      }
+    };
+    smoothRafRef.current = window.requestAnimationFrame(step);
+  };
+
   const scrollToTargetId = (id: string) => {
     const target = document.getElementById(id);
     if (!target) return;
     const top = target.getBoundingClientRect().top + window.scrollY;
-    const behavior: ScrollBehavior = prefersReducedMotion() ? "auto" : "smooth";
-    window.scrollTo({ top, behavior });
+    if (prefersReducedMotion()) {
+      cancelSmoothScroll();
+      window.scrollTo({ top, behavior: "auto" });
+      return;
+    }
+    animateScrollTo(top);
   };
 
   const applyScrubFromClientY = (clientY: number) => {
@@ -140,6 +197,8 @@ function SectionRail() {
     const box = list.getBoundingClientRect();
     const f = Math.min(1, Math.max(0, (clientY - box.top) / Math.max(1, box.height)));
     const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    // Scrubbing takes over from any in-flight smooth scroll.
+    cancelSmoothScroll();
     window.scrollTo({ top: f * docMax, behavior: "auto" });
   };
 
@@ -156,6 +215,30 @@ function SectionRail() {
   useEffect(() => {
     activeRef.current = active;
   }, [active]);
+
+  // Cancel any in-flight smooth scroll the moment the user takes over with
+  // the wheel, touch, or keyboard — the animation should never fight input.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const cancel = () => cancelSmoothScroll();
+    const onKey = (e: KeyboardEvent) => {
+      // Only cancel for keys that actually scroll.
+      const scrollKeys = new Set([
+        "PageUp", "PageDown", "Home", "End",
+        "ArrowUp", "ArrowDown", " ", "Spacebar",
+      ]);
+      if (scrollKeys.has(e.key)) cancel();
+    };
+    window.addEventListener("wheel", cancel, { passive: true });
+    window.addEventListener("touchstart", cancel, { passive: true });
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("wheel", cancel);
+      window.removeEventListener("touchstart", cancel);
+      window.removeEventListener("keydown", onKey);
+      cancelSmoothScroll();
+    };
+  }, []);
 
   // Sync with URL hash — deep links should highlight the right chapter.
   useEffect(() => {
@@ -366,6 +449,8 @@ function SectionRail() {
 
   const handleRailPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0 && e.pointerType === "mouse") return;
+    // A fresh press on the rail always wins over any in-flight animation.
+    cancelSmoothScroll();
     dragStartYRef.current = e.clientY;
     draggingRef.current = false;
     suppressClickRef.current = false;
