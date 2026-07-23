@@ -121,6 +121,13 @@ function SectionRail() {
   const suppressClickRef = useRef(false);
   const scrubRafRef = useRef<number | null>(null);
   const pendingScrubYRef = useRef<number | null>(null);
+  // Track the active pointer id so global safety-net listeners (window
+  // pointercancel, blur, visibilitychange) can force-release capture even
+  // if the element-scoped pointerup/cancel never fires — e.g. the OS
+  // hijacks the gesture, the tab is backgrounded mid-drag, or a modal
+  // steals focus. Without this the drag stays "captured" forever and the
+  // rail desyncs from real scroll position on the next interaction.
+  const activePointerIdRef = useRef<number | null>(null);
   // Velocity tracking for touch inertia. We keep a short ring buffer of
   // recent pointer samples so release velocity reflects the last ~80ms of
   // motion, not the whole gesture — feels natural on touchscreens.
