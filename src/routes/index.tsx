@@ -120,6 +120,12 @@ function SectionRail() {
   const suppressClickRef = useRef(false);
   const scrubRafRef = useRef<number | null>(null);
   const pendingScrubYRef = useRef<number | null>(null);
+  // Velocity tracking for touch inertia. We keep a short ring buffer of
+  // recent pointer samples so release velocity reflects the last ~80ms of
+  // motion, not the whole gesture — feels natural on touchscreens.
+  const scrubSamplesRef = useRef<Array<{ y: number; t: number }>>([]);
+  const pointerTypeRef = useRef<string>("mouse");
+  const inertiaRafRef = useRef<number | null>(null);
   // Custom smooth-scroll animation state so we can retarget or interrupt
   // mid-flight (native window.scrollTo({behavior:'smooth'}) can't be cancelled
   // or re-aimed without racing the browser).
@@ -140,6 +146,13 @@ function SectionRail() {
     }
     smoothTargetRef.current = null;
     smoothStartRef.current = null;
+  };
+
+  const cancelInertia = () => {
+    if (inertiaRafRef.current !== null) {
+      window.cancelAnimationFrame(inertiaRafRef.current);
+      inertiaRafRef.current = null;
+    }
   };
 
   const easeOutExpo = (t: number) =>
@@ -202,6 +215,58 @@ function SectionRail() {
     window.scrollTo({ top: f * docMax, behavior: "auto" });
   };
 
+  // Convert a pointer sample into document scroll position, but only push
+  // samples for velocity — the actual scroll happens via applyScrubFromClientY.
+  const pushSample = (clientY: number) => {
+    const list = listRef.current;
+    if (!list) return;
+    const box = list.getBoundingClientRect();
+    const f = Math.min(1, Math.max(0, (clientY - box.top) / Math.max(1, box.height)));
+    const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const y = f * docMax;
+    const now = performance.now();
+    const buf = scrubSamplesRef.current;
+    buf.push({ y, t: now });
+    // Keep only the last ~120ms of samples.
+    while (buf.length > 2 && now - buf[0].t > 120) buf.shift();
+  };
+
+  const releaseVelocity = () => {
+    const buf = scrubSamplesRef.current;
+    if (buf.length < 2) return 0;
+    const first = buf[0];
+    const last = buf[buf.length - 1];
+    const dt = Math.max(1, last.t - first.t);
+    return (last.y - first.y) / dt; // px per ms in document space
+  };
+
+  const startInertia = (v0: number) => {
+    // Ignore trivial flicks so a slow drag doesn't drift after release.
+    if (Math.abs(v0) < 0.35) return;
+    cancelInertia();
+    cancelSmoothScroll();
+    let v = v0;
+    let last = performance.now();
+    // Exponential decay — friction tuned so a hard fling settles in ~600ms.
+    const decayPerMs = 0.995;
+    const step = () => {
+      const now = performance.now();
+      const dt = now - last;
+      last = now;
+      const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const nextY = Math.min(docMax, Math.max(0, window.scrollY + v * dt));
+      window.scrollTo(0, nextY);
+      v *= Math.pow(decayPerMs, dt);
+      // Stop at edges or when velocity is negligible.
+      if (Math.abs(v) < 0.02 || nextY === 0 || nextY === docMax) {
+        inertiaRafRef.current = null;
+        return;
+      }
+      inertiaRafRef.current = window.requestAnimationFrame(step);
+    };
+    inertiaRafRef.current = window.requestAnimationFrame(step);
+  };
+
   const scheduleScrub = (clientY: number) => {
     pendingScrubYRef.current = clientY;
     if (scrubRafRef.current !== null) return;
@@ -220,7 +285,10 @@ function SectionRail() {
   // the wheel, touch, or keyboard — the animation should never fight input.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const cancel = () => cancelSmoothScroll();
+    const cancel = () => {
+      cancelSmoothScroll();
+      cancelInertia();
+    };
     const onKey = (e: KeyboardEvent) => {
       // Only cancel for keys that actually scroll.
       const scrollKeys = new Set([
@@ -237,6 +305,7 @@ function SectionRail() {
       window.removeEventListener("touchstart", cancel);
       window.removeEventListener("keydown", onKey);
       cancelSmoothScroll();
+      cancelInertia();
     };
   }, []);
 
@@ -451,6 +520,9 @@ function SectionRail() {
     if (e.button !== 0 && e.pointerType === "mouse") return;
     // A fresh press on the rail always wins over any in-flight animation.
     cancelSmoothScroll();
+    cancelInertia();
+    pointerTypeRef.current = e.pointerType;
+    scrubSamplesRef.current = [{ y: window.scrollY, t: performance.now() }];
     dragStartYRef.current = e.clientY;
     draggingRef.current = false;
     suppressClickRef.current = false;
@@ -460,13 +532,17 @@ function SectionRail() {
     const list = listRef.current;
     if (!list?.hasPointerCapture?.(e.pointerId)) return;
     const dy = e.clientY - dragStartYRef.current;
-    if (!draggingRef.current && Math.abs(dy) < 4) return;
+    // Touch pointers are less precise than a mouse — use a larger threshold
+    // so a stationary tap doesn't get promoted to a drag by finger jitter.
+    const threshold = pointerTypeRef.current === "touch" ? 8 : 4;
+    if (!draggingRef.current && Math.abs(dy) < threshold) return;
     if (!draggingRef.current) {
       draggingRef.current = true;
       suppressClickRef.current = true;
       setScrubbing(true);
     }
     e.preventDefault();
+    pushSample(e.clientY);
     scheduleScrub(e.clientY);
   };
   const handleRailPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -475,6 +551,21 @@ function SectionRail() {
       list.releasePointerCapture(e.pointerId);
     }
     if (draggingRef.current) {
+      // Flush any queued scrub frame so the release position is final before
+      // inertia takes over — otherwise the fling starts from a stale y.
+      if (scrubRafRef.current !== null) {
+        window.cancelAnimationFrame(scrubRafRef.current);
+        scrubRafRef.current = null;
+        if (pendingScrubYRef.current !== null) {
+          applyScrubFromClientY(pendingScrubYRef.current);
+          pendingScrubYRef.current = null;
+        }
+      }
+      // Only fling on touch — mouse users expect the page to stop where they
+      // released the button, which matches native scrollbar drag behavior.
+      if (pointerTypeRef.current === "touch" && e.type !== "pointercancel") {
+        startInertia(releaseVelocity());
+      }
       // Reset next tick so the anchor click handler (fired after pointerup)
       // still sees suppressClickRef=true and cancels the navigation.
       window.setTimeout(() => {
@@ -482,6 +573,7 @@ function SectionRail() {
         setScrubbing(false);
       }, 0);
     }
+    scrubSamplesRef.current = [];
   };
 
   return (
