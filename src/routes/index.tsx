@@ -108,7 +108,6 @@ function SectionRail() {
   const itemsRef = useRef<Record<string, HTMLAnchorElement | null>>({});
   const listRef = useRef<HTMLDivElement | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
-  const hoverRafRef = useRef<number | null>(null);
   const navIds = useRef(new Set(NAV.map((n) => n.href.slice(1))));
   const activeRef = useRef<string>("");
   const [scrubbing, setScrubbing] = useState(false);
@@ -371,65 +370,6 @@ function SectionRail() {
     window.addEventListener("hashchange", syncFromHash);
     return () => window.removeEventListener("hashchange", syncFromHash);
   }, []);
-
-  useEffect(() => {
-    if (!hovered) return;
-    const target = document.getElementById(hovered);
-    if (!target) return;
-    const anchor = itemsRef.current[hovered];
-    const bar = anchor?.querySelector<HTMLElement>("[data-rail-localbar]") ?? null;
-    const label = anchor?.querySelector<HTMLElement>("[data-rail-localpct]") ?? null;
-
-    // Cache the section's document-space top/height so scroll frames only
-    // touch window.scrollY (a cheap read) instead of forcing layout with
-    // getBoundingClientRect on every rAF.
-    let sectionTop = 0;
-    let sectionHeight = 1;
-    let lastPct = -1;
-    const remeasure = () => {
-      const rect = target.getBoundingClientRect();
-      sectionTop = rect.top + window.scrollY;
-      sectionHeight = Math.max(1, rect.height);
-    };
-    const compute = () => {
-      const anchor = window.scrollY + window.innerHeight / 2;
-      const raw = (anchor - sectionTop) / sectionHeight;
-      const pct = Math.min(1, Math.max(0, raw));
-      if (Math.abs(pct - lastPct) > 0.005) {
-        lastPct = pct;
-        if (bar) bar.style.width = `${(pct * 100).toFixed(1)}%`;
-        if (label) label.textContent = `${Math.round(pct * 100)}%`;
-      }
-    };
-    remeasure();
-    compute();
-
-    let ticking = false;
-    const schedule = () => {
-      if (ticking) return;
-      ticking = true;
-      hoverRafRef.current = window.requestAnimationFrame(() => {
-        ticking = false;
-        compute();
-      });
-    };
-    const onResize = () => {
-      remeasure();
-      schedule();
-    };
-    // Section geometry can shift as reveals expand / fonts load — track it
-    // with a ResizeObserver rather than remeasuring on every scroll frame.
-    const ro = new ResizeObserver(onResize);
-    ro.observe(target);
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", onResize);
-      if (hoverRafRef.current !== null) window.cancelAnimationFrame(hoverRafRef.current);
-    };
-  }, [hovered]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -887,28 +827,6 @@ function SectionRail() {
               >
                 <span className="font-serif text-[13px] leading-none tracking-tight text-foreground">
                   {n.label}
-                </span>
-                <span className="h-3 w-px bg-border" aria-hidden />
-                <span className="flex items-center gap-2">
-                  <span
-                    aria-hidden
-                    className="relative block h-[3px] w-16 overflow-hidden bg-border/70"
-                  >
-                    <span
-                      data-rail-localbar
-                      className="absolute inset-y-0 left-0 bg-accent"
-                      style={{
-                        width: "0%",
-                        transition: "width 160ms linear",
-                      }}
-                    />
-                  </span>
-                  <span
-                    data-rail-localpct
-                    className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular-nums"
-                  >
-                    0%
-                  </span>
                 </span>
               </span>
             </a>
