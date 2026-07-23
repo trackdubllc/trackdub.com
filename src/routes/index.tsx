@@ -5,6 +5,37 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 
+const FAQ_ITEMS: { q: string; a: string }[] = [
+  {
+    q: "Does my video get uploaded anywhere?",
+    a: "No. Trackdub runs the whole pipeline on your machine by default. Cloud endpoints exist for teams that want them, but they're opt-in per project and per stage — never implicit.",
+  },
+  {
+    q: "What happens to my data if I uninstall?",
+    a: "Your projects, source media, and generated output live in folders you chose, so they stay where they are until you delete them. The app data directory — model cache, preferences, and logs — can be removed during uninstall or manually from %LOCALAPPDATA%\\Trackdub.",
+  },
+  {
+    q: "Can I use it commercially?",
+    a: "Yes, on the Studio and On-prem plans. Trackdub gates model use by license lane: research-only checkpoints are blocked from loading under a commercial context.",
+  },
+  {
+    q: "How is the voice cloning handled?",
+    a: "Each detected speaker gets one short reference clip you can review or replace. The voicing stage uses that reference — one voice per person, not one 'AI voice' for the whole video. References stay on your disk.",
+  },
+  {
+    q: "What if the ASR gets a word wrong?",
+    a: "Fix it in the transcript. The translation for that line invalidates, the voicing for that line queues for a regen, and nothing else rebuilds. Every stage declares its inputs, so edits propagate exactly as far as they need to.",
+  },
+  {
+    q: "Do I need a GPU?",
+    a: "No, but it helps. Trackdub runs on CPU, DirectML, CUDA, CoreML, or Windows ML. On integrated graphics you'll get roughly 2× realtime end-to-end; on a mid-range discrete GPU, 6–9×.",
+  },
+  {
+    q: "Can I automate it?",
+    a: "Yes. The Studio and On-prem plans include the Trackdub CLI and SDK. The same pipeline the app runs is scriptable for batch localization, CI, or an on-prem REST worker.",
+  },
+];
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -24,6 +55,31 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Trackdub",
+          url: "https://www.trackdub.com",
+          description:
+            "Local-first Windows desktop workstation for AI video dubbing.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: FAQ_ITEMS.map((it) => ({
+            "@type": "Question",
+            name: it.q,
+            acceptedAnswer: { "@type": "Answer", text: it.a },
+          })),
+        }),
+      },
+    ],
   }),
   component: Index,
 });
@@ -2377,6 +2433,9 @@ function StageChapters() {
     <section data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="03" label="Each stage, in detail" />
+        <h2 className="mt-2 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+          Each pipeline stage, in detail.
+        </h2>
         <div className="mt-14 space-y-16">
           {STAGES.map((s, i) => (
             <article
@@ -2922,36 +2981,7 @@ function Pricing() {
 /* ---------------- faq ---------------- */
 
 function FAQ() {
-  const items = [
-    {
-      q: "Does my video get uploaded anywhere?",
-      a: "No. Trackdub runs the whole pipeline on your machine by default. Cloud endpoints exist for teams that want them, but they're opt-in per project and per stage — never implicit.",
-    },
-    {
-      q: "What happens to my data if I uninstall?",
-      a: "Your projects, source media, and generated output live in folders you chose, so they stay where they are until you delete them. The app data directory — model cache, preferences, and logs — can be removed during uninstall or manually from %LOCALAPPDATA%\\Trackdub. See the full privacy policy for the complete list.",
-    },
-    {
-      q: "Can I use it commercially?",
-      a: "Yes, on the Studio and On-prem plans. Trackdub gates model use by license lane: research-only checkpoints are blocked from loading under a commercial context, so you don't ship a video with a model you weren't allowed to use.",
-    },
-    {
-      q: "How is the voice cloning handled?",
-      a: "Each detected speaker gets one short reference clip you can review or replace. The voicing stage uses that reference — one voice per person, not one 'AI voice' for the whole video. References stay on your disk.",
-    },
-    {
-      q: "What if the ASR gets a word wrong?",
-      a: "Fix it in the transcript. The translation for that line invalidates, the voicing for that line queues for a regen, and nothing else rebuilds. Every stage declares its inputs, so edits propagate exactly as far as they need to.",
-    },
-    {
-      q: "Do I need a GPU?",
-      a: "No, but it helps. Trackdub runs on CPU, DirectML, CUDA, CoreML, or Windows ML. On integrated graphics you'll get roughly 2× realtime end-to-end; on a mid-range discrete GPU, 6–9×.",
-    },
-    {
-      q: "Can I automate it?",
-      a: "Yes. The Studio and On-prem plans include the Trackdub CLI and SDK. The same pipeline the app runs is scriptable for batch localization, CI, or an on-prem REST worker.",
-    },
-  ];
+  const items = FAQ_ITEMS;
   return (
     <section id="faq" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
