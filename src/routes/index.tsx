@@ -116,8 +116,6 @@ function SectionRail() {
   // bypassing React re-renders and the reconciler.
   const progressFillRef = useRef<HTMLSpanElement | null>(null);
   const indicatorRef = useRef<HTMLSpanElement | null>(null);
-  const localBarRef = useRef<HTMLSpanElement | null>(null);
-  const localPctRef = useRef<HTMLSpanElement | null>(null);
   const dragStartYRef = useRef(0);
   const draggingRef = useRef(false);
   const suppressClickRef = useRef(false);
