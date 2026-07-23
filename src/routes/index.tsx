@@ -84,7 +84,7 @@ function Container({ children, className = "" }: { children: React.ReactNode; cl
 
 function SectionNumber({ n, label }: { n: string; label: string }) {
   return (
-    <div className="mb-10 sm:mb-14">
+    <div className="mb-10 sm:mb-14" data-lead>
       <div className="mb-4 flex items-center gap-3">
         <span className="h-px w-8 bg-accent" aria-hidden />
         <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
