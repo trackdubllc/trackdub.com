@@ -862,26 +862,26 @@ function Masthead() {
   const [open, setOpen] = useState(false);
   return (
     <header className="border-b border-border bg-background">
-      <Container className="flex h-16 items-center justify-between">
-        <a href="#top" className="font-serif text-2xl leading-none tracking-tight text-foreground">
+      <Container className="flex h-16 items-center justify-between gap-6">
+        <a href="#top" className="shrink-0 font-serif text-2xl leading-none tracking-tight text-foreground">
           Trackdub<span className="text-accent">.</span>
         </a>
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
+        <nav className="hidden flex-1 items-center justify-center gap-x-6 gap-y-2 lg:gap-x-7 md:flex" aria-label="Primary">
           {NAV.map((n) => (
             <a
               key={n.href}
               href={n.href}
-              className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+              className="whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
             >
               {n.label}
             </a>
           ))}
         </nav>
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden shrink-0 items-center gap-4 md:flex lg:gap-5">
           <MotionToggle />
           <a
             href="mailto:hello@trackdub.com"
-            className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+            className="whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
           >
             Contact
           </a>
