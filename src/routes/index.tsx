@@ -218,7 +218,7 @@ function InkButton({
   variant?: "primary" | "ghost";
 }) {
   const base =
-    "inline-flex items-center gap-2 px-4 py-2 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+    "btn-sheen inline-flex items-center gap-2 px-4 py-2 text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
   const styles =
     variant === "primary"
       ? "bg-foreground text-background hover:bg-ink"
@@ -2048,7 +2048,7 @@ function WhatYouGet() {
         </h2>
         <dl className="mt-14 grid gap-y-8 gap-x-12 md:grid-cols-2">
           {items.map(([term, def]) => (
-            <div key={term} className="border-t border-border pt-5">
+            <div key={term} className="card-lift group border-t border-border px-1 pt-5 hover:bg-surface/40">
               <dt className="font-serif text-[22px] text-foreground">{term}</dt>
               <dd className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{def}</dd>
             </div>
