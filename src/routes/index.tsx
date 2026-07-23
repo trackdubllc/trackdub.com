@@ -167,7 +167,7 @@ function SectionRail() {
     const now = performance.now();
     const distance = Math.abs(clamped - window.scrollY);
     // Scale duration modestly with distance, capped for snappiness.
-    smoothDurRef.current = Math.min(720, Math.max(320, 260 + distance * 0.35));
+    smoothDurRef.current = Math.min(280, Math.max(140, 120 + distance * 0.08));
     smoothStartRef.current = { y: window.scrollY, t: now };
     if (smoothRafRef.current !== null) return; // loop already running
     const step = () => {
