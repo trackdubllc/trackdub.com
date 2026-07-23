@@ -1641,6 +1641,7 @@ function Colophon() {
         ["Control", "#control"],
         ["Performance", "#performance"],
         ["Architecture", "#architecture"],
+        ["Requirements", "#requirements"],
         ["Pricing", "#pricing"],
       ],
     ],
