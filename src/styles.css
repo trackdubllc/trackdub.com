@@ -686,7 +686,7 @@ html.reduce-motion .pulse-once { animation: none !important; }
 /* Assign chapters to existing section ids — no index.tsx changes required.
    Rotation ordered so adjacent sections always contrast strongly. */
 section#top         { @apply chapter-paper; }
-section#pipeline    { @apply chapter-ash; }
+section#pipeline    { @apply chapter-paper; }
 section#walkthrough { @apply chapter-ink; }
 section#resume      { @apply chapter-burgundy; }
 section#control     { @apply chapter-cream; }

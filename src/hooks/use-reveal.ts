@@ -7,11 +7,23 @@ import { useEffect } from "react";
 export function useReveal() {
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const revealHashTarget = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (!id) return;
+      const target = document.getElementById(id);
+      const revealRoot = target?.closest<HTMLElement>("[data-reveal]");
+      revealRoot?.classList.add("revealed");
+      requestAnimationFrame(() => target?.scrollIntoView());
+    };
+
+    revealHashTarget();
+    window.addEventListener("hashchange", revealHashTarget);
+
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
       document.querySelectorAll<HTMLElement>("[data-reveal]").forEach((el) => {
         el.classList.add("revealed");
       });
-      return;
+      return () => window.removeEventListener("hashchange", revealHashTarget);
     }
     const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
     // Pre-index staggered children so their CSS delays are ready before reveal.
@@ -46,7 +58,10 @@ export function useReveal() {
       },
       { rootMargin: "0px 0px -12% 0px", threshold: [0, 0.08] },
     );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    els.filter((el) => !el.classList.contains("revealed")).forEach((el) => io.observe(el));
+    return () => {
+      io.disconnect();
+      window.removeEventListener("hashchange", revealHashTarget);
+    };
   }, []);
 }

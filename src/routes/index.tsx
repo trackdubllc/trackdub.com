@@ -28,11 +28,31 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "Do I need a GPU?",
-    a: "No, but it helps. Trackdub runs on CPU, DirectML, CUDA, CoreML, or Windows ML, with per-stage fallback if a provider isn't available. Integrated graphics land in the low multiples of realtime; a discrete GPU well beyond that — exact numbers publish via DubBench ahead of launch.",
+    a: "No. CPU execution is the portable baseline. Compatible hardware can use TensorRT RTX, CUDA, DirectML, CoreML, MIGraphX, OpenVINO, or QNN per stage, with automatic fallback when a provider or model combination is unavailable.",
   },
   {
     q: "Can I automate it?",
     a: "Yes — the CLI ships in every tier, Free included. The same pipeline the app runs is scriptable for batch localization, CI, or an on-prem REST worker via the SDK.",
+  },
+  {
+    q: "Can the whole pipeline run offline?",
+    a: "Yes. Once the models you selected are downloaded, every bundled stage can run without an internet connection. Hosted translation or voice providers are optional and configured one stage at a time.",
+  },
+  {
+    q: "Can I choose which accelerator Trackdub uses?",
+    a: "Yes. Automatic mode selects the best compatible provider per stage, while an execution policy lets you prefer or exclude providers. A stage can fall back without changing the rest of the project.",
+  },
+  {
+    q: "What operating systems are supported?",
+    a: "Trackdub targets Windows, macOS, and Linux with the same project format. Available acceleration providers differ by operating system and hardware, but CPU execution remains the portable fallback.",
+  },
+  {
+    q: "Can I use a cloud provider for only one stage?",
+    a: "Yes. You can route translation or voice generation to a provider you configure while keeping ingest, transcription, timing, mixing, and the rest of the project local.",
+  },
+  {
+    q: "How are model licenses handled?",
+    a: "Every bundled model is declared in the model manifest with its source, checksum, and commercial-use lane. Unknown or research-only licenses are not treated as safe bundled defaults.",
   },
 ];
 
@@ -92,9 +112,9 @@ function Index() {
       <SectionRail />
       <main>
         <Lead />
+        <PipelineFeature />
         <ProductPlate />
         <TrustStrip />
-        <PipelineFeature />
         <Walkthrough />
         <ResumableJob />
         <StageChapters />
@@ -127,6 +147,7 @@ const NAV = [
   { href: "#requirements", label: "Requirements" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
+  { href: "#waitlist", label: "Launch list" },
 ];
 const NAV_PRIMARY = new Set([
   "#pipeline",
@@ -134,7 +155,6 @@ const NAV_PRIMARY = new Set([
   "#control",
   "#performance",
   "#pricing",
-  "#faq",
 ]);
 
 function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -911,11 +931,11 @@ function InkButton({
   variant?: "primary" | "ghost";
 }) {
   const base =
-    "btn-sheen inline-flex items-center gap-2 px-4 py-2 text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+    "btn-sheen inline-flex items-center gap-2 px-6 py-3 text-[14px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
   const styles =
     variant === "primary"
-      ? "bg-foreground text-background hover:bg-ink"
-      : "border border-foreground/70 text-foreground hover:border-foreground";
+      ? "border border-[var(--burgundy)] bg-[var(--burgundy)] text-[var(--cream)] hover:border-[var(--rust)] hover:bg-[var(--rust)]"
+      : "border border-[var(--rust)] text-[var(--burgundy)] hover:bg-[var(--rust)] hover:text-[var(--cream)]";
   return (
     <a href={href} className={`${base} ${styles}`}>
       {children}
@@ -929,17 +949,17 @@ function Masthead() {
   const [open, setOpen] = useState(false);
   return (
     <header className="border-b border-border bg-background">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-6 px-6 sm:px-10">
-        <a href="#top" className="shrink-0 font-serif text-2xl leading-none tracking-tight text-foreground">
+      <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between gap-6 px-6 sm:h-[88px] sm:px-10">
+        <a href="#top" className="shrink-0 font-serif text-2xl leading-none tracking-tight text-foreground sm:text-[38px]">
           Trackdub<span className="text-accent">.</span>
         </a>
-        <nav className="hidden flex-1 items-center justify-center gap-x-6 gap-y-2 lg:gap-x-7 md:flex" aria-label="Primary">
+        <nav className="hidden flex-1 items-center justify-center gap-x-7 md:flex" aria-label="Primary">
           {NAV.map((n) => (
             <a
               key={n.href}
               href={n.href}
-              className={`whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground ${
-                NAV_PRIMARY.has(n.href) ? "" : "hidden xl:inline"
+              className={`whitespace-nowrap font-mono text-[12px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground ${
+                NAV_PRIMARY.has(n.href) ? "" : "hidden"
               }`}
             >
               {n.label}
@@ -948,7 +968,7 @@ function Masthead() {
         </nav>
         <div className="hidden shrink-0 items-center gap-4 md:flex lg:gap-5">
           <div className="hidden lg:block"><MotionToggle /></div>
-          <InkButton href="#pricing">Get Trackdub</InkButton>
+          <InkButton href="#waitlist">Join launch list</InkButton>
         </div>
         <button
           className="md:hidden font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
@@ -973,7 +993,7 @@ function Masthead() {
               </a>
             ))}
             <div className="py-2"><MotionToggle /></div>
-            <InkButton href="#pricing">Get Trackdub</InkButton>
+            <InkButton href="#waitlist">Join launch list</InkButton>
           </Container>
         </div>
       )}
@@ -1045,41 +1065,54 @@ function MotionToggle() {
 function Lead() {
   return (
     <section id="top" className="border-b border-border">
-      <Container className="grid grid-cols-1 gap-10 py-16 sm:py-24 lg:grid-cols-12 lg:gap-16 lg:py-32">
-        <div className="lg:col-span-8">
-          <SectionNumber n="00" label="A workstation for dubbing" />
-          <h1 className="mt-6 font-serif text-5xl leading-[1.02] tracking-tight text-foreground sm:text-6xl lg:text-7xl xl:text-[88px]">
-            Dub videos into other languages{" "}
-            <em className="text-accent">without giving up control.</em>
-          </h1>
-          <p className="mt-8 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-            Trackdub is a desktop workstation for translating, voicing, and mixing video. Every stage
-            of the pipeline is inspectable, editable, and rerunnable — from the transcript to the
-            final mix. Your media never leaves your machine unless you say so.
-          </p>
-          <div className="mt-10 flex flex-wrap items-center gap-6">
-            <InkButton href="#pricing">Get early access</InkButton>
-            <TextLink href="#pipeline">Read the pipeline →</TextLink>
+      <div className="mx-auto w-full max-w-[1600px] px-6 py-12 sm:px-10 sm:py-9 lg:pb-8 lg:pt-9">
+        <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-10 xl:gap-14">
+          <div>
+            <h1 className="font-serif text-5xl leading-[0.98] tracking-tight text-foreground sm:text-6xl lg:text-[68px] xl:text-[76px]">
+              Dub videos into other languages without giving up control<span className="text-accent">.</span>
+            </h1>
+            <p className="mt-7 max-w-xl text-[17px] leading-relaxed text-muted-foreground sm:text-lg">
+              Trackdub is a desktop workstation for translating, voicing, and mixing video. Every stage
+              of the pipeline is inspectable, editable, and rerunnable — from the transcript to the
+              final mix. Your media never leaves your machine unless you say so.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-4 sm:gap-6">
+              <InkButton href="#waitlist">Be first to know <span aria-hidden>→</span></InkButton>
+              <InkButton href="#pipeline" variant="ghost">Explore the workflow <span aria-hidden>→</span></InkButton>
+            </div>
+          </div>
+          <div className="hidden lg:block">
+            <WorkstationMock />
           </div>
         </div>
-        <aside className="lg:col-span-4 lg:border-l lg:border-border lg:pl-10">
-          <dl className="space-y-5 font-mono text-[12px] text-muted-foreground">
-            {[
-              ["Version", "Early preview"],
-              ["Platforms", "Windows · macOS · Linux"],
-              ["License", "Commercial · non-commercial"],
-              ["Runs on", "CPU · DirectML · CUDA · CoreML"],
-              ["Data", "Local by default"],
-            ].map(([k, v]) => (
-              <div key={k} className="flex justify-between gap-4 border-b border-hairline pb-3">
-                <dt className="uppercase tracking-[0.14em]">{k}</dt>
-                <dd className="text-right text-foreground">{v}</dd>
-              </div>
-            ))}
-          </dl>
-        </aside>
-      </Container>
+        <HeroPulseRail />
+      </div>
     </section>
+  );
+}
+
+function HeroPulseRail() {
+  return (
+    <div className="my-8 flex items-center gap-4" aria-hidden="true">
+      <span className="font-mono text-[9px] tracking-[0.14em] text-accent">00:00:14:12</span>
+      <svg viewBox="0 0 1000 20" className="h-5 min-w-0 flex-1" preserveAspectRatio="none">
+        {Array.from({ length: 160 }).map((_, i) => {
+          const energy = Math.max(1, Math.abs(Math.sin(i * 0.73) * Math.cos(i * 0.19)) * 15);
+          return (
+            <rect
+              key={i}
+              x={i * 6.25}
+              y={(20 - energy) / 2}
+              width="1"
+              height={energy}
+              fill="currentColor"
+              className="text-accent"
+              opacity={Math.max(0.16, 1 - i / 190)}
+            />
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
@@ -1623,30 +1656,32 @@ function statusLabel(s: JobStageStatus, pct: number): string {
 
 function ProductPlate() {
   return (
-    <section data-reveal className="reveal border-b border-border">
+    <section className="border-b border-border">
       <Container className="py-14 sm:py-20">
-        <div className="animate-fade-up">
-          <WorkstationMock />
-          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-            Fig. 01 &nbsp;·&nbsp; Stylized rendering of the project view, not a screenshot. Layout
-            mirrors the shipping app: run column, script editor, per-speaker panel.
-          </p>
-        </div>
-        <div className="mt-14">
-          <figure className="overflow-hidden border border-border">
-            <img
-              src="/screenshots/app-shell-early-build.png"
-              alt="Trackdub desktop app shell, early build — pipeline stage list with separation, cleanup, transcribe, and identify stages, stem separation and speaker diarization toggles, voice selector"
-              className="w-full"
-              loading="lazy"
-              width={2766}
-              height={1118}
-            />
-          </figure>
-          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-            Fig. 01b &nbsp;·&nbsp; Actual desktop shell, early build. Pre-release UI — chrome and
-            copy are still moving.
-          </p>
+        <div className="grid gap-8 lg:grid-cols-[280px_1fr] lg:gap-12">
+          <div>
+            <SectionNumber n="01a" label="The workstation" />
+            <p className="max-w-sm text-[16px] leading-relaxed text-muted-foreground">
+              The interface is being built around the pipeline itself: source media, editable stages,
+              and the exact state of every run in one place.
+            </p>
+          </div>
+          <div>
+            <figure className="overflow-hidden border border-border">
+              <img
+                src="/screenshots/app-shell-early-build.png"
+                alt="Trackdub desktop app shell, early build — pipeline stage list with separation, cleanup, transcribe, and identify stages, stem separation and speaker diarization toggles, voice selector"
+                className="w-full"
+                loading="lazy"
+                width={2766}
+                height={1118}
+              />
+            </figure>
+            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Fig. 02 &nbsp;·&nbsp; Actual desktop shell, early build. Pre-release UI — chrome and
+              copy are still moving.
+            </p>
+          </div>
         </div>
       </Container>
     </section>
@@ -1674,9 +1709,12 @@ function WorkstationMock() {
             <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.55 0.02 250)" }} />
             <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.55 0.02 250)" }} />
           </span>
-          <span>trackdub — interview_final_cut.mp4</span>
+          <span>Project &nbsp; Kyoto Doc</span>
         </div>
-        <span>DE → EN · project #1147</span>
+        <div className="flex items-center gap-5">
+          <span>ja → en &nbsp;·&nbsp; 24 fps</span>
+          <span>Autosave 10:42:11 &nbsp;●</span>
+        </div>
       </div>
 
       <div className="grid grid-cols-12">
@@ -1742,8 +1780,9 @@ function WorkstationMock() {
               S1 Anna · 00:42.180
             </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {[
+              { t: "00:34", s: "S2", de: "京都の朝は静かに始まる。", en: "Kyoto wakes quietly.", a: false },
               { t: "00:38", s: "S1", de: "Wir haben die Pipeline neu gebaut,", en: "We rebuilt the pipeline,", a: false },
               { t: "00:42", s: "S1", de: "damit jede Stufe editierbar bleibt.", en: "so every stage stays editable.", a: true },
               { t: "00:46", s: "S2", de: "Und wenn etwas nicht stimmt —", en: "And if something is off —", a: false },
@@ -1780,7 +1819,7 @@ function WorkstationMock() {
           </div>
 
           {/* waveform */}
-          <div className="mt-6">
+          <div className="mt-4">
             <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
               <span>Waveform</span>
               <span>−14.1 LUFS</span>
@@ -1805,34 +1844,65 @@ function WorkstationMock() {
           </div>
         </div>
 
-        {/* right: speakers */}
+        {/* right: active stage and line metadata */}
         <div className="col-span-3 p-4">
           <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
-            Speakers
+            Stage
           </div>
           {[
-            { n: "Anna", lang: "de-DE → en-US", ref: "3.4s ref", color: "oklch(0.68 0.15 258)" },
-            { n: "Mateo", lang: "de-DE → en-US", ref: "5.1s ref", color: "oklch(0.70 0.12 190)" },
-          ].map((s) => (
-            <div key={s.n} className="mb-3 border-t pt-3 font-mono text-[11px]" style={{ borderColor: "oklch(0.28 0.014 250)" }}>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
-                <span style={{ color: inkText }}>{s.n}</span>
-              </div>
-              <div className="mt-1" style={{ color: dim }}>
-                {s.lang}
-              </div>
-              <div style={{ color: dim }}>{s.ref}</div>
+            ["Ingest", "Done", "oklch(0.75 0.13 155)"],
+            ["Transcribe", "Done", "oklch(0.75 0.13 155)"],
+            ["Translate", "Done", "oklch(0.75 0.13 155)"],
+            ["Voice", "In progress", "oklch(0.74 0.17 62)"],
+            ["Align", "Pending", dim],
+            ["Mix", "Pending", dim],
+            ["Export", "Pending", dim],
+          ].map(([name, status, color]) => (
+            <div key={name} className="flex items-center justify-between gap-3 py-1.5 font-mono text-[10px]">
+              <span className="flex items-center gap-2" style={{ color: inkText }}>
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
+                {name}
+              </span>
+              <span style={{ color }}>{status}</span>
             </div>
           ))}
-          <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
-            Job
+          <div className="mt-5 border-t pt-4 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ borderColor: "oklch(0.28 0.014 250)", color: dim }}>
+            Line 004
           </div>
-          <div className="mt-2 font-mono text-[12px]">Resumable · 62%</div>
-          <div className="mt-2 h-[3px] w-full" style={{ background: "oklch(0.28 0.014 250)" }}>
-            <div className="h-full" style={{ width: "62%", background: "oklch(0.72 0.15 258)" }} />
-          </div>
+          <dl className="mt-3 space-y-2 font-mono text-[10px]">
+            {[
+              ["Speaker", "Anna"],
+              ["Start", "00:00:42.18"],
+              ["Duration", "00:00:03.20"],
+              ["Status", "Voiced"],
+              ["Voice", "Anna (EN)"],
+            ].map(([k, v]) => (
+              <div key={k} className="flex justify-between gap-3">
+                <dt style={{ color: dim }}>{k}</dt>
+                <dd style={{ color: k === "Voice" ? "oklch(0.74 0.17 62)" : inkText }}>{v}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
+      </div>
+
+      <div className="border-t px-4 py-3" style={{ borderColor: "oklch(0.28 0.014 250)" }}>
+        <div className="mb-2 grid grid-cols-[80px_1fr] gap-3 font-mono text-[9px]" style={{ color: dim }}>
+          <span>00:00:00</span>
+          <div className="flex justify-between"><span>00:00:05</span><span>00:00:10</span><span>00:00:15</span><span>00:00:20</span><span>00:00:25</span></div>
+        </div>
+        {["Source ref", "Dialogue", "Music bed", "SFX"].map((track, trackIndex) => (
+          <div key={track} className="grid grid-cols-[80px_1fr] items-center gap-3 border-t py-1.5" style={{ borderColor: "oklch(0.25 0.014 250)" }}>
+            <span className="font-mono text-[9px]" style={{ color: trackIndex === 1 ? "oklch(0.74 0.17 62)" : dim }}>{track}</span>
+            <svg viewBox="0 0 600 18" className="h-4 w-full" preserveAspectRatio="none">
+              {Array.from({ length: 100 }).map((_, i) => {
+                const signal = 2 + Math.abs(Math.sin((i + trackIndex * 5) * 0.83) * Math.cos(i * 0.17)) * (trackIndex === 1 ? 14 : 9);
+                return <rect key={i} x={i * 6} y={(18 - signal) / 2} width="2.4" height={signal} fill={trackIndex === 1 ? "oklch(0.72 0.15 50)" : "oklch(0.48 0.02 245)"} />;
+              })}
+              {trackIndex === 1 && <line x1="280" x2="280" y1="0" y2="18" stroke="oklch(0.78 0.17 62)" strokeWidth="1" />}
+            </svg>
+          </div>
+        ))}
       </div>
     </figure>
   );
@@ -1910,15 +1980,57 @@ const STAGES = [
 ];
 
 function PipelineFeature() {
+  const facts = [
+    ["Platforms", "Windows · macOS · Linux"],
+    ["Acceleration", "TensorRT RTX · CUDA · DirectML · CoreML · MIGraphX · OpenVINO · QNN · CPU"],
+    ["Data", "Local by default · cloud providers opt in per stage"],
+  ];
+
   return (
     <section id="pipeline" data-reveal className="reveal border-b border-border">
-      <Container className="py-20 sm:py-28">
-        <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
+      <div className="mx-auto w-full max-w-[1600px] px-6 sm:px-10">
+        <div className="grid border-b border-border lg:grid-cols-[220px_320px_1fr]">
+          <div className="flex items-center border-b border-border py-8 lg:border-b-0 lg:border-r lg:py-10">
+            <span className="font-serif text-[112px] leading-[0.75] tracking-[-0.06em] text-[var(--burgundy)] sm:text-[150px]">01</span>
+          </div>
+          <div className="border-b border-border py-8 lg:border-b-0 lg:border-r lg:px-9 lg:py-10">
+            <HeroPulseRail />
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--rust)]">The pipeline</div>
+            <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-muted-foreground">
+              A clear, inspectable path from source media to final mix. Nothing is hidden.
+            </p>
+          </div>
+          <div className="flex items-center py-8 lg:px-12 lg:py-10">
+            <div>
+              <h2 className="font-serif text-4xl leading-[1.02] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                Built for control at every stage.
+              </h2>
+              <p className="mt-5 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
+                Review every line. Tweak every take. Rerun only what changed. You are always in control.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <dl className="grid border-b border-border md:grid-cols-[1fr_2fr_1fr]">
+          {facts.map(([k, v], index) => (
+            <div
+              key={k}
+              className={`flex min-h-24 flex-col items-center justify-center gap-2 px-5 py-5 text-center font-mono text-[11px] ${
+                index > 0 ? "border-t border-border md:border-l md:border-t-0" : ""
+              }`}
+            >
+              <dt className="uppercase tracking-[0.16em] text-muted-foreground">{k}</dt>
+              <dd className="max-w-xl leading-relaxed text-foreground">{v}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <div className="grid gap-14 py-20 lg:grid-cols-12 lg:gap-16 sm:py-24">
           <div className="lg:col-span-5">
-            <SectionNumber n="01" label="The pipeline" />
-            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+            <h3 className="font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
               Six stages. Each one editable, each one rerunnable.
-            </h2>
+            </h3>
             <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted-foreground">
               A dubbed video is not a single button. It's a chain of decisions — what someone said,
               what it should say in the target language, whose voice says it, and how it sits in the
@@ -1951,7 +2063,7 @@ function PipelineFeature() {
             ))}
           </ol>
         </div>
-      </Container>
+      </div>
     </section>
   );
 }
@@ -2675,7 +2787,7 @@ function Control() {
         <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <h2 className="font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-              The transcript said <em>"Pipeline"</em>. You wanted <em>"pipe line"</em>.
+              You changed one line. Only one line regenerates.
             </h2>
             <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted-foreground">
               Change it. The translation invalidates. The affected voice line queues for a regen.
@@ -2691,9 +2803,9 @@ function Control() {
               hint="Auto-generated · pace 1.00× · pause 200 ms"
             />
             <ControlPlate
-              tag="After you tweaked prosody"
+              tag="After text + prosody edit"
               t="00:42.180"
-              text="so every stage stays editable."
+              text={<>so every stage <span className="border-b-2 border-accent">remains editable</span>.</>}
               hint="Regen · pace 0.94× · pause 320 ms · this line only"
               accent
             />
@@ -2713,7 +2825,7 @@ function ControlPlate({
 }: {
   tag: string;
   t: string;
-  text: string;
+  text: React.ReactNode;
   hint: string;
   accent?: boolean;
 }) {
@@ -2723,14 +2835,7 @@ function ControlPlate({
         <span className={accent ? "text-accent" : ""}>{tag}</span>
         <span>{t}</span>
       </div>
-      <div
-        className="mt-4 font-serif text-2xl leading-snug text-foreground"
-        style={{
-          textDecoration: accent ? "underline" : "none",
-          textDecorationColor: "var(--accent)",
-          textUnderlineOffset: 6,
-        }}
-      >
+      <div className="mt-4 font-serif text-2xl leading-snug text-foreground">
         "{text}"
       </div>
       <figcaption className="mt-4 font-mono text-[11px] text-muted-foreground">{hint}</figcaption>
@@ -2743,7 +2848,7 @@ function ControlPlate({
 function Performance() {
   return (
     <section id="performance" data-reveal className="reveal border-b border-border bg-surface">
-      <Container className="py-20 sm:py-28">
+      <div className="mx-auto w-full max-w-[1600px] px-6 py-20 sm:px-10 sm:py-28">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <SectionNumber n="04" label="Performance" />
@@ -2751,44 +2856,49 @@ function Performance() {
               Runs on the hardware you already have.
             </h2>
             <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
-              Trackdub ships execution providers for CPU, DirectML, CUDA, CoreML, TensorRT RTX, and
-              Windows ML. Pick a policy or let it choose per stage. Relative ordering below; full
-              measured benchmarks publish via DubBench ahead of v1 launch.
+              Trackdub can select TensorRT RTX, CUDA, DirectML, CoreML, MIGraphX, OpenVINO, QNN,
+              or CPU per stage. Pick a policy or let it choose automatically. The tiers below are
+              directional; measured benchmarks publish via DubBench ahead of v1 launch.
             </p>
           </div>
           <div className="lg:col-span-8">
-            <table className="w-full border-collapse text-left">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] table-fixed border-collapse text-left">
               <thead>
                 <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                  <th className="border-b border-border py-3 pr-4 font-normal">Provider</th>
-                  <th className="border-b border-border py-3 pr-4 font-normal">Platform</th>
-                  <th className="border-b border-border py-3 pr-4 font-normal">Relative speed</th>
-                  <th className="border-b border-border py-3 text-right font-normal">Availability</th>
+                  <th className="w-[20%] border-b border-border py-3 pr-5 text-left font-normal">Provider</th>
+                  <th className="w-[25%] border-b border-border py-3 pr-5 text-left font-normal">Platform</th>
+                  <th className="w-[20%] border-b border-border py-3 pr-5 text-left font-normal">Relative speed</th>
+                  <th className="w-[35%] border-b border-border py-3 text-left font-normal">Availability</th>
                 </tr>
               </thead>
               <tbody className="font-mono text-[13px]">
                 {[
-                  ["TensorRT RTX", "Windows · RTX 30/40/50", "Fastest tier", "Auto-selected when supported"],
-                  ["CUDA", "Windows / Linux · NVIDIA", "Fast", "Non-RTX NVIDIA cards"],
-                  ["CoreML", "macOS · Apple Silicon", "Fast", "Neural Engine + GPU"],
-                  ["DirectML", "Windows · any DX12 GPU", "2–4× realtime, model-dependent", "Broadest Windows GPU coverage"],
-                  ["CPU (ONNX Runtime)", "All platforms", "0.8–1.5× realtime", "Always available"],
+                  ["TensorRT RTX", "Windows · RTX 30/40/50", "Fastest supported tier", "Selected when the model and RTX runtime are compatible"],
+                  ["CUDA", "Windows / Linux · NVIDIA", "Fast", "NVIDIA fallback when TensorRT RTX is unavailable"],
+                  ["CoreML", "macOS · Apple Silicon", "Fast", "Uses Apple Neural Engine and GPU where supported"],
+                  ["MIGraphX", "Windows 11 · AMD", "Accelerated", "Catalog-delivered AMD GPU lane for compatible ONNX graphs"],
+                  ["OpenVINO", "Windows 11 · Intel", "Accelerated", "Catalog-delivered Intel CPU, GPU, and NPU lane"],
+                  ["QNN", "Windows ARM64 · Snapdragon", "Accelerated", "Qualcomm NPU/GPU lane on compatible devices"],
+                  ["DirectML", "Windows · any DX12 GPU", "Broad coverage", "Intel, AMD, and NVIDIA DirectX 12 hardware"],
+                  ["CPU (ONNX Runtime)", "All platforms", "Portable baseline", "Always available as the per-stage fallback"],
                 ].map(([p, plat, spd, av]) => (
                   <tr key={p} className="hover:bg-background/60">
-                    <td className="border-b border-border py-4 pr-4 text-foreground">{p}</td>
-                    <td className="border-b border-border py-4 pr-4 text-muted-foreground">{plat}</td>
-                    <td className="border-b border-border py-4 pr-4 text-right text-foreground">{spd}</td>
-                    <td className="border-b border-border py-4 text-right text-muted-foreground">{av}</td>
+                    <td className="border-b border-border py-4 pr-5 text-left align-top text-foreground">{p}</td>
+                    <td className="border-b border-border py-4 pr-5 text-left align-top text-muted-foreground">{plat}</td>
+                    <td className="border-b border-border py-4 pr-5 text-left align-top text-foreground">{spd}</td>
+                    <td className="border-b border-border py-4 text-left align-top text-muted-foreground">{av}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
             <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
               Tbl. 01 &nbsp;·&nbsp; Provider fallback order, fastest to slowest. Not measured throughput.
             </p>
           </div>
         </div>
-      </Container>
+      </div>
     </section>
   );
 }
@@ -3014,6 +3124,10 @@ function Endnote() {
           Dub this in Spanish. Keep the original music. Regenerate line 42 with slower prosody.
           Ship it before lunch.
         </p>
+        <p className="mx-auto mt-6 max-w-xl text-[17px] leading-relaxed text-muted-foreground">
+          Interested in Trackdub? Join the launch list and be the first to know when downloads,
+          release notes, and preview invitations are ready.
+        </p>
         <WaitlistForm />
         <div className="mt-8 flex flex-wrap justify-center gap-6">
           <TextLink href="mailto:hello@trackdub.com">Talk to us →</TextLink>
@@ -3228,7 +3342,6 @@ function Colophon() {
         <Rule className="mt-14" />
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
           <span>© 2026 Trackdub</span>
-          <span>Set in Instrument Serif, Work Sans, JetBrains Mono</span>
         </div>
       </Container>
     </footer>
@@ -3436,7 +3549,7 @@ function Architecture() {
       where: "On device",
       tag: "Default",
       stages: "Transcribe · Diarize",
-      what: "ASR and speaker separation via bundled ONNX models. Accelerated by DirectML, CUDA, CoreML, or Windows ML when available; CPU otherwise.",
+      what: "ASR and speaker separation via bundled ONNX models. A compatible execution provider is selected for the current platform and model; CPU remains the fallback.",
       leaves: "Nothing leaves the machine.",
     },
     {
@@ -3466,44 +3579,6 @@ function Architecture() {
       stages: "Telemetry",
       what: "Crash reports and anonymous usage counters. Disabled unless you turn them on in Preferences.",
       leaves: "Stack traces and counters. No media, no transcripts.",
-    },
-  ];
-
-  const providers: {
-    name: string;
-    platform: string;
-    used: string;
-    notes: string;
-  }[] = [
-    {
-      name: "TensorRT RTX",
-      platform: "Windows · RTX 30/40/50",
-      used: "ASR · Diarize · TTS",
-      notes: "Selected automatically on supported RTX GPUs. First run compiles an engine cache per model; subsequent runs skip it.",
-    },
-    {
-      name: "DirectML",
-      platform: "Windows · any DX12 GPU",
-      used: "ASR · Diarize · TTS",
-      notes: "Works on Intel Arc, Iris Xe, AMD Radeon, and older NVIDIA cards. The broadest Windows fallback before CPU.",
-    },
-    {
-      name: "CUDA",
-      platform: "Windows / Linux · NVIDIA",
-      used: "ASR · Diarize · TTS",
-      notes: "Used when a matching CUDA runtime is present. Preferred over DirectML on non-RTX NVIDIA hardware.",
-    },
-    {
-      name: "CoreML",
-      platform: "macOS · Apple Silicon",
-      used: "ASR · Diarize · TTS",
-      notes: "Neural Engine + GPU. Selected automatically on M-series Macs.",
-    },
-    {
-      name: "CPU (ONNX Runtime)",
-      platform: "All platforms",
-      used: "Every stage",
-      notes: "Always present. If no accelerator is available — or a model isn't supported by the chosen provider — that stage falls back to CPU without failing the run.",
     },
   ];
 
@@ -3565,40 +3640,6 @@ function Architecture() {
                 </div>
               ))}
             </div>
-
-            <div className="mt-14 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Fig. 04a-ii &nbsp;·&nbsp; Execution providers &amp; fallback order
-            </div>
-            <ol className="mt-3 border-t border-border">
-              {providers.map((p, i) => (
-                <li
-                  key={p.name}
-                  className="grid grid-cols-12 gap-x-4 border-b border-border py-5"
-                >
-                  <div className="col-span-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                    {String(i + 1).padStart(2, "0")}
-                  </div>
-                  <div className="col-span-4">
-                    <div className="font-serif text-[20px] text-foreground">
-                      {p.name}
-                    </div>
-                    <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                      {p.platform}
-                    </div>
-                  </div>
-                  <div className="col-span-3 font-mono text-[12px] text-foreground">
-                    {p.used}
-                  </div>
-                  <div className="col-span-4 text-[14px] leading-relaxed text-muted-foreground">
-                    {p.notes}
-                  </div>
-                </li>
-              ))}
-            </ol>
-            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Fallback is per-stage. A missing provider on one stage does not
-              disable the rest of the pipeline.
-            </p>
           </div>
         </div>
       </Container>
@@ -3617,14 +3658,14 @@ function SystemRequirements() {
   }[] = [
     {
       item: "OS",
-      minimum: "Windows 10 22H2 (x64)",
+      minimum: "Windows 10 22H2 (x64 or ARM64)",
       recommended: "Windows 11 23H2 or later",
-      notes: "64-bit only. ARM64 Windows runs under emulation with CPU fallback.",
+      notes: "Native x64 and ARM64 builds are intended. Acceleration depends on provider and device support, with CPU fallback where needed.",
     },
     {
       item: "CPU",
-      minimum: "x64 CPU with AVX2 (Intel 6th gen / AMD Ryzen 2000)",
-      recommended: "Intel 10th gen / AMD Ryzen 5000 or newer, 8 cores+",
+      minimum: "64-bit x64 or ARM64 CPU",
+      recommended: "Modern 8-core x64 CPU or Snapdragon X-class ARM64 device",
       notes: "Used for ingest, probe, VAD, and CPU fallback inference.",
     },
     {
@@ -3661,21 +3702,51 @@ function SystemRequirements() {
   }[] = [
     {
       name: "TensorRT RTX",
-      requirement: "NVIDIA RTX 30 / 40 / 50 series · 8 GB+ VRAM",
+      requirement: "Windows or Linux · NVIDIA RTX 30 / 40 / 50 series",
       speedup: "Fastest on supported hardware",
-      caveat: "First run compiles an engine cache per model. Cache is portable across projects.",
+      caveat: "Requires a compatible model, driver, and installed provider bundle. First run can compile an engine cache.",
+    },
+    {
+      name: "CUDA",
+      requirement: "Linux or advanced Windows setup · NVIDIA GPU",
+      speedup: "Fast general NVIDIA lane",
+      caveat: "Used when the matching native ONNX Runtime and CUDA dependencies are available.",
+    },
+    {
+      name: "CoreML",
+      requirement: "macOS · Apple Silicon",
+      speedup: "Apple Neural Engine + GPU",
+      caveat: "Model compatibility determines whether a stage stays on CoreML or falls back to CPU.",
+    },
+    {
+      name: "MIGraphX",
+      requirement: "Windows 11 24H2+ · supported AMD GPU",
+      speedup: "AMD catalog acceleration",
+      caveat: "Installed through the Windows ML provider catalog; availability is model and device dependent.",
+    },
+    {
+      name: "OpenVINO",
+      requirement: "Windows 11 24H2+ · supported Intel CPU, GPU, or NPU",
+      speedup: "Intel catalog acceleration",
+      caveat: "Installed through the Windows ML provider catalog and used only for compatible stages.",
+    },
+    {
+      name: "QNN",
+      requirement: "Windows ARM64 · compatible Snapdragon device",
+      speedup: "Qualcomm NPU/GPU acceleration",
+      caveat: "Catalog availability and model support determine whether a stage can use the QNN lane.",
     },
     {
       name: "DirectML",
-      requirement: "Any DirectX 12 GPU · 4 GB+ VRAM",
-      speedup: "2–4× realtime end-to-end on modern integrated/discrete GPUs",
-      caveat: "Not every model is equally optimized. Falls back to CPU per-stage if a model fails.",
+      requirement: "Windows · any DirectX 12 GPU · 4 GB+ VRAM",
+      speedup: "Broadest Windows GPU coverage",
+      caveat: "Legacy-compatible fallback for Intel, AMD, and NVIDIA hardware; model support varies by stage.",
     },
     {
       name: "CPU fallback",
-      requirement: "Any AVX2-capable x64 CPU",
-      speedup: "0.8–1.5× realtime depending on model and core count",
-      caveat: "Always available. No GPU required to complete a project.",
+      requirement: "Windows, macOS, or Linux · x64 or ARM64",
+      speedup: "Portable baseline",
+      caveat: "Always available. No accelerator is required to complete a project.",
     },
   ];
 
@@ -3746,7 +3817,7 @@ function SystemRequirements() {
             <div className="mt-14 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
               Tbl. 03 &nbsp;·&nbsp; Acceleration notes
             </div>
-            <div className="mt-3 grid gap-px bg-border md:grid-cols-3">
+            <div className="mt-3 grid gap-px bg-border md:grid-cols-2">
               {accelerators.map((a) => (
                 <div key={a.name} className="bg-background p-5">
                   <div className="font-serif text-[22px] text-foreground">{a.name}</div>
