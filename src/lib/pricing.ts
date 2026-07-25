@@ -22,7 +22,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       "Exports watermarked, 5-minute max",
     ],
     cta: "Join the list",
-    href: "mailto:hello@trackdub.com?subject=Trackdub%20Personal",
+    href: "/?interest=personal#waitlist",
   },
   {
     name: "Pro",
@@ -35,7 +35,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       "Lifetime updates within v1.x",
     ],
     cta: "Reserve Pro",
-    href: "mailto:hello@trackdub.com?subject=Trackdub%20Pro",
+    href: "/?interest=pro#waitlist",
     featured: true,
   },
   {
@@ -49,6 +49,6 @@ export const PRICING_PLANS: PricingPlan[] = [
       "Ships after Pro, once real",
     ],
     cta: "Get updates",
-    href: "mailto:hello@trackdub.com?subject=Trackdub%20Studio",
+    href: "/?interest=studio#waitlist",
   },
 ];

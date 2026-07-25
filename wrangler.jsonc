@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "trackdub-website",
+  "compatibility_flags": ["nodejs_compat"],
+  "tail_consumers": [
+    {
+      "service": "trackdub-website"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "WAITLIST_DB",
+      "database_name": "trackdub-waitlist",
+      "database_id": "e8200feb-8da3-4bf6-a3c4-b9e06c15e12a"
+    }
+  ]
+}

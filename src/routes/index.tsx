@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useReveal } from "@/hooks/use-reveal";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { PRICING_PLANS } from "@/lib/pricing";
@@ -2936,19 +2935,13 @@ function Pricing() {
                     ))}
                   </ul>
                   <div className="mt-10">
-                    {p.featured ? (
-                      <InkButton href={p.href} aria-label={`${p.cta} — ${p.name} plan`}>
-                        {p.cta}
-                      </InkButton>
-                    ) : (
-                      <a
-                        href={p.href}
-                        aria-label={`${p.cta} — ${p.name} plan`}
-                        className="inline-flex items-baseline gap-1 rounded-sm border-b border-foreground/40 pb-0.5 text-foreground outline-none hover:border-accent hover:text-accent focus-visible:outline-none"
-                      >
-                        {p.cta} <span aria-hidden>→</span>
-                      </a>
-                    )}
+                    <a
+                      href={p.href}
+                      aria-label={`${p.cta} — ${p.name} plan`}
+                      className="inline-flex items-baseline gap-1 rounded-sm border-b border-foreground/40 pb-0.5 text-foreground outline-none hover:border-accent hover:text-accent focus-visible:outline-none"
+                    >
+                      {p.cta} <span aria-hidden>→</span>
+                    </a>
                   </div>
                 </article>
               </li>
@@ -3014,7 +3007,7 @@ function FAQ() {
 
 function Endnote() {
   return (
-    <section data-reveal className="reveal border-b border-border">
+    <section id="waitlist" data-reveal className="reveal border-b border-border">
       <Container className="py-24 sm:py-36 text-center">
         <SectionNumber n="09" label="End" />
         <p className="mx-auto mt-8 max-w-3xl font-serif text-4xl leading-[1.12] tracking-tight text-foreground sm:text-5xl">
@@ -3032,6 +3025,8 @@ function Endnote() {
 
 /* ---------------- waitlist ---------------- */
 
+const TURNSTILE_SITE_KEY = "0x4AAAAAAD9lzJEZ4kPqqyZe";
+
 const waitlistSchema = z.object({
   email: z
     .string()
@@ -3041,9 +3036,31 @@ const waitlistSchema = z.object({
     .email("That doesn't look like an email"),
 });
 
+declare global {
+  interface Window {
+    onWaitlistTurnstile?: (token: string) => void;
+  }
+}
+
+const WAITLIST_INTERESTS = new Set(["personal", "pro", "studio"]);
+
 function WaitlistForm() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [interest, setInterest] = useState<string | null>(null);
+
+  useEffect(() => {
+    window.onWaitlistTurnstile = (token: string) => setTurnstileToken(token);
+    return () => {
+      delete window.onWaitlistTurnstile;
+    };
+  }, []);
+
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("interest");
+    if (fromUrl && WAITLIST_INTERESTS.has(fromUrl)) setInterest(fromUrl);
+  }, []);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -3053,72 +3070,82 @@ function WaitlistForm() {
       toast.error(parsed.error.issues[0]?.message ?? "Invalid email");
       return;
     }
-    setStatus("loading");
-    const normalized = parsed.data.email.toLowerCase();
-    // Random high-entropy password — the waitlist flow is email-confirmation only;
-    // users never sign in with a password. Confirming the email address is the point.
-    const throwawayPassword =
-      crypto.randomUUID() + crypto.randomUUID().replace(/-/g, "").toUpperCase() + "!";
-    const { error } = await supabase.auth.signUp({
-      email: normalized,
-      password: throwawayPassword,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-        data: { source: "waitlist" },
-      },
-    });
-    if (error) {
-      setStatus("idle");
-      toast.error(error.message || "Could not send confirmation. Try again in a moment.");
+    if (!turnstileToken) {
+      toast.error("Still verifying — give it a second and try again.");
       return;
     }
-    // Mirror into waitlist_emails for the launch list; ignore duplicates.
-    await supabase
-      .from("waitlist_emails")
-      .insert({ email: normalized })
-      .then(() => undefined, () => undefined);
+    setStatus("loading");
+    const normalized = parsed.data.email.toLowerCase();
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalized, turnstileToken, interest: interest ?? undefined }),
+      });
+      const data: { ok: boolean; error?: string } | null = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setStatus("idle");
+        toast.error(data?.error || "Could not join the list. Try again in a moment.");
+        return;
+      }
+    } catch {
+      setStatus("idle");
+      toast.error("Could not reach the server. Try again in a moment.");
+      return;
+    }
     setStatus("done");
-    toast.success("Check your inbox to confirm your email.");
+    toast.success("You're on the list.");
   }
 
   if (status === "done") {
     return (
       <p className="mx-auto mt-12 max-w-md font-mono text-[13px] uppercase tracking-[0.14em] text-accent">
-        Check your inbox — confirm your email to lock in your spot.
+        You're on the list — we'll email you when Trackdub ships.
       </p>
     );
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="mx-auto mt-12 flex w-full max-w-md flex-col gap-3 sm:flex-row"
-      noValidate
-    >
-      <label htmlFor="waitlist-email" className="sr-only">
-        Email address
-      </label>
-      <input
-        id="waitlist-email"
-        type="email"
-        required
-        autoComplete="email"
-        inputMode="email"
-        maxLength={320}
-        placeholder="you@studio.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        disabled={status === "loading"}
-        className="flex-1 rounded-sm border border-border bg-background px-4 py-3 text-[15px] text-foreground placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background disabled:opacity-60"
-      />
-      <button
-        type="submit"
-        disabled={status === "loading"}
-        className="inline-flex items-center justify-center rounded-sm bg-foreground px-6 py-3 font-mono text-[12px] uppercase tracking-[0.16em] text-background outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
+    <>
+      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+      <form
+        onSubmit={onSubmit}
+        className="mx-auto mt-12 flex w-full max-w-md flex-col items-center gap-3"
+        noValidate
       >
-        {status === "loading" ? "Adding…" : "Join launch list"}
-      </button>
-    </form>
+        <div className="flex w-full flex-col gap-3 sm:flex-row">
+          <label htmlFor="waitlist-email" className="sr-only">
+            Email address
+          </label>
+          <input
+            id="waitlist-email"
+            type="email"
+            required
+            autoComplete="email"
+            inputMode="email"
+            maxLength={320}
+            placeholder="you@studio.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={status === "loading"}
+            className="flex-1 rounded-sm border border-border bg-background px-4 py-3 text-[15px] text-foreground placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background disabled:opacity-60"
+          />
+          <button
+            type="submit"
+            disabled={status === "loading"}
+            className="inline-flex items-center justify-center rounded-sm bg-foreground px-6 py-3 font-mono text-[12px] uppercase tracking-[0.16em] text-background outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
+          >
+            {status === "loading" ? "Adding…" : "Join launch list"}
+          </button>
+        </div>
+        <div
+          className="cf-turnstile"
+          data-sitekey={TURNSTILE_SITE_KEY}
+          data-callback="onWaitlistTurnstile"
+          data-action="waitlist"
+        />
+      </form>
+    </>
   );
 }
 
