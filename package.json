@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "deploy": "bun run build && wrangler deploy --config .output/server/wrangler.json"
+    "deploy": "bun run build && wrangler deploy --config .output/server/wrangler.json",
+    "setup-deploy": "pwsh scripts/setup-deploy.ps1"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
