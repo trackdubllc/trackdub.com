@@ -1,0 +1,259 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { PRICING_PLANS } from "@/lib/pricing";
+
+export const Route = createFileRoute("/pricing")({
+  head: () => ({
+    meta: [
+      { title: "Pricing — Trackdub" },
+      {
+        name: "description",
+        content:
+          "Trackdub pricing: Free desktop app with a watermark and 5-minute export cap, Pro at $149 one-time with no subscription, Studio in development. No recurring fees.",
+      },
+      { property: "og:title", content: "Pricing — Trackdub" },
+      {
+        property: "og:description",
+        content:
+          "Free, Pro ($149 one-time), and Studio (in development). No subscriptions, no per-minute billing.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "/pricing" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "index,follow" },
+    ],
+    links: [{ rel: "canonical", href: "/pricing" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: "Trackdub",
+          description: "Local-first desktop workstation for AI video dubbing.",
+          offers: PRICING_PLANS.filter((p) => p.price.startsWith("$") || p.price === "Free").map(
+            (p) => ({
+              "@type": "Offer",
+              name: p.name,
+              price: p.price === "Free" ? "0" : p.price.replace("$", ""),
+              priceCurrency: "USD",
+            }),
+          ),
+        }),
+      },
+    ],
+  }),
+  component: PricingPage,
+});
+
+function PricingPage() {
+  return (
+    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-accent/20 selection:text-ink">
+      <TopBar />
+      <main>
+        <Header />
+        <Plans />
+        <Terms />
+        <Contact />
+      </main>
+      <FooterMini />
+    </div>
+  );
+}
+
+function TopBar() {
+  return (
+    <header className="border-b border-border">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 sm:px-10">
+        <Link to="/" className="font-serif text-2xl leading-none text-foreground">
+          Trackdub<span className="text-accent">.</span>
+        </Link>
+        <Link
+          to="/"
+          className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 font-mono text-[12px] uppercase tracking-[0.14em] text-foreground hover:border-accent hover:text-accent"
+        >
+          ← Back to site
+        </Link>
+      </div>
+    </header>
+  );
+}
+
+function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
+}
+
+function SectionNumber({ n, label }: { n: string; label: string }) {
+  return (
+    <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+      <span className="text-accent">{n}</span>
+      <span className="mx-2 text-hairline">/</span>
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function Header() {
+  return (
+    <section className="border-b border-border">
+      <Container className="py-20 sm:py-28">
+        <SectionNumber n="00" label="Pricing" />
+        <h1 className="mt-6 max-w-3xl font-serif text-5xl leading-[1.03] tracking-tight text-foreground sm:text-6xl">
+          One-time purchase. No subscription, ever.
+        </h1>
+        <p className="mt-8 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
+          Trackdub is priced like software you own, not software you rent. Free gets you the full
+          pipeline with a watermark and a 5-minute export cap — commercial use included. Pro removes
+          both for a one-time $149.
+        </p>
+      </Container>
+    </section>
+  );
+}
+
+function Plans() {
+  const plans = PRICING_PLANS;
+  return (
+    <section className="border-b border-border bg-surface">
+      <Container className="py-20 sm:py-28">
+        <ul
+          role="list"
+          className="grid list-none divide-y divide-border border-y border-border md:grid-cols-3 md:divide-x md:divide-y-0"
+        >
+          {plans.map((p) => {
+            const titleId = `plan-${p.name.toLowerCase().replace(/\s+/g, "-")}`;
+            return (
+              <li key={p.name} className="contents">
+                <article
+                  aria-labelledby={titleId}
+                  className="relative bg-background p-8 transition-colors hover:bg-surface/50 focus-within:bg-surface/50"
+                >
+                  <header className="flex items-center gap-3">
+                    <h2 id={titleId} className="font-serif text-2xl text-foreground">
+                      {p.name}
+                    </h2>
+                    {p.featured && (
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
+                        Recommended
+                      </span>
+                    )}
+                  </header>
+                  <div className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}>
+                    {p.price}
+                  </div>
+                  <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                    {p.note}
+                  </p>
+                  <ul className="mt-8 space-y-3 text-[15px] text-foreground">
+                    {p.features.map((f) => (
+                      <li key={f} className="flex gap-3">
+                        <span className="mt-2 h-px w-4 flex-none bg-accent" aria-hidden />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-10">
+                    <a
+                      href={p.href}
+                      aria-label={`${p.cta} — ${p.name} plan`}
+                      className="inline-flex items-baseline gap-1 border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+                    >
+                      {p.cta} <span aria-hidden>→</span>
+                    </a>
+                  </div>
+                </article>
+              </li>
+            );
+          })}
+        </ul>
+      </Container>
+    </section>
+  );
+}
+
+function Terms() {
+  const items: [string, string][] = [
+    [
+      "What does the Free watermark look like?",
+      "A small \"Made with Trackdub\" mark burned into the bottom-right corner during export. It's removed automatically once a valid Pro license is detected.",
+    ],
+    [
+      "Does Free block commercial use?",
+      "No. Free is commercial-use-safe from day one — the only gates are the watermark and the 5-minute export cap. Every bundled model is commercial-safe by manifest, so nothing research-only ever loads, on any tier.",
+    ],
+    [
+      "How does the Pro license work?",
+      "A machine-bound license key, validated locally at app start. No phone-home, no internet required to keep working. One license covers 2 machine activations (desktop + laptop).",
+    ],
+    [
+      "What happens if my Pro license fails to validate?",
+      "Trackdub reverts to the Free tier — watermark and 5-minute cap — never a crash.",
+    ],
+    [
+      "Is there a subscription option?",
+      "No. Pro is a one-time purchase. Paid major-version upgrades (v2.0, etc.) are separate, optional purchases — never a recurring charge for using the version you bought.",
+    ],
+    [
+      "What's in Studio?",
+      "Batch and multi-GPU processing, a 4K-optimized export pipeline, and commercial redistribution rights for agencies. It's real but unfinished — we don't sell it until at least two of those features ship.",
+    ],
+  ];
+  return (
+    <section className="border-b border-border">
+      <Container className="py-20 sm:py-28">
+        <SectionNumber n="01" label="Terms" />
+        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+          The fine print, in plain language.
+        </h2>
+        <dl className="mt-12">
+          {items.map(([q, a], i) => (
+            <div
+              key={q}
+              className={`grid gap-4 py-6 md:grid-cols-[280px_1fr] md:gap-10 ${
+                i > 0 ? "border-t border-border" : ""
+              }`}
+            >
+              <dt className="font-serif text-[20px] leading-snug text-foreground">{q}</dt>
+              <dd className="text-[16px] leading-relaxed text-muted-foreground">{a}</dd>
+            </div>
+          ))}
+        </dl>
+      </Container>
+    </section>
+  );
+}
+
+function Contact() {
+  return (
+    <section className="border-b border-border">
+      <Container className="py-20 text-center sm:py-28">
+        <SectionNumber n="02" label="Contact" />
+        <p className="mx-auto mt-6 max-w-2xl font-serif text-3xl leading-[1.15] tracking-tight text-foreground sm:text-4xl">
+          Buying for a team, or need an on-prem deployment?
+        </p>
+        <p className="mx-auto mt-6 max-w-xl text-[16px] leading-relaxed text-muted-foreground">
+          Write to{" "}
+          <a
+            href="mailto:hello@trackdub.com?subject=Trackdub%20Team%2FOn-prem"
+            className="border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+          >
+            hello@trackdub.com
+          </a>
+          .
+        </p>
+      </Container>
+    </section>
+  );
+}
+
+function FooterMini() {
+  return (
+    <footer className="bg-background">
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-10 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground sm:px-10">
+        <span>© 2026 Trackdub</span>
+        <Link to="/" className="text-foreground hover:text-accent">
+          trackdub.com
+        </Link>
+      </div>
+    </footer>
+  );
+}

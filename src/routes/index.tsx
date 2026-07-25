@@ -4,6 +4,7 @@ import { useReveal } from "@/hooks/use-reveal";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { PRICING_PLANS } from "@/lib/pricing";
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
@@ -16,7 +17,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "Can I use it commercially?",
-    a: "Yes, on the Studio and On-prem plans. Trackdub gates model use by license lane: research-only checkpoints are blocked from loading under a commercial context.",
+    a: "Yes, on every tier — including Free. Free exports carry a small watermark and cap at 5 minutes; Pro removes both. Every bundled model is commercial-safe by manifest, so nothing research-only ever loads.",
   },
   {
     q: "How is the voice cloning handled?",
@@ -28,11 +29,11 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "Do I need a GPU?",
-    a: "No, but it helps. Trackdub runs on CPU, DirectML, CUDA, CoreML, or Windows ML. On integrated graphics you'll get roughly 2× realtime end-to-end; on a mid-range discrete GPU, 6–9×.",
+    a: "No, but it helps. Trackdub runs on CPU, DirectML, CUDA, CoreML, or Windows ML, with per-stage fallback if a provider isn't available. Integrated graphics land in the low multiples of realtime; a discrete GPU well beyond that — exact numbers publish via DubBench ahead of launch.",
   },
   {
     q: "Can I automate it?",
-    a: "Yes. The Studio and On-prem plans include the Trackdub CLI and SDK. The same pipeline the app runs is scriptable for batch localization, CI, or an on-prem REST worker.",
+    a: "Yes — the CLI ships in every tier, Free included. The same pipeline the app runs is scriptable for batch localization, CI, or an on-prem REST worker via the SDK.",
   },
 ];
 
@@ -1044,8 +1045,8 @@ function MotionToggle() {
 
 function Lead() {
   return (
-    <section id="top" data-reveal className="reveal border-b border-border">
-      <Container className="grid gap-10 py-16 sm:py-24 lg:grid-cols-12 lg:gap-16 lg:py-32">
+    <section id="top" className="border-b border-border">
+      <Container className="grid grid-cols-1 gap-10 py-16 sm:py-24 lg:grid-cols-12 lg:gap-16 lg:py-32">
         <div className="lg:col-span-8">
           <SectionNumber n="00" label="A workstation for dubbing" />
           <h1 className="mt-6 font-serif text-5xl leading-[1.02] tracking-tight text-foreground sm:text-6xl lg:text-7xl xl:text-[88px]">
@@ -1058,14 +1059,14 @@ function Lead() {
             final mix. Your media never leaves your machine unless you say so.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-6">
-            <InkButton href="#pricing">Download for Windows</InkButton>
+            <InkButton href="#pricing">Get early access</InkButton>
             <TextLink href="#pipeline">Read the pipeline →</TextLink>
           </div>
         </div>
         <aside className="lg:col-span-4 lg:border-l lg:border-border lg:pl-10">
           <dl className="space-y-5 font-mono text-[12px] text-muted-foreground">
             {[
-              ["Version", "0.9.2 — preview"],
+              ["Version", "Early preview"],
               ["Platforms", "Windows · macOS · Linux"],
               ["License", "Commercial · non-commercial"],
               ["Runs on", "CPU · DirectML · CUDA · CoreML"],
@@ -1334,7 +1335,7 @@ function ResumableJob() {
   return (
     <section id="resume" data-reveal className="reveal border-b border-border bg-background">
       <Container className="py-20 sm:py-28">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <SectionNumber n="02b" label="Resumable jobs" />
             <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -1628,8 +1629,24 @@ function ProductPlate() {
         <div className="animate-fade-up">
           <WorkstationMock />
           <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-            Fig. 01 &nbsp;·&nbsp; Trackdub project view. German source dubbed to English; six stages
-            visible in the run column; line 42 open in the script editor.
+            Fig. 01 &nbsp;·&nbsp; Stylized rendering of the project view, not a screenshot. Layout
+            mirrors the shipping app: run column, script editor, per-speaker panel.
+          </p>
+        </div>
+        <div className="mt-14">
+          <figure className="overflow-hidden border border-border">
+            <img
+              src="/screenshots/app-shell-early-build.png"
+              alt="Trackdub desktop app shell, early build — pipeline stage list with separation, cleanup, transcribe, and identify stages, stem separation and speaker diarization toggles, voice selector"
+              className="w-full"
+              loading="lazy"
+              width={2766}
+              height={1118}
+            />
+          </figure>
+          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            Fig. 01b &nbsp;·&nbsp; Actual desktop shell, early build. Pre-release UI — chrome and
+            copy are still moving.
           </p>
         </div>
       </Container>
@@ -2042,7 +2059,7 @@ function Walkthrough() {
   return (
     <section id="walkthrough" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <SectionNumber n="02" label="Try the pipeline" />
             <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -2441,7 +2458,7 @@ function StageChapters() {
             <article
               key={s.n}
               id={`stage-${s.n}`}
-              className="grid gap-10 lg:grid-cols-12 lg:gap-16"
+              className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16"
             >
               <header className="lg:col-span-5">
                 <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
@@ -2656,7 +2673,7 @@ function Control() {
     <section id="control" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
         <SectionNumber n="03" label="You can fix anything, and only that thing" />
-        <div className="mt-8 grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <h2 className="font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
               The transcript said <em>"Pipeline"</em>. You wanted <em>"pipe line"</em>.
@@ -2728,47 +2745,47 @@ function Performance() {
   return (
     <section id="performance" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <SectionNumber n="04" label="Performance" />
             <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
               Runs on the hardware you already have.
             </h2>
             <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
-              Trackdub ships execution providers for CPU, DirectML, CUDA, CoreML, and Windows ML.
-              Pick a policy or let it choose. Numbers below are for a ten-minute two-speaker source
-              on a fresh project, warm models.
+              Trackdub ships execution providers for CPU, DirectML, CUDA, CoreML, TensorRT RTX, and
+              Windows ML. Pick a policy or let it choose per stage. Relative ordering below; full
+              measured benchmarks publish via DubBench ahead of v1 launch.
             </p>
           </div>
           <div className="lg:col-span-8">
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                  <th className="border-b border-border py-3 pr-4 font-normal">Device</th>
                   <th className="border-b border-border py-3 pr-4 font-normal">Provider</th>
-                  <th className="border-b border-border py-3 pr-4 text-right font-normal">Throughput</th>
-                  <th className="border-b border-border py-3 text-right font-normal">Wall time</th>
+                  <th className="border-b border-border py-3 pr-4 font-normal">Platform</th>
+                  <th className="border-b border-border py-3 pr-4 font-normal">Relative speed</th>
+                  <th className="border-b border-border py-3 text-right font-normal">Availability</th>
                 </tr>
               </thead>
               <tbody className="font-mono text-[13px]">
                 {[
-                  ["MacBook Pro · M3 Pro", "CoreML", "6.4× realtime", "1m 34s"],
-                  ["Windows · RTX 4070", "CUDA", "9.1× realtime", "1m 06s"],
-                  ["Windows · Iris Xe", "DirectML", "2.1× realtime", "4m 46s"],
-                  ["Linux · Ryzen 7 5800X", "CPU", "1.3× realtime", "7m 42s"],
-                  ["Windows · Arc A770", "DirectML", "3.7× realtime", "2m 42s"],
-                ].map(([d, p, thr, w]) => (
-                  <tr key={d} className="hover:bg-background/60">
-                    <td className="border-b border-border py-4 pr-4 text-foreground">{d}</td>
-                    <td className="border-b border-border py-4 pr-4 text-muted-foreground">{p}</td>
-                    <td className="border-b border-border py-4 pr-4 text-right text-foreground">{thr}</td>
-                    <td className="border-b border-border py-4 text-right text-muted-foreground">{w}</td>
+                  ["TensorRT RTX", "Windows · RTX 30/40/50", "Fastest tier", "Auto-selected when supported"],
+                  ["CUDA", "Windows / Linux · NVIDIA", "Fast", "Non-RTX NVIDIA cards"],
+                  ["CoreML", "macOS · Apple Silicon", "Fast", "Neural Engine + GPU"],
+                  ["DirectML", "Windows · any DX12 GPU", "2–4× realtime, model-dependent", "Broadest Windows GPU coverage"],
+                  ["CPU (ONNX Runtime)", "All platforms", "0.8–1.5× realtime", "Always available"],
+                ].map(([p, plat, spd, av]) => (
+                  <tr key={p} className="hover:bg-background/60">
+                    <td className="border-b border-border py-4 pr-4 text-foreground">{p}</td>
+                    <td className="border-b border-border py-4 pr-4 text-muted-foreground">{plat}</td>
+                    <td className="border-b border-border py-4 pr-4 text-right text-foreground">{spd}</td>
+                    <td className="border-b border-border py-4 text-right text-muted-foreground">{av}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Tbl. 01 &nbsp;·&nbsp; End-to-end wall time, source→muxed export, bundled models.
+              Tbl. 01 &nbsp;·&nbsp; Provider fallback order, fastest to slowest. Not measured throughput.
             </p>
           </div>
         </div>
@@ -2787,10 +2804,12 @@ function WhatYouGet() {
     ["Per-line regen", "Regenerate one voice line, one speaker, or one stage. Never a full-project redo for a small fix."],
     ["Editable script", "Transcript and translation are real documents with a glossary, not opaque intermediates."],
     ["Voice cloning per speaker", "One short reference per speaker. No shared 'AI voice' for the whole video."],
-    ["Music & SFX preserved", "Source stems are kept and ducked under dialogue automatically. Or manually, if you prefer."],
+    ["Source separation", "Vocal and instrumental stems are split out, kept, and ducked under dialogue automatically. Or manually, if you prefer."],
+    ["Lip sync", "Optional viseme-matched lip sync for on-camera speakers. Off by default, gated by license lane."],
     ["Open model manifest", "Every bundled model, its license lane, and its checksum is declared in one JSON file."],
     ["CLI and SDK", "The same pipeline the app runs is scriptable — for batch, CI, or on-prem automation."],
     ["Cross-platform", "Windows, macOS, Linux. Same project format. Same output."],
+    ["Open-core engine", "Domain, application, inference, SDK, and CLI ship Apache 2.0. The desktop app and licensing layer are source-visible."],
   ];
   return (
     <section data-reveal className="reveal border-b border-border">
@@ -2819,15 +2838,15 @@ function WhatYouGet() {
 /* ---------------- compared to ---------------- */
 
 function ComparedTo() {
-  const rows: [string, string, string, string][] = [
-    ["Runs locally", "Yes", "No", "Partial"],
-    ["Editable transcript", "Yes", "Limited", "Yes"],
-    ["Per-line voice regen", "Yes", "No", "No"],
-    ["Speaker-aware voicing", "Yes", "Yes", "Manual"],
-    ["Deterministic runs", "Yes", "No", "No"],
-    ["Resumable jobs", "Yes", "N/A", "No"],
-    ["Scriptable via CLI/SDK", "Yes", "API only", "No"],
-    ["No account required", "Yes", "No", "No"],
+  const rows: [string, string, string, string, string][] = [
+    ["Runs locally", "Yes", "No", "No", "Yes"],
+    ["Editable transcript", "Yes", "Yes", "Yes, in Dubbing Studio", "Yes"],
+    ["Per-line / per-clip regen", "Yes", "Composition-level", "Yes, in Dubbing Studio", "Manual"],
+    ["Speaker-aware voicing", "Yes", "Yes, manual speaker→voice map", "Yes, clip or track voice clone", "Manual"],
+    ["Deterministic runs", "Yes", "Not published", "Not published", "No"],
+    ["Resumable jobs", "Yes", "Not published", "Not published", "No"],
+    ["Programmatic access", "CLI + SDK", "Not published", "API, enterprise waitlist", "N/A"],
+    ["No account required", "Yes", "No", "No", "N/A"],
   ];
   return (
     <section data-reveal className="reveal border-b border-border bg-surface">
@@ -2837,27 +2856,33 @@ function ComparedTo() {
           Trackdub, next to how dubbing usually gets done.
         </h2>
         <div className="mt-12 overflow-x-auto">
-          <table className="w-full min-w-[640px] border-collapse text-left">
+          <table className="w-full min-w-[760px] border-collapse text-left">
             <thead>
               <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
                 <th className="border-b border-border py-4 pr-4 font-normal"></th>
                 <th className="border-b border-border py-4 pr-4 font-normal text-foreground">Trackdub</th>
-                <th className="border-b border-border py-4 pr-4 font-normal">Cloud dubbing SaaS</th>
+                <th className="border-b border-border py-4 pr-4 font-normal">Descript</th>
+                <th className="border-b border-border py-4 pr-4 font-normal">ElevenLabs Dubbing</th>
                 <th className="border-b border-border py-4 font-normal">DIY (Whisper + TTS + DAW)</th>
               </tr>
             </thead>
             <tbody className="font-mono text-[13px]">
-              {rows.map(([label, a, b, c]) => (
+              {rows.map(([label, a, b, c, d]) => (
                 <tr key={label}>
                   <td className="border-b border-border py-4 pr-4 font-serif text-[16px] font-normal text-foreground">{label}</td>
                   <td className="border-b border-border py-4 pr-4 text-foreground">{a}</td>
                   <td className="border-b border-border py-4 pr-4 text-muted-foreground">{b}</td>
-                  <td className="border-b border-border py-4 text-muted-foreground">{c}</td>
+                  <td className="border-b border-border py-4 pr-4 text-muted-foreground">{c}</td>
+                  <td className="border-b border-border py-4 text-muted-foreground">{d}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          Descript and ElevenLabs Dubbing feature sets per each vendor's public docs, checked July
+          2026. Feature sets change — verify current before deciding.
+        </p>
       </Container>
     </section>
   );
@@ -2866,49 +2891,7 @@ function ComparedTo() {
 /* ---------------- pricing ---------------- */
 
 function Pricing() {
-  const plans = [
-    {
-      name: "Personal",
-      price: "Free",
-      note: "Non-commercial use",
-      features: [
-        "Full desktop app",
-        "Local pipeline",
-        "Non-commercial model lane",
-        "Community support",
-      ],
-      cta: "Download",
-      href: "mailto:hello@trackdub.com?subject=Trackdub%20Personal",
-    },
-    {
-      name: "Studio",
-      price: "$29",
-      unit: " / mo",
-      note: "Per seat, billed annually",
-      features: [
-        "Everything in Personal",
-        "Commercial model lane",
-        "CLI + SDK for automation",
-        "Priority email support",
-      ],
-      cta: "Start Studio",
-      href: "mailto:hello@trackdub.com?subject=Trackdub%20Studio",
-      featured: true,
-    },
-    {
-      name: "On-prem",
-      price: "Contact",
-      note: "For teams and vendors",
-      features: [
-        "Everything in Studio",
-        "REST API + Worker",
-        "SSO and audit log",
-        "NDA-friendly deployment",
-      ],
-      cta: "Talk to us",
-      href: "mailto:hello@trackdub.com?subject=Trackdub%20On-prem",
-    },
-  ];
+  const plans = PRICING_PLANS;
   return (
     <section id="pricing" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
@@ -2940,7 +2923,6 @@ function Pricing() {
                   </header>
                   <div className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}>
                     {p.price}
-                    {p.unit && <span className="font-sans text-lg text-muted-foreground">{p.unit}</span>}
                   </div>
                   <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
                     {p.note}
@@ -2973,6 +2955,11 @@ function Pricing() {
             );
           })}
         </ul>
+        <p className="mt-8 font-mono text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
+          <Link to="/pricing" className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent">
+            Full pricing, license terms, and FAQ →
+          </Link>
+        </p>
       </Container>
     </section>
   );
@@ -2985,7 +2972,7 @@ function FAQ() {
   return (
     <section id="faq" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <SectionNumber n="08" label="Questions" />
             <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -3147,18 +3134,18 @@ function Colophon() {
         ["Resumable jobs", "#resume"],
         ["Performance", "#performance"],
         ["Architecture", "#architecture"],
-        ["Privacy", "#privacy"],
         ["Requirements", "#requirements"],
-        ["Pricing", "#pricing"],
+        ["Pricing", "/pricing"],
+        ["Changelog", "/changelog"],
       ],
     ],
     [
       "Developers",
       [
-        ["CLI", "mailto:hello@trackdub.com?subject=CLI"],
-        ["SDK", "mailto:hello@trackdub.com?subject=SDK"],
-        ["REST API", "mailto:hello@trackdub.com?subject=API"],
-        ["Model manifest", "mailto:hello@trackdub.com?subject=Manifest"],
+        ["CLI", "/docs#quickstart"],
+        ["SDK", "/docs"],
+        ["REST API", "/docs"],
+        ["Model manifest", "/docs#manifest"],
       ],
     ],
     [
@@ -3175,7 +3162,7 @@ function Colophon() {
   return (
     <footer className="bg-background">
       <Container className="py-16">
-        <div className="grid gap-10 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <div className="font-serif text-3xl leading-none text-foreground">
               Trackdub<span className="text-accent">.</span>
@@ -3199,11 +3186,10 @@ function Colophon() {
             </div>
           ))}
           <div className="lg:col-span-2">
-            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Build</div>
+            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Status</div>
             <ul className="mt-4 space-y-2 font-mono text-[12px] text-muted-foreground">
-              <li>v 0.9.2</li>
-              <li>rev 4c1a8f</li>
-              <li>2026-07-23</li>
+              <li>Early preview</li>
+              <li>Building in public</li>
             </ul>
           </div>
         </div>
@@ -3309,7 +3295,7 @@ function Privacy() {
   return (
     <section id="privacy" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <SectionNumber n="04b" label="Privacy & retention" />
             <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -3492,7 +3478,7 @@ function Architecture() {
   return (
     <section id="architecture" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <SectionNumber n="04a" label="Local-first architecture" />
             <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -3664,7 +3650,7 @@ function SystemRequirements() {
   return (
     <section id="requirements" data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <SectionNumber n="04c" label="System requirements" />
             <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">

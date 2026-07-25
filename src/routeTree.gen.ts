@@ -11,6 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuidesAiDubbingGuideRouteImport } from './routes/guides/ai-dubbing-guide'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -24,6 +27,21 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangelogRoute = ChangelogRouteImport.update({
+  id: '/changelog',
+  path: '/changelog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,6 +67,9 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/changelog': typeof ChangelogRoute
+  '/docs': typeof DocsRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/guides/ai-dubbing-guide': typeof GuidesAiDubbingGuideRoute
@@ -57,6 +78,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/changelog': typeof ChangelogRoute
+  '/docs': typeof DocsRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/guides/ai-dubbing-guide': typeof GuidesAiDubbingGuideRoute
@@ -66,6 +90,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/changelog': typeof ChangelogRoute
+  '/docs': typeof DocsRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/guides/ai-dubbing-guide': typeof GuidesAiDubbingGuideRoute
@@ -76,6 +103,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/changelog'
+    | '/docs'
+    | '/pricing'
     | '/privacy'
     | '/sitemap.xml'
     | '/guides/ai-dubbing-guide'
@@ -84,6 +114,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/changelog'
+    | '/docs'
+    | '/pricing'
     | '/privacy'
     | '/sitemap.xml'
     | '/guides/ai-dubbing-guide'
@@ -92,6 +125,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/changelog'
+    | '/docs'
+    | '/pricing'
     | '/privacy'
     | '/sitemap.xml'
     | '/guides/ai-dubbing-guide'
@@ -101,6 +137,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChangelogRoute: typeof ChangelogRoute
+  DocsRoute: typeof DocsRoute
+  PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   GuidesAiDubbingGuideRoute: typeof GuidesAiDubbingGuideRoute
@@ -122,6 +161,27 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/changelog': {
+      id: '/changelog'
+      path: '/changelog'
+      fullPath: '/changelog'
+      preLoaderRoute: typeof ChangelogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -157,6 +217,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChangelogRoute: ChangelogRoute,
+  DocsRoute: DocsRoute,
+  PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   GuidesAiDubbingGuideRoute: GuidesAiDubbingGuideRoute,
@@ -166,3 +229,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

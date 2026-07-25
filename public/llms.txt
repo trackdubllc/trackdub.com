@@ -7,4 +7,8 @@ Trackdub runs the entire dubbing pipeline — ASR, translation, diarization, TTS
 ## Pages
 
 - [Home](/): Product overview, pipeline, performance, pricing, and FAQ.
+- [Pricing](/pricing): Free, Pro ($149 one-time), and Studio (in development). No subscriptions.
+- [Docs](/docs): CLI usage, pipeline stages, execution providers, and the bundled model manifest.
+- [Changelog](/changelog): Real, dated engineering milestones. Building in public pre-launch.
 - [Privacy](/privacy): What Trackdub stores, what stays on your machine, and what is opt-in.
+- [AI dubbing guide](/guides/ai-dubbing-guide): How dubbing AI works stage by stage, and how local compares to cloud.
