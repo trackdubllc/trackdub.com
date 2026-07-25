@@ -1,0 +1,57 @@
+src/styles.css
+  s_aa107db594a355::t_3125f32dade1b9 8-77
+  s_aa107db594a355::t_e817af6c6ff103 7
+src/routes/changelog.tsx
+  s_aa107db594a355::t_c52a07f449e497 1-152
+src/lib/pricing.ts
+  s_aa107db594a355::t_8021c923504588 1-54
+src/routes/index.tsx
+  s_aa107db594a355::t_7874c938f75fc4 2958-2962
+  s_aa107db594a355::t_13db3e1b74bcbf 2755-2757,2765-2767,2772-2782,2788
+  s_aa107db594a355::t_674cf7ace6faf0 2807-2808,2812
+  s_aa107db594a355::t_ca319c5a547395 3138-3139,3145-3148
+  s_aa107db594a355::t_2ac148f2cfcbb6 3189,3191-3192
+  s_aa107db594a355::t_4366e69b48acc1 1048-1049,1062,1069
+  s_aa107db594a355::t_837509c660b1af 1338,2062,2461,2676,2748,2975,3165,3298,3481,3653
+  s_aa107db594a355::t_0786e56a384755 1632-1649
+  s_aa107db594a355::t_aa8114cc9b6129 2841-2849,2859,2864-2865,2870,2875-2876,2882-2885
+  s_aa107db594a355::t_7953d1a0172398 2894
+  s_aa107db594a355::t_8d4534fc9d29d6 7
+  s_aa107db594a355::t_6b4bc1ab86b3d0 20,32,36
+src/routes/lovable/email/auth/webhook.ts
+  s_aa107db594a355::t_d656b05852f1a0 20-25
+  s_aa107db594a355::t_babb9ac304259e 87-90
+src/routes/pricing.tsx
+  s_aa107db594a355::t_2031d899161424 1-259
+src/routes/sitemap[.]xml.ts
+  s_aa107db594a355::t_491a2dddde2462 18-20
+src/routes/docs.tsx
+  s_aa107db594a355::t_abfe672e2b904b 1-102,104-155,157,159-202,204-264
+  s_aa107db594a355::t_dfca71767101fe 103
+  s_aa107db594a355::t_a000a221673218 156,158
+  s_aa107db594a355::t_bd5424532e1470 203
+public/llms.txt
+  s_aa107db594a355::t_d435a4ed2e276b 10-14
+src/routes/__root.tsx
+  s_aa107db594a355::t_498ae4e88be1d2 98-109
+.gitignore
+  s_aa107db594a355::t_8eac9b535ed9f4 1-37
+src/routeTree.gen.ts
+  s_aa107db594a355::t_4e951ebfaec64e 14-16,32-46,70-72,81-83,93-95,106-108,117-119,128-130,140-142,166-186,220-222,232-241
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "3dab50ee777c506195ff26d1ca86336ec5742eb8",
+  "prompts": {},
+  "sessions": {
+    "s_aa107db594a355": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0e4ad752-dcb9-4df4-b035-83d26e74cdc4",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "tonythethompson <github@trackdub.com>"
+    }
+  }
+}
