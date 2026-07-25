@@ -388,7 +388,7 @@ function GuidePage() {
             </ul>
             <div className="flex flex-wrap gap-3 pt-2">
               <a
-                href={CHECKLIST_URL}
+                href={CHECKLIST_ABSOLUTE_URL}
                 download
                 type="application/pdf"
                 aria-label="Download the Local-First Dubbing Workflow Checklist (PDF, 2 pages)"
@@ -397,7 +397,7 @@ function GuidePage() {
                 Download the checklist (PDF)
               </a>
               <a
-                href={CHECKLIST_URL}
+                href={CHECKLIST_ABSOLUTE_URL}
                 target="_blank"
                 rel="noopener"
                 type="application/pdf"
