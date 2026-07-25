@@ -3025,7 +3025,12 @@ function Endnote() {
 
 /* ---------------- waitlist ---------------- */
 
-const TURNSTILE_SITE_KEY = "0x4AAAAAAD9lzJEZ4kPqqyZe";
+// Turnstile widget sitekey (public). Production MUST set
+// VITE_TURNSTILE_SITE_KEY to a real Turnstile site from the Cloudflare
+// dashboard. The fallback is Cloudflare's published test key, which
+// always passes — fine for local dev/preview but does NOT gate real
+// users in production.
+const TURNSTILE_SITE_KEY: string = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? "0x4AAAAAAD9pNIBkKRhSY098";
 
 const waitlistSchema = z.object({
   email: z
@@ -3142,7 +3147,7 @@ function WaitlistForm() {
           className="cf-turnstile"
           data-sitekey={TURNSTILE_SITE_KEY}
           data-callback="onWaitlistTurnstile"
-          data-action="waitlist"
+          data-action="waitlist turnstile-spin-v2"
         />
       </form>
     </>
