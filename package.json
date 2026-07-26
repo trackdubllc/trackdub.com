@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "deploy": "bun run build && wrangler deploy --config .output/server/wrangler.json",
-    "setup-deploy": "pwsh scripts/setup-deploy.ps1"
+    "setup-deploy": "pwsh scripts/setup-deploy.ps1",
+    "stage:sites": "pwsh scripts/stage-sites.ps1"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
