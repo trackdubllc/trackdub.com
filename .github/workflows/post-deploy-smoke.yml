@@ -1,0 +1,26 @@
+name: Post-deploy smoke
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Workers Build]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  smoke:
+    name: Verify production routing and CORS
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check www redirect and waitlist CORS
+        run: node scripts/post-deploy-smoke.mjs

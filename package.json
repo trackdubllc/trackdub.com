@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "smoke:postdeploy": "node scripts/post-deploy-smoke.mjs",
     "deploy": "bun run build && wrangler deploy --config .output/server/wrangler.json",
     "setup-deploy": "pwsh scripts/setup-deploy.ps1",
     "stage:sites": "pwsh scripts/stage-sites.ps1"

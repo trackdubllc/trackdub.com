@@ -3693,11 +3693,10 @@ function Endnote() {
 
 /* ---------------- waitlist ---------------- */
 
-// Turnstile widget sitekey (public). Production MUST set
-// VITE_TURNSTILE_SITE_KEY to a real Turnstile site from the Cloudflare
-// dashboard. The fallback is Cloudflare's published test key, which
-// always passes — fine for local dev/preview but does NOT gate real
-// users in production.
+// Turnstile widget sitekey (public). Set VITE_TURNSTILE_SITE_KEY at build
+// time to the real Turnstile site from the Cloudflare dashboard — the
+// fallback below is only a placeholder for local dev/preview builds that
+// never set it.
 const TURNSTILE_SITE_KEY: string =
   import.meta.env.VITE_TURNSTILE_SITE_KEY ?? "0x4AAAAAAD9pNIBkKRhSY098";
 
@@ -3712,7 +3711,11 @@ const waitlistSchema = z.object({
 
 declare global {
   interface Window {
-    onWaitlistTurnstile?: (token: string) => void;
+    turnstile?: {
+      render: (container: HTMLElement, options: Record<string, unknown>) => string;
+      remove: (widgetId: string) => void;
+    };
+    __onTurnstileLoad__?: () => void;
   }
 }
 
@@ -3723,17 +3726,42 @@ function WaitlistForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [interest, setInterest] = useState<string | null>(null);
-
-  useEffect(() => {
-    window.onWaitlistTurnstile = (token: string) => setTurnstileToken(token);
-    return () => {
-      delete window.onWaitlistTurnstile;
-    };
-  }, []);
+  const widgetContainerRef = useRef<HTMLDivElement | null>(null);
+  const widgetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const fromUrl = new URLSearchParams(window.location.search).get("interest");
     if (fromUrl && WAITLIST_INTERESTS.has(fromUrl)) setInterest(fromUrl);
+  }, []);
+
+  // Render the widget explicitly instead of Turnstile's implicit
+  // `.cf-turnstile` auto-scan: on an SSR'd page the auto-scan can run before
+  // (or race) the container landing in the DOM and silently no-op, leaving
+  // the widget permanently blank with no console error. Rendering once both
+  // the container ref and the turnstile API are confirmed ready removes
+  // that race entirely.
+  useEffect(() => {
+    let cancelled = false;
+    const tryRender = () => {
+      if (cancelled || !widgetContainerRef.current || widgetIdRef.current || !window.turnstile) {
+        return;
+      }
+      widgetIdRef.current = window.turnstile.render(widgetContainerRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        action: "waitlist_signup",
+        callback: (token: string) => setTurnstileToken(token),
+      });
+    };
+    if (window.turnstile) {
+      tryRender();
+    } else {
+      window.__onTurnstileLoad__ = tryRender;
+    }
+    return () => {
+      cancelled = true;
+      if (widgetIdRef.current) window.turnstile?.remove(widgetIdRef.current);
+      delete window.__onTurnstileLoad__;
+    };
   }, []);
 
   async function onSubmit(e: FormEvent) {
@@ -3797,7 +3825,11 @@ function WaitlistForm() {
 
   return (
     <>
-      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+      <script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=__onTurnstileLoad__&render=explicit"
+        async
+        defer
+      />
       <form
         onSubmit={onSubmit}
         className="mx-auto mt-12 flex w-full max-w-md flex-col items-center gap-3"
@@ -3828,12 +3860,7 @@ function WaitlistForm() {
             {status === "loading" ? "Adding…" : "Join launch list"}
           </button>
         </div>
-        <div
-          className="cf-turnstile"
-          data-sitekey={TURNSTILE_SITE_KEY}
-          data-callback="onWaitlistTurnstile"
-          data-action="waitlist turnstile-spin-v2"
-        />
+        <div ref={widgetContainerRef} />
       </form>
     </>
   );
