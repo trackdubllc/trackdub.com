@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/docs")({
   head: () => ({
     meta: [
-      { title: "Docs — Trackdub" },
+      { title: "Docs · Trackdub" },
       {
         name: "description",
         content:
           "Trackdub documentation: CLI usage, pipeline stages, execution providers, system requirements, and the bundled model manifest.",
       },
-      { property: "og:title", content: "Docs — Trackdub" },
+      { property: "og:title", content: "Docs · Trackdub" },
       {
         property: "og:description",
         content: "CLI usage, pipeline stages, execution providers, and the bundled model manifest.",
@@ -59,7 +59,13 @@ function TopBar() {
   );
 }
 
-function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Container({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
 }
 
@@ -82,7 +88,7 @@ function Header() {
           How the pipeline actually works.
         </h1>
         <p className="mt-8 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-          This is an early set of docs — CLI usage, pipeline stages, execution providers, and the
+          This is an early set of docs: CLI usage, pipeline stages, execution providers, and the
           model manifest. A full reference lands with v1.
         </p>
       </Container>
@@ -107,7 +113,7 @@ function Quickstart() {
           The CLI runs the same pipeline the desktop app runs.
         </h2>
         <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-          No separate headless engine, no feature gap — same stages, same models, scriptable for
+          No separate headless engine, no feature gap: same stages, same models, scriptable for
           batch localization or CI. Included on every tier, Free included.
         </p>
         <div className="mt-10 space-y-4">
@@ -117,7 +123,7 @@ function Quickstart() {
           <Pre>{`trackdub dub --preset my-preset --input-dir ./videos`}</Pre>
         </div>
         <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-          Re-running the same project skips already-completed stages — only what changed reruns.
+          Re-running the same project skips already-completed stages; only what changed reruns.
         </p>
       </Container>
     </section>
@@ -147,7 +153,9 @@ function Stages() {
                 {n}
               </div>
               <div className="col-span-3 font-serif text-[20px] text-foreground">{name}</div>
-              <div className="col-span-8 text-[14px] leading-relaxed text-muted-foreground">{body}</div>
+              <div className="col-span-8 text-[14px] leading-relaxed text-muted-foreground">
+                {body}
+              </div>
             </li>
           ))}
         </ol>
@@ -166,10 +174,18 @@ function Stages() {
 function Providers() {
   const providers: [string, string, string][] = [
     ["TensorRT RTX", "Windows · RTX 30/40/50", "Auto-selected on supported GPUs."],
-    ["DirectML", "Windows · any DX12 GPU", "Broadest Windows GPU coverage, incl. Intel Arc, AMD Radeon."],
+    [
+      "DirectML",
+      "Windows · any DX12 GPU",
+      "Broadest Windows GPU coverage, incl. Intel Arc, AMD Radeon.",
+    ],
     ["CUDA", "Windows / Linux · NVIDIA", "Used on non-RTX NVIDIA cards."],
     ["CoreML", "macOS · Apple Silicon", "Neural Engine + GPU, auto-selected on M-series."],
-    ["CPU (ONNX Runtime)", "All platforms", "Always available. No GPU required to complete a project."],
+    [
+      "CPU (ONNX Runtime)",
+      "All platforms",
+      "Always available. No GPU required to complete a project.",
+    ],
   ];
   return (
     <section className="border-b border-border bg-surface/40">
@@ -179,8 +195,8 @@ function Providers() {
           Fallback is per-stage, not per-project.
         </h2>
         <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-          A missing provider on one stage doesn't disable the rest of the pipeline — each stage
-          picks the fastest provider your hardware supports and falls back on its own.
+          A missing provider on one stage doesn't disable the rest of the pipeline; each stage picks
+          the fastest provider your hardware supports and falls back on its own.
         </p>
         <div className="mt-12 grid gap-px bg-border md:grid-cols-3">
           {providers.map(([name, platform, note]) => (
@@ -204,7 +220,7 @@ function Manifest() {
       <Container className="py-20 sm:py-28">
         <SectionNumber n="04" label="Model manifest" />
         <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Every bundled model, declared — not implied.
+          Every bundled model, declared, not implied.
         </h2>
         <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
           <code className="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[14px]">
@@ -214,13 +230,20 @@ function Manifest() {
           checksum. No research-only or non-commercial-only checkpoint ships in any tier.
         </p>
         <div className="mt-10 grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-4">
-          {["VAD", "ASR", "Diarization", "Translation", "TTS", "Source separation", "Forced alignment", "Lip sync"].map(
-            (task) => (
-              <div key={task} className="bg-background p-4 font-mono text-[12px] text-foreground">
-                {task}
-              </div>
-            ),
-          )}
+          {[
+            "VAD",
+            "ASR",
+            "Diarization",
+            "Translation",
+            "TTS",
+            "Source separation",
+            "Forced alignment",
+            "Lip sync",
+          ].map((task) => (
+            <div key={task} className="bg-background p-4 font-mono text-[12px] text-foreground">
+              {task}
+            </div>
+          ))}
         </div>
       </Container>
     </section>

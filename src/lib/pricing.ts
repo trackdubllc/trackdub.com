@@ -41,7 +41,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "Studio",
     price: "In development",
-    note: "Post-launch — not sold yet",
+    note: "Post-launch · not sold yet",
     features: [
       "Batch and multi-GPU processing",
       "4K-optimized export pipeline",

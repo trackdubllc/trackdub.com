@@ -78,15 +78,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Trackdub — Dub videos without giving up control" },
-      { name: "description", content: "A Windows desktop workstation for AI video dubbing. Translate, voice, and mix in one workflow — inspect every stage and fix what needs fixing." },
+      { title: "Trackdub · Dub videos without giving up control" },
+      {
+        name: "description",
+        content:
+          "A Windows desktop workstation for AI video dubbing. Translate, voice, and mix in one workflow. Inspect every stage and fix what needs fixing.",
+      },
       { name: "author", content: "Trackdub" },
-      { property: "og:title", content: "Trackdub — Dub videos without giving up control" },
-      { property: "og:description", content: "A Windows desktop workstation for AI video dubbing. Inspect every stage and fix what needs fixing." },
+      { property: "og:title", content: "Trackdub · Dub videos without giving up control" },
+      {
+        property: "og:description",
+        content:
+          "A Windows desktop workstation for AI video dubbing. Inspect every stage and fix what needs fixing.",
+      },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Trackdub" },
+      { property: "og:image", content: "https://trackdub.com/og.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      {
+        property: "og:image:alt",
+        content: "Trackdub · dub videos into other languages without giving up control",
+      },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Trackdub — Dub videos without giving up control" },
-      { name: "twitter:description", content: "A Windows desktop workstation for AI video dubbing." },
+      { name: "twitter:title", content: "Trackdub · Dub videos without giving up control" },
+      {
+        name: "twitter:description",
+        content: "A Windows desktop workstation for AI video dubbing.",
+      },
+      { name: "twitter:image", content: "https://trackdub.com/og.png" },
     ],
     links: [
       {
@@ -94,6 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/icon-512.png" },
       {
         rel: "preload",
         as: "font",
@@ -116,9 +137,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "Trackdub",
-          url: "https://www.trackdub.com",
-          description:
-            "Local-first desktop workstation for AI video dubbing.",
+          url: "https://trackdub.com",
+          logo: "https://trackdub.com/icon-512.png",
+          image: "https://trackdub.com/og.png",
+          description: "Local-first desktop workstation for AI video dubbing.",
+          email: "hello@trackdub.com",
+          contactPoint: [
+            {
+              "@type": "ContactPoint",
+              email: "hello@trackdub.com",
+              contactType: "customer support",
+            },
+            {
+              "@type": "ContactPoint",
+              email: "press@trackdub.com",
+              contactType: "public relations",
+            },
+          ],
         }),
       },
     ],

@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/changelog")({
   head: () => ({
     meta: [
-      { title: "Changelog — Trackdub" },
+      { title: "Changelog · Trackdub" },
       {
         name: "description",
         content:
           "A working log of real Trackdub engineering milestones, not a highlight reel. Building in public ahead of v1 launch.",
       },
-      { property: "og:title", content: "Changelog — Trackdub" },
+      { property: "og:title", content: "Changelog · Trackdub" },
       {
         property: "og:description",
         content: "Real engineering milestones on the road to v1. Building in public.",
@@ -28,7 +28,7 @@ const ENTRIES: { date: string; title: string; body: string }[] = [
   {
     date: "2026-07-24",
     title: "trackdub.com relaunches",
-    body: "New site: honest pricing, a real early-build screenshot next to the interactive mock, and this changelog. No fabricated version numbers or benchmark data — what's not measured yet says so.",
+    body: "New site: honest pricing, a real early-build screenshot next to the interactive mock, and this changelog. No fabricated version numbers or benchmark data; what's not measured yet says so.",
   },
   {
     date: "2026-06-12",
@@ -38,7 +38,7 @@ const ENTRIES: { date: string; title: string; body: string }[] = [
   {
     date: "2026-06-10",
     title: "First full headless dub off real models",
-    body: "The whole pipeline — voice detection, diarization, transcription, translation, TTS, export — ran end to end on real models via the CLI, with honest per-stage failure states instead of silent fallbacks. Re-running an unchanged project correctly skipped every already-completed stage.",
+    body: "The whole pipeline (voice detection, diarization, transcription, translation, TTS, export) ran end to end on real models via the CLI, with honest per-stage failure states instead of silent fallbacks. Re-running an unchanged project correctly skipped every already-completed stage.",
   },
   {
     date: "2026-06-01",
@@ -78,7 +78,13 @@ function TopBar() {
   );
 }
 
-function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Container({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
 }
 
@@ -101,7 +107,7 @@ function Header() {
           Building in public.
         </h1>
         <p className="mt-8 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-          A working log of real engineering milestones, not a highlight reel. This is pre-launch —
+          A working log of real engineering milestones, not a highlight reel. This is pre-launch;
           the v1 release changelog starts once Pro ships.
         </p>
       </Container>

@@ -4,13 +4,13 @@ import { PRICING_PLANS } from "@/lib/pricing";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Pricing — Trackdub" },
+      { title: "Pricing · Trackdub" },
       {
         name: "description",
         content:
           "Trackdub pricing: Free desktop app with a watermark and 5-minute export cap, Pro at $149 one-time with no subscription, Studio in development. No recurring fees.",
       },
-      { property: "og:title", content: "Pricing — Trackdub" },
+      { property: "og:title", content: "Pricing · Trackdub" },
       {
         property: "og:description",
         content:
@@ -78,7 +78,13 @@ function TopBar() {
   );
 }
 
-function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Container({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
 }
 
@@ -102,7 +108,7 @@ function Header() {
         </h1>
         <p className="mt-8 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
           Trackdub is priced like software you own, not software you rent. Free gets you the full
-          pipeline with a watermark and a 5-minute export cap — commercial use included. Pro removes
+          pipeline with a watermark and a 5-minute export cap, commercial use included. Pro removes
           both for a one-time $149.
         </p>
       </Container>
@@ -137,7 +143,9 @@ function Plans() {
                       </span>
                     )}
                   </header>
-                  <div className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}>
+                  <div
+                    className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}
+                  >
                     {p.price}
                   </div>
                   <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -154,7 +162,7 @@ function Plans() {
                   <div className="mt-10">
                     <a
                       href={p.href}
-                      aria-label={`${p.cta} — ${p.name} plan`}
+                      aria-label={`${p.cta} · ${p.name} plan`}
                       className="inline-flex items-baseline gap-1 border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent"
                     >
                       {p.cta} <span aria-hidden>→</span>
@@ -174,11 +182,11 @@ function Terms() {
   const items: [string, string][] = [
     [
       "What does the Free watermark look like?",
-      "A small \"Made with Trackdub\" mark burned into the bottom-right corner during export. It's removed automatically once a valid Pro license is detected.",
+      'A small "Made with Trackdub" mark burned into the bottom-right corner during export. It\'s removed automatically once a valid Pro license is detected.',
     ],
     [
       "Does Free block commercial use?",
-      "No. Free is commercial-use-safe from day one — the only gates are the watermark and the 5-minute export cap. Every bundled model is commercial-safe by manifest, so nothing research-only ever loads, on any tier.",
+      "No. Free is commercial-use-safe from day one; the only gates are the watermark and the 5-minute export cap. Every bundled model is commercial-safe by manifest, so nothing research-only ever loads, on any tier.",
     ],
     [
       "How does the Pro license work?",
@@ -186,15 +194,15 @@ function Terms() {
     ],
     [
       "What happens if my Pro license fails to validate?",
-      "Trackdub reverts to the Free tier — watermark and 5-minute cap — never a crash.",
+      "Trackdub reverts to the Free tier (watermark and 5-minute cap), never a crash.",
     ],
     [
       "Is there a subscription option?",
-      "No. Pro is a one-time purchase. Paid major-version upgrades (v2.0, etc.) are separate, optional purchases — never a recurring charge for using the version you bought.",
+      "No. Pro is a one-time purchase. Paid major-version upgrades (v2.0, etc.) are separate, optional purchases, never a recurring charge for using the version you bought.",
     ],
     [
       "What's in Studio?",
-      "Batch and multi-GPU processing, a 4K-optimized export pipeline, and commercial redistribution rights for agencies. It's real but unfinished — we don't sell it until at least two of those features ship.",
+      "Batch and multi-GPU processing, a 4K-optimized export pipeline, and commercial redistribution rights for agencies. It's real but unfinished, and we don't sell it until at least two of those features ship.",
     ],
   ];
   return (

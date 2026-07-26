@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 const PUBLISHED = "2026-07-01";
 const MODIFIED = "2026-07-23";
-const URL = "https://www.trackdub.com/guides/ai-dubbing-guide";
+const URL = "https://trackdub.com/guides/ai-dubbing-guide";
 
 const FAQS: { q: string; a: string }[] = [
   {
@@ -37,7 +37,7 @@ const FAQS: { q: string; a: string }[] = [
 
 const CHECKLIST_URL = "/downloads/trackdub-local-first-dubbing-checklist.pdf";
 const CHECKLIST_ABSOLUTE_URL =
-  "https://www.trackdub.com/downloads/trackdub-local-first-dubbing-checklist.pdf";
+  "https://trackdub.com/downloads/trackdub-local-first-dubbing-checklist.pdf";
 const CHECKLIST_ANCHOR_URL = `${URL}#checklist`;
 
 export const Route = createFileRoute("/guides/ai-dubbing-guide")({
@@ -54,7 +54,10 @@ export const Route = createFileRoute("/guides/ai-dubbing-guide")({
         content:
           "dubbing ai, ai dubbing, ai video dubbing, ai dubbing software, ai voice dubbing, ai dubbing tool, local ai dubbing, dub video with ai, ai dubbing free",
       },
-      { property: "og:title", content: "Dubbing AI in 2026: A Practical Guide to Local-First AI Video Dubbing" },
+      {
+        property: "og:title",
+        content: "Dubbing AI in 2026: A Practical Guide to Local-First AI Video Dubbing",
+      },
       {
         property: "og:description",
         content:
@@ -65,7 +68,10 @@ export const Route = createFileRoute("/guides/ai-dubbing-guide")({
       { property: "article:published_time", content: PUBLISHED },
       { property: "article:modified_time", content: MODIFIED },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Dubbing AI in 2026: A Practical Guide to Local-First AI Video Dubbing" },
+      {
+        name: "twitter:title",
+        content: "Dubbing AI in 2026: A Practical Guide to Local-First AI Video Dubbing",
+      },
       {
         name: "twitter:description",
         content:
@@ -109,8 +115,13 @@ export const Route = createFileRoute("/guides/ai-dubbing-guide")({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Trackdub", item: "https://www.trackdub.com/" },
-            { "@type": "ListItem", position: 2, name: "Guides", item: "https://www.trackdub.com/guides" },
+            { "@type": "ListItem", position: 1, name: "Trackdub", item: "https://trackdub.com/" },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "Guides",
+              item: "https://trackdub.com/guides",
+            },
             { "@type": "ListItem", position: 3, name: "Dubbing AI", item: URL },
           ],
         }),
@@ -138,7 +149,7 @@ export const Route = createFileRoute("/guides/ai-dubbing-guide")({
           publisher: {
             "@type": "Organization",
             name: "Trackdub",
-            url: "https://www.trackdub.com/",
+            url: "https://trackdub.com/",
           },
           license: "https://creativecommons.org/licenses/by/4.0/",
           keywords:
@@ -195,10 +206,9 @@ function GuidePage() {
               Dubbing AI in 2026: a practical guide to local-first AI video dubbing
             </h1>
             <p className="text-lg text-muted-foreground">
-              Everything that happens between a source clip and a finished dub —
-              how modern AI video dubbing works stage by stage, and why serious
-              teams are moving AI dubbing software off cloud services and onto
-              local workstations.
+              Everything that happens between a source clip and a finished dub — how modern AI video
+              dubbing works stage by stage, and why serious teams are moving AI dubbing software off
+              cloud services and onto local workstations.
             </p>
             <p className="text-xs text-muted-foreground">
               Published {PUBLISHED} · Updated {MODIFIED} · 8 min read
@@ -208,47 +218,41 @@ function GuidePage() {
           <section className="space-y-3">
             <h2 className="font-serif text-2xl">What is dubbing AI?</h2>
             <p>
-              Dubbing AI is a chain of models, not a single one. A source video
-              is transcribed, translated, cut into speaker turns, revoiced with
-              synthesized speech, and mixed back against the original music and
-              effects. AI video dubbing tools stitch these stages into one
-              pipeline; the quality of the finished dub is the quality of the
-              weakest link. Every stage has its own failure modes —
-              mistranscribed names, off-tone translations, the wrong speaker on
-              a line, a TTS take that overruns the shot.
+              Dubbing AI is a chain of models, not a single one. A source video is transcribed,
+              translated, cut into speaker turns, revoiced with synthesized speech, and mixed back
+              against the original music and effects. AI video dubbing tools stitch these stages
+              into one pipeline; the quality of the finished dub is the quality of the weakest link.
+              Every stage has its own failure modes — mistranscribed names, off-tone translations,
+              the wrong speaker on a line, a TTS take that overruns the shot.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-serif text-2xl">
-              How AI video dubbing works: the six stages
-            </h2>
+            <h2 className="font-serif text-2xl">How AI video dubbing works: the six stages</h2>
             <ol className="list-decimal space-y-3 pl-5">
               <li>
-                <strong>Ingest.</strong> Demux the source, normalize sample
-                rate, keep the original picture untouched.
+                <strong>Ingest.</strong> Demux the source, normalize sample rate, keep the original
+                picture untouched.
               </li>
               <li>
-                <strong>AI transcription (ASR).</strong> Turn source speech into
-                timestamped text. This is where names, jargon, and overlapping
-                speech get mangled.
+                <strong>AI transcription (ASR).</strong> Turn source speech into timestamped text.
+                This is where names, jargon, and overlapping speech get mangled.
               </li>
               <li>
-                <strong>AI translation.</strong> Convert the transcript into the
-                target language with context — idioms, register, on-screen text.
+                <strong>AI translation.</strong> Convert the transcript into the target language
+                with context — idioms, register, on-screen text.
               </li>
               <li>
-                <strong>Diarization &amp; speaker assignment.</strong> Group
-                turns by speaker so the right voice reads the right lines.
+                <strong>Diarization &amp; speaker assignment.</strong> Group turns by speaker so the
+                right voice reads the right lines.
               </li>
               <li>
-                <strong>AI voice dubbing (TTS).</strong> Synthesize each line in
-                a voice that fits the speaker and the timing budget of the shot.
+                <strong>AI voice dubbing (TTS).</strong> Synthesize each line in a voice that fits
+                the speaker and the timing budget of the shot.
               </li>
               <li>
-                <strong>Mix &amp; preview.</strong> Duck the original dialogue,
-                keep music and effects, and render a preview you can actually
-                judge.
+                <strong>Mix &amp; preview.</strong> Duck the original dialogue, keep music and
+                effects, and render a preview you can actually judge.
               </li>
             </ol>
           </section>
@@ -258,9 +262,9 @@ function GuidePage() {
               Cloud AI dubbing software vs. local-first workstations
             </h2>
             <p>
-              Cloud AI dubbing services are convenient for one-off clips. For
-              real work — a series, a client backlog, footage under NDA — the
-              tradeoffs against a local AI dubbing tool add up quickly.
+              Cloud AI dubbing services are convenient for one-off clips. For real work — a series,
+              a client backlog, footage under NDA — the tradeoffs against a local AI dubbing tool
+              add up quickly.
             </p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm border border-border">
@@ -275,22 +279,30 @@ function GuidePage() {
                   <tr>
                     <td className="p-3 border-b border-border">Control</td>
                     <td className="p-3 border-b border-border">One button, opaque pipeline</td>
-                    <td className="p-3 border-b border-border">Every stage inspectable and re-runnable</td>
+                    <td className="p-3 border-b border-border">
+                      Every stage inspectable and re-runnable
+                    </td>
                   </tr>
                   <tr>
                     <td className="p-3 border-b border-border">Fixing one line</td>
                     <td className="p-3 border-b border-border">Usually re-runs everything</td>
-                    <td className="p-3 border-b border-border">Regenerate that line, keep the rest</td>
+                    <td className="p-3 border-b border-border">
+                      Regenerate that line, keep the rest
+                    </td>
                   </tr>
                   <tr>
                     <td className="p-3 border-b border-border">Cost model</td>
                     <td className="p-3 border-b border-border">Per-minute, forever</td>
-                    <td className="p-3 border-b border-border">One-time license, unlimited local runs</td>
+                    <td className="p-3 border-b border-border">
+                      One-time license, unlimited local runs
+                    </td>
                   </tr>
                   <tr>
                     <td className="p-3 border-b border-border">Data</td>
                     <td className="p-3 border-b border-border">Media uploaded to a third party</td>
-                    <td className="p-3 border-b border-border">Stays on your machine unless you opt in</td>
+                    <td className="p-3 border-b border-border">
+                      Stays on your machine unless you opt in
+                    </td>
                   </tr>
                   <tr>
                     <td className="p-3">Reliability</td>
@@ -303,59 +315,53 @@ function GuidePage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-serif text-2xl">
-              Why local AI dubbing wins for serious work
-            </h2>
+            <h2 className="font-serif text-2xl">Why local AI dubbing wins for serious work</h2>
             <p>
-              Modern consumer GPUs run the entire dubbing AI stack fast enough
-              for production. DirectML and TensorRT RTX push ASR and AI voice
-              dubbing well past real-time on a mid-range card; CPU fallback
-              keeps the pipeline usable on laptops. Once inference lives on
-              your hardware, three things change:
+              Modern consumer GPUs run the entire dubbing AI stack fast enough for production.
+              DirectML and TensorRT RTX push ASR and AI voice dubbing well past real-time on a
+              mid-range card; CPU fallback keeps the pipeline usable on laptops. Once inference
+              lives on your hardware, three things change:
             </p>
             <ul className="list-disc space-y-2 pl-5">
               <li>
-                <strong>Sovereignty.</strong> NDA footage never leaves the
-                machine. There's no "we sent it to the vendor" conversation.
+                <strong>Sovereignty.</strong> NDA footage never leaves the machine. There's no "we
+                sent it to the vendor" conversation.
               </li>
               <li>
-                <strong>Cost.</strong> Per-minute billing disappears. A season
-                of episodes costs the same as a single clip.
+                <strong>Cost.</strong> Per-minute billing disappears. A season of episodes costs the
+                same as a single clip.
               </li>
               <li>
-                <strong>Iteration.</strong> You can rerun a single stage in
-                seconds instead of waiting on a queue.
+                <strong>Iteration.</strong> You can rerun a single stage in seconds instead of
+                waiting on a queue.
               </li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-serif text-2xl">
-              What to look for in an AI dubbing tool
-            </h2>
+            <h2 className="font-serif text-2xl">What to look for in an AI dubbing tool</h2>
             <ul className="list-disc space-y-2 pl-5">
               <li>Every stage is editable, not just the final output.</li>
               <li>Fixing one line doesn't invalidate the rest of the project.</li>
               <li>Jobs are resumable after crashes, OOMs, or cancellations.</li>
               <li>Errors name the stage and the cause, not a generic "failed".</li>
-              <li>Local acceleration is real — DirectML, TensorRT RTX, or equivalent — with an honest CPU fallback.</li>
+              <li>
+                Local acceleration is real — DirectML, TensorRT RTX, or equivalent — with an honest
+                CPU fallback.
+              </li>
               <li>Stems (vocals, music, effects) can be separated and re-mixed.</li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="font-serif text-2xl">
-              How to dub a video with AI in Trackdub
-            </h2>
+            <h2 className="font-serif text-2xl">How to dub a video with AI in Trackdub</h2>
             <p>
-              Trackdub is a Windows desktop workstation built around this
-              philosophy: dubbing AI as a pipeline you drive, not a service you
-              submit to. Drop in a clip, pick a target language, and Trackdub
-              runs ingest, ASR, translation, diarization, AI voice dubbing, and
-              mix as separate, inspectable stages. Fix one line, reassign a
-              speaker, swap a voice — the rest of the project stays intact.
-              Media stays local unless you explicitly opt a stage into a cloud
-              model.
+              Trackdub is a Windows desktop workstation built around this philosophy: dubbing AI as
+              a pipeline you drive, not a service you submit to. Drop in a clip, pick a target
+              language, and Trackdub runs ingest, ASR, translation, diarization, AI voice dubbing,
+              and mix as separate, inspectable stages. Fix one line, reassign a speaker, swap a
+              voice — the rest of the project stays intact. Media stays local unless you explicitly
+              opt a stage into a cloud model.
             </p>
             <p>
               <Link to="/" className="underline underline-offset-4">
@@ -371,14 +377,11 @@ function GuidePage() {
             <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
               Free download · PDF · 2 pages
             </p>
-            <h2 className="font-serif text-2xl">
-              Local-First Dubbing Workflow Checklist
-            </h2>
+            <h2 className="font-serif text-2xl">Local-First Dubbing Workflow Checklist</h2>
             <p>
-              A printable, stage-by-stage checklist for shipping AI-dubbed video
-              without giving up control. Eight sections covering ingest, ASR,
-              translation, diarization, TTS, mix, reliability, and privacy —
-              every item is a concrete thing to verify before you call a
+              A printable, stage-by-stage checklist for shipping AI-dubbed video without giving up
+              control. Eight sections covering ingest, ASR, translation, diarization, TTS, mix,
+              reliability, and privacy — every item is a concrete thing to verify before you call a
               pipeline production-ready.
             </p>
             <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
@@ -440,11 +443,10 @@ function GuidePage() {
             <h2 className="font-serif text-2xl">Related terms</h2>
             <p className="text-sm text-muted-foreground">
               People searching for this guide also look for: <em>ai dubbing</em>,{" "}
-              <em>ai video dubbing</em>, <em>ai dubbing software</em>,{" "}
-              <em>ai voice dubbing</em>, <em>ai dubbing tool</em>,{" "}
-              <em>local ai dubbing</em>, <em>dub video with ai</em>, and{" "}
-              <em>ai dubbing free</em>. This guide covers the same workflow
-              under all of those names — it's one pipeline with many labels.
+              <em>ai video dubbing</em>, <em>ai dubbing software</em>, <em>ai voice dubbing</em>,{" "}
+              <em>ai dubbing tool</em>, <em>local ai dubbing</em>, <em>dub video with ai</em>, and{" "}
+              <em>ai dubbing free</em>. This guide covers the same workflow under all of those names
+              — it's one pipeline with many labels.
             </p>
           </section>
         </article>
