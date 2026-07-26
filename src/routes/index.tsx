@@ -16,19 +16,19 @@ function round3(n: number) {
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: "Does my video get uploaded anywhere?",
-    a: "No. Trackdub runs the whole pipeline on your machine by default. Cloud endpoints exist for teams that want them, but they're opt-in per project and per stage — never implicit.",
+    a: "No. Trackdub runs the whole pipeline on your machine by default. Cloud endpoints exist for teams that want them, but they're opt-in per project and per stage, never implicit.",
   },
   {
     q: "What happens to my data if I uninstall?",
-    a: "Your projects, source media, and generated output live in folders you chose, so they stay where they are until you delete them. The app data directory — model cache, preferences, and logs — can be removed during uninstall or manually from %LOCALAPPDATA%\\Trackdub.",
+    a: "Your projects, source media, and generated output live in folders you chose, so they stay where they are until you delete them. The app data directory (model cache, preferences, and logs) can be removed during uninstall or manually from %LOCALAPPDATA%\\Trackdub.",
   },
   {
     q: "Can I use it commercially?",
-    a: "Yes, on every tier — including Free. Free exports carry a small watermark and cap at 5 minutes; Pro removes both. Every bundled model is commercial-safe by manifest, so nothing research-only ever loads.",
+    a: "Yes, on every tier, including Free. Free exports carry a small watermark and cap at 5 minutes; Pro removes both. Every bundled model is commercial-safe by manifest, so nothing research-only ever loads.",
   },
   {
     q: "How is the voice cloning handled?",
-    a: "Each detected speaker gets one short reference clip you can review or replace. The voicing stage uses that reference — one voice per person, not one 'AI voice' for the whole video. References stay on your disk.",
+    a: "Each detected speaker gets one short reference clip you can review or replace. The voicing stage uses that reference: one voice per person, not one 'AI voice' for the whole video. References stay on your disk.",
   },
   {
     q: "What if the ASR gets a word wrong?",
@@ -40,7 +40,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "Can I automate it?",
-    a: "Yes — the CLI ships in every tier, Free included. The same pipeline the app runs is scriptable for batch localization, CI, or an on-prem REST worker via the SDK.",
+    a: "Yes. The CLI ships in every tier, Free included. The same pipeline the app runs is scriptable for batch localization, CI, or an on-prem REST worker via the SDK.",
   },
   {
     q: "Can the whole pipeline run offline?",
@@ -67,17 +67,17 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Trackdub — A desktop workstation for dubbing video" },
+      { title: "Trackdub · A desktop workstation for dubbing video" },
       {
         name: "description",
         content:
           "Trackdub is a local-first desktop workstation for dubbing video into other languages. Editable stages, deterministic runs, your media stays on your machine.",
       },
-      { property: "og:title", content: "Trackdub — A desktop workstation for dubbing video" },
+      { property: "og:title", content: "Trackdub · A desktop workstation for dubbing video" },
       {
         property: "og:description",
         content:
-          "Local-first, stage-by-stage dubbing. Editable script, per-line voice, alignment, mix — all inspectable.",
+          "Local-first, stage-by-stage dubbing. Editable script, per-line voice, alignment, mix: all inspectable.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
@@ -90,9 +90,8 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Trackdub",
-          url: "https://www.trackdub.com",
-          description:
-            "Local-first Windows desktop workstation for AI video dubbing.",
+          url: "https://trackdub.com",
+          description: "Local-first Windows desktop workstation for AI video dubbing.",
         }),
       },
       {
@@ -128,9 +127,7 @@ function Index() {
         <StageChapters />
         <Control />
         <Performance />
-        <Architecture />
-        <Privacy />
-        <SystemRequirements />
+        <LocalFirst />
         <WhatYouGet />
         <ComparedTo />
         <Pricing />
@@ -150,22 +147,21 @@ const NAV = [
   { href: "#resume", label: "Resume" },
   { href: "#control", label: "Control" },
   { href: "#performance", label: "Performance" },
-  { href: "#architecture", label: "Architecture" },
-  { href: "#privacy", label: "Privacy" },
-  { href: "#requirements", label: "Requirements" },
+  { href: "#architecture", label: "Local-first" },
+  { href: "#manifest", label: "Manifest" },
   { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
   { href: "#waitlist", label: "Launch list" },
 ];
-const NAV_PRIMARY = new Set([
-  "#pipeline",
-  "#walkthrough",
-  "#control",
-  "#performance",
-  "#pricing",
-]);
+const NAV_PRIMARY = new Set(["#pipeline", "#walkthrough", "#control", "#performance", "#pricing"]);
 
-function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Container({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
 }
 
@@ -193,6 +189,15 @@ function SectionNumber({ n, label }: { n: string; label: string }) {
 
 function Rule({ className = "" }: { className?: string }) {
   return <div className={`h-px w-full bg-border ${className}`} aria-hidden />;
+}
+
+// Click a rubber stamp to re-slam it. No-op under reduce-motion (the
+// stamp-thunk animation is disabled there, so nothing replays).
+function replayStamp(e: React.MouseEvent<HTMLDivElement>) {
+  const el = e.currentTarget;
+  el.style.animation = "none";
+  void el.offsetWidth;
+  el.style.animation = "";
 }
 
 /* ---------------- section rail (kinetic progress) ---------------- */
@@ -263,8 +268,7 @@ function SectionRail() {
     }
   };
 
-  const easeOutExpo = (t: number) =>
-    t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+  const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
   const animateScrollTo = (targetY: number) => {
     const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
@@ -433,8 +437,14 @@ function SectionRail() {
     const onKey = (e: KeyboardEvent) => {
       // Only cancel for keys that actually scroll.
       const scrollKeys = new Set([
-        "PageUp", "PageDown", "Home", "End",
-        "ArrowUp", "ArrowDown", " ", "Spacebar",
+        "PageUp",
+        "PageDown",
+        "Home",
+        "End",
+        "ArrowUp",
+        "ArrowDown",
+        " ",
+        "Spacebar",
       ]);
       if (scrollKeys.has(e.key)) cancel();
     };
@@ -645,9 +655,7 @@ function SectionRail() {
     pointerTypeRef.current = e.pointerType;
     // Velocity samples are only used for touch inertia.
     scrubSamplesRef.current =
-      e.pointerType === "touch"
-        ? [{ y: window.scrollY, t: performance.now() }]
-        : [];
+      e.pointerType === "touch" ? [{ y: window.scrollY, t: performance.now() }] : [];
     dragStartYRef.current = e.clientY;
     draggingRef.current = false;
     suppressClickRef.current = false;
@@ -746,10 +754,7 @@ function SectionRail() {
   const handleRailPointerUp = (e: PointerEvent) => {
     // Ignore stray up/cancel from pointers we didn't capture (e.g. a second
     // finger releasing while the primary drag continues).
-    if (
-      activePointerIdRef.current !== null &&
-      e.pointerId !== activePointerIdRef.current
-    ) {
+    if (activePointerIdRef.current !== null && e.pointerId !== activePointerIdRef.current) {
       return;
     }
     finishScrub(e.type, e.clientY);
@@ -776,20 +781,14 @@ function SectionRail() {
     // pointerup/cancel may never arrive. Force cleanup so the rail can't
     // get stuck in a captured/dragging state.
     const onWindowCancel = (e: PointerEvent) => {
-      if (
-        activePointerIdRef.current !== null &&
-        e.pointerId === activePointerIdRef.current
-      ) {
+      if (activePointerIdRef.current !== null && e.pointerId === activePointerIdRef.current) {
         finishScrub("pointercancel", null);
       }
     };
     const onWindowUp = (e: PointerEvent) => {
       // Only fires if the element handler missed it (e.g. pointer released
       // outside a captured region on a browser that dropped capture).
-      if (
-        activePointerIdRef.current !== null &&
-        e.pointerId === activePointerIdRef.current
-      ) {
+      if (activePointerIdRef.current !== null && e.pointerId === activePointerIdRef.current) {
         finishScrub(e.type, e.clientY);
       }
     };
@@ -835,7 +834,10 @@ function SectionRail() {
         aria-valuenow={0}
       >
         {/* vertical track */}
-        <span className="pointer-events-none absolute left-0 top-1 bottom-1 w-0.5 bg-border/70" aria-hidden />
+        <span
+          className="pointer-events-none absolute left-0 top-1 bottom-1 w-0.5 bg-border/70"
+          aria-hidden
+        />
         {/* progress fill */}
         <span
           ref={progressFillRef}
@@ -856,8 +858,7 @@ function SectionRail() {
             transform: "translateY(0px)",
             height: "12px",
             willChange: "transform, height",
-            transition:
-              "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), height 140ms ease-out",
+            transition: "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), height 140ms ease-out",
           }}
           aria-hidden
         />
@@ -958,10 +959,16 @@ function Masthead() {
   return (
     <header className="border-b border-border bg-background">
       <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between gap-6 px-6 sm:h-[88px] sm:px-10">
-        <a href="#top" className="shrink-0 font-serif text-2xl leading-none tracking-tight text-foreground sm:text-[38px]">
+        <a
+          href="#top"
+          className="shrink-0 font-serif text-2xl leading-none tracking-tight text-foreground sm:text-[38px]"
+        >
           Trackdub<span className="text-accent">.</span>
         </a>
-        <nav className="hidden flex-1 items-center justify-center gap-x-7 md:flex" aria-label="Primary">
+        <nav
+          className="hidden flex-1 items-center justify-center gap-x-7 md:flex"
+          aria-label="Primary"
+        >
           {NAV.map((n) => (
             <a
               key={n.href}
@@ -975,7 +982,9 @@ function Masthead() {
           ))}
         </nav>
         <div className="hidden shrink-0 items-center gap-4 md:flex lg:gap-5">
-          <div className="hidden lg:block"><MotionToggle /></div>
+          <div className="hidden lg:block">
+            <MotionToggle />
+          </div>
           <InkButton href="#waitlist">Join launch list</InkButton>
         </div>
         <button
@@ -1000,7 +1009,9 @@ function Masthead() {
                 {n.label}
               </a>
             ))}
-            <div className="py-2"><MotionToggle /></div>
+            <div className="py-2">
+              <MotionToggle />
+            </div>
             <InkButton href="#waitlist">Join launch list</InkButton>
           </Container>
         </div>
@@ -1018,9 +1029,10 @@ function MotionToggle() {
   const [mode, setMode] = useState<MotionMode | null>(null);
 
   useEffect(() => {
-    const stored = (typeof window !== "undefined"
-      ? (localStorage.getItem(MOTION_KEY) as MotionMode | null)
-      : null);
+    const stored =
+      typeof window !== "undefined"
+        ? (localStorage.getItem(MOTION_KEY) as MotionMode | null)
+        : null;
     const prefersReduced =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -1077,16 +1089,21 @@ function Lead() {
         <div className="grid items-start gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-10 xl:gap-14">
           <div>
             <h1 className="font-serif text-5xl leading-[0.98] tracking-tight text-foreground sm:text-6xl lg:text-[68px] xl:text-[76px]">
-              Dub videos into other languages without giving up control<span className="text-accent">.</span>
+              Dub videos into other languages without giving up control
+              <span className="text-accent">.</span>
             </h1>
             <p className="mt-7 max-w-xl text-[17px] leading-relaxed text-muted-foreground sm:text-lg">
-              Trackdub is a desktop workstation for translating, voicing, and mixing video. Every stage
-              of the pipeline is inspectable, editable, and rerunnable — from the transcript to the
-              final mix. Your media never leaves your machine unless you say so.
+              Trackdub is a desktop workstation for translating, voicing, and mixing video. Every
+              stage of the pipeline is inspectable, editable, and rerunnable, from the transcript to
+              the final mix. Your media never leaves your machine unless you say so.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4 sm:gap-6">
-              <InkButton href="#waitlist">Be first to know <span aria-hidden>→</span></InkButton>
-              <InkButton href="#pipeline" variant="ghost">Explore the workflow <span aria-hidden>→</span></InkButton>
+              <InkButton href="#waitlist">
+                Be first to know <span aria-hidden>→</span>
+              </InkButton>
+              <InkButton href="#pipeline" variant="ghost">
+                Explore the workflow <span aria-hidden>→</span>
+              </InkButton>
             </div>
           </div>
           <div className="hidden lg:block">
@@ -1100,26 +1117,54 @@ function Lead() {
 }
 
 function HeroPulseRail() {
+  const tcRef = useRef<HTMLSpanElement | null>(null);
+
+  // Ticking timecode, 24 fps. Direct textContent writes; no React re-renders.
+  // Holds still while reduce-motion is active (checked per tick so the header
+  // toggle takes effect immediately, no listener bookkeeping).
+  useEffect(() => {
+    let frame = 14 * 24 + 12; // matches the initial 00:00:14:12
+    const iv = window.setInterval(() => {
+      if (document.documentElement.classList.contains("reduce-motion")) return;
+      frame = (frame + 1) % (60 * 60 * 24);
+      const total = Math.floor(frame / 24);
+      const mm = String(Math.floor(total / 60)).padStart(2, "0");
+      const ss = String(total % 60).padStart(2, "0");
+      const ff = String(frame % 24).padStart(2, "0");
+      if (tcRef.current) tcRef.current.textContent = `00:${mm}:${ss}:${ff}`;
+    }, 1000 / 24);
+    return () => window.clearInterval(iv);
+  }, []);
+
   return (
     <div className="my-8 flex items-center gap-4" aria-hidden="true">
-      <span className="font-mono text-[9px] tracking-[0.14em] text-accent">00:00:14:12</span>
-      <svg viewBox="0 0 1000 20" className="h-5 min-w-0 flex-1" preserveAspectRatio="none">
-        {Array.from({ length: 160 }).map((_, i) => {
-          const energy = round3(Math.max(1, Math.abs(Math.sin(i * 0.73) * Math.cos(i * 0.19)) * 15));
-          return (
-            <rect
-              key={i}
-              x={i * 6.25}
-              y={(20 - energy) / 2}
-              width="1"
-              height={energy}
-              fill="currentColor"
-              className="text-accent"
-              opacity={Math.max(0.16, 1 - i / 190)}
-            />
-          );
-        })}
-      </svg>
+      <span ref={tcRef} className="font-mono text-[9px] tracking-[0.14em] tabular-nums text-accent">
+        00:00:14:12
+      </span>
+      <div className="relative min-w-0 flex-1 basis-0 overflow-hidden">
+        <svg viewBox="0 0 1000 20" className="h-5 w-full" preserveAspectRatio="none">
+          {Array.from({ length: 160 }).map((_, i) => {
+            const energy = round3(
+              Math.max(1, Math.abs(Math.sin(i * 0.73) * Math.cos(i * 0.19)) * 15),
+            );
+            return (
+              <rect
+                key={i}
+                x={i * 6.25}
+                y={(20 - energy) / 2}
+                width="1"
+                height={energy}
+                fill="currentColor"
+                className="text-accent"
+                opacity={Math.max(0.16, 1 - i / 190)}
+              />
+            );
+          })}
+        </svg>
+        <div className="playhead-wrap pointer-events-none absolute inset-0">
+          <span className="absolute inset-y-0 left-0 w-px bg-accent/70" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -1137,7 +1182,13 @@ const JOB_STAGES: {
   artifact: string;
 }[] = [
   { id: "ingest", n: "01", label: "Ingest & probe", sec: 2.0, artifact: "media.probe.json" },
-  { id: "transcribe", n: "02", label: "Transcribe (ASR)", sec: 6.5, artifact: "transcript.de.jsonl" },
+  {
+    id: "transcribe",
+    n: "02",
+    label: "Transcribe (ASR)",
+    sec: 6.5,
+    artifact: "transcript.de.jsonl",
+  },
   { id: "translate", n: "03", label: "Translate", sec: 3.5, artifact: "transcript.en.jsonl" },
   { id: "diarize", n: "04", label: "Diarize", sec: 4.0, artifact: "speakers.rttm" },
   { id: "voice", n: "05", label: "Voice (TTS)", sec: 7.0, artifact: "lines/*.wav" },
@@ -1203,7 +1254,7 @@ const FAILURES: Record<FailureKind, Omit<FailureInfo, "applyRecovery">> = {
       "FFmpeg opened interview_de.mp4 but track #2 uses an EAC3 stream that this build cannot decode. Video and track #1 were probed successfully; the file was not modified.",
     recoverLabel: "Install decoder & rescan",
     recoveryNote:
-      "Installed the missing EAC3 decoder. Re-probing the container — video and existing tracks are reused, only the audio scan re-runs.",
+      "Installed the missing EAC3 decoder. Re-probing the container; video and existing tracks are reused, only the audio scan re-runs.",
     fromCheckpoint: 0.6,
   },
   partial_ingest: {
@@ -1212,7 +1263,7 @@ const FAILURES: Record<FailureKind, Omit<FailureInfo, "applyRecovery">> = {
     code: "E_TRUNCATED_STREAM",
     title: "Source media ended mid-segment",
     detail:
-      "The last 3.2s of interview_de.mp4 are missing packets — likely a truncated export. Trackdub transcribed 124 of 128 segments and saved them. Nothing was discarded.",
+      "The last 3.2s of interview_de.mp4 are missing packets, likely a truncated export. Trackdub transcribed 124 of 128 segments and saved them. Nothing was discarded.",
     recoverLabel: "Continue with 124 saved segments",
     recoveryNote:
       "Accepted partial ingest. Downstream stages will run on the 124 valid segments; the truncated tail is flagged in the transcript for review.",
@@ -1291,7 +1342,10 @@ function ResumableJob() {
         }
         return { ...prev, status: s };
       });
-      addLog(next ? "Resume · continuing from last checkpoint" : "Pause · state persisted to disk", "warn");
+      addLog(
+        next ? "Resume · continuing from last checkpoint" : "Pause · state persisted to disk",
+        "warn",
+      );
       return next;
     });
   };
@@ -1341,7 +1395,10 @@ function ResumableJob() {
     setRunning(false);
     setFailure(info);
     addLog(`FAIL · ${info.code} · ${info.title.toLowerCase()}`, "warn");
-    addLog(`Paused · checkpoint saved at ${info.stage} ${(info.fromCheckpoint * 100).toFixed(0)}%`, "warn");
+    addLog(
+      `Paused · checkpoint saved at ${info.stage} ${(info.fromCheckpoint * 100).toFixed(0)}%`,
+      "warn",
+    );
   };
 
   const recover = () => {
@@ -1382,15 +1439,13 @@ function ResumableJob() {
               Pause anything. Edit one stage. Resume only what changed.
             </h2>
             <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
-              Every stage writes a checkpoint to disk. Close the app, unplug the
-              laptop, edit a translation two days later — the job picks up from
-              the last completed artifact.
+              Every stage writes a checkpoint to disk. Close the app, unplug the laptop, edit a
+              translation two days later, and the job picks up from the last completed artifact.
             </p>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-              When you change a translated line, Trackdub marks that stage and
-              everything downstream as <em>stale</em> and requeues only those.
-              Ingest, transcription, and diarization stay done — they don't
-              depend on the edit.
+              When you change a translated line, Trackdub marks that stage and everything downstream
+              as <em>stale</em> and requeues only those. Ingest, transcription, and diarization stay
+              done; they don't depend on the edit.
             </p>
             <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
               Try it → pause · edit translation · resume
@@ -1404,8 +1459,12 @@ function ResumableJob() {
             >
               {/* header row */}
               <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                <div className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: DIM }}>
-                  Job · interview_de.mp4 → en-US &nbsp;·&nbsp; checkpoint dir: /projects/interview/.trackdub
+                <div
+                  className="font-mono text-[10px] uppercase tracking-[0.14em]"
+                  style={{ color: DIM }}
+                >
+                  Job · interview_de.mp4 → en-US &nbsp;·&nbsp; checkpoint dir:
+                  /projects/interview/.trackdub
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -1614,8 +1673,8 @@ function ResumableJob() {
             </div>
 
             <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Fig. 02b &nbsp;·&nbsp; Simulated job runner with failure injection.
-              Progress, errors, and log are client-side only.
+              Fig. 02b &nbsp;·&nbsp; Simulated job runner with failure injection. Progress, errors,
+              and log are client-side only.
             </p>
           </div>
         </div>
@@ -1670,15 +1729,15 @@ function ProductPlate() {
           <div>
             <SectionNumber n="01a" label="The workstation" />
             <p className="max-w-sm text-[16px] leading-relaxed text-muted-foreground">
-              The interface is being built around the pipeline itself: source media, editable stages,
-              and the exact state of every run in one place.
+              The interface is being built around the pipeline itself: source media, editable
+              stages, and the exact state of every run in one place.
             </p>
           </div>
           <div>
             <figure className="overflow-hidden border border-border">
               <img
                 src="/screenshots/app-shell-early-build.png"
-                alt="Trackdub desktop app shell, early build — pipeline stage list with separation, cleanup, transcribe, and identify stages, stem separation and speaker diarization toggles, voice selector"
+                alt="Trackdub desktop app shell, early build: pipeline stage list with separation, cleanup, transcribe, and identify stages, stem separation and speaker diarization toggles, voice selector"
                 className="w-full"
                 loading="lazy"
                 width={2766}
@@ -1686,7 +1745,7 @@ function ProductPlate() {
               />
             </figure>
             <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Fig. 02 &nbsp;·&nbsp; Actual desktop shell, early build. Pre-release UI — chrome and
+              Fig. 02 &nbsp;·&nbsp; Actual desktop shell, early build. Pre-release UI; chrome and
               copy are still moving.
             </p>
           </div>
@@ -1727,11 +1786,11 @@ function WorkstationMock() {
 
       <div className="grid grid-cols-12">
         {/* left: stages */}
-        <div
-          className="col-span-3 border-r p-4"
-          style={{ borderColor: "oklch(0.28 0.014 250)" }}
-        >
-          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+        <div className="col-span-3 border-r p-4" style={{ borderColor: "oklch(0.28 0.014 250)" }}>
+          <div
+            className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]"
+            style={{ color: dim }}
+          >
             Run
           </div>
           <ol className="space-y-1.5">
@@ -1765,23 +1824,29 @@ function WorkstationMock() {
               </li>
             ))}
           </ol>
-          <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+          <div
+            className="mt-6 font-mono text-[10px] uppercase tracking-[0.14em]"
+            style={{ color: dim }}
+          >
             Provider
           </div>
           <div className="mt-2 font-mono text-[12px]">DirectML · RTX 4070</div>
-          <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+          <div
+            className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em]"
+            style={{ color: dim }}
+          >
             Manifest
           </div>
           <div className="mt-2 font-mono text-[12px]">bundled · commercial</div>
         </div>
 
         {/* center: script */}
-        <div
-          className="col-span-6 border-r p-5"
-          style={{ borderColor: "oklch(0.28 0.014 250)" }}
-        >
+        <div className="col-span-6 border-r p-5" style={{ borderColor: "oklch(0.28 0.014 250)" }}>
           <div className="mb-3 flex items-center justify-between">
-            <div className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+            <div
+              className="font-mono text-[10px] uppercase tracking-[0.14em]"
+              style={{ color: dim }}
+            >
               Script · line 42
             </div>
             <div className="font-mono text-[10px]" style={{ color: dim }}>
@@ -1790,11 +1855,41 @@ function WorkstationMock() {
           </div>
           <div className="space-y-2">
             {[
-              { t: "00:34", s: "S2", de: "京都の朝は静かに始まる。", en: "Kyoto wakes quietly.", a: false },
-              { t: "00:38", s: "S1", de: "Wir haben die Pipeline neu gebaut,", en: "We rebuilt the pipeline,", a: false },
-              { t: "00:42", s: "S1", de: "damit jede Stufe editierbar bleibt.", en: "so every stage stays editable.", a: true },
-              { t: "00:46", s: "S2", de: "Und wenn etwas nicht stimmt —", en: "And if something is off —", a: false },
-              { t: "00:49", s: "S2", de: "regenerierst du nur diese eine Zeile.", en: "you regenerate just that one line.", a: false },
+              {
+                t: "00:34",
+                s: "S2",
+                de: "京都の朝は静かに始まる。",
+                en: "Kyoto wakes quietly.",
+                a: false,
+              },
+              {
+                t: "00:38",
+                s: "S1",
+                de: "Wir haben die Pipeline neu gebaut,",
+                en: "We rebuilt the pipeline,",
+                a: false,
+              },
+              {
+                t: "00:42",
+                s: "S1",
+                de: "damit jede Stufe editierbar bleibt.",
+                en: "so every stage stays editable.",
+                a: true,
+              },
+              {
+                t: "00:46",
+                s: "S2",
+                de: "Und wenn etwas nicht stimmt …",
+                en: "And if something is off …",
+                a: false,
+              },
+              {
+                t: "00:49",
+                s: "S2",
+                de: "regenerierst du nur diese eine Zeile.",
+                en: "you regenerate just that one line.",
+                a: false,
+              },
             ].map((r) => (
               <div key={r.t} className="grid grid-cols-[52px_28px_1fr] gap-3 py-1">
                 <span className="font-mono text-[11px]" style={{ color: dim }}>
@@ -1828,7 +1923,10 @@ function WorkstationMock() {
 
           {/* waveform */}
           <div className="mt-4">
-            <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+            <div
+              className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em]"
+              style={{ color: dim }}
+            >
               <span>Waveform</span>
               <span>−14.1 LUFS</span>
             </div>
@@ -1854,7 +1952,10 @@ function WorkstationMock() {
 
         {/* right: active stage and line metadata */}
         <div className="col-span-3 p-4">
-          <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+          <div
+            className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em]"
+            style={{ color: dim }}
+          >
             Stage
           </div>
           {[
@@ -1866,7 +1967,10 @@ function WorkstationMock() {
             ["Mix", "Pending", dim],
             ["Export", "Pending", dim],
           ].map(([name, status, color]) => (
-            <div key={name} className="flex items-center justify-between gap-3 py-1.5 font-mono text-[10px]">
+            <div
+              key={name}
+              className="flex items-center justify-between gap-3 py-1.5 font-mono text-[10px]"
+            >
               <span className="flex items-center gap-2" style={{ color: inkText }}>
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
                 {name}
@@ -1874,7 +1978,10 @@ function WorkstationMock() {
               <span style={{ color }}>{status}</span>
             </div>
           ))}
-          <div className="mt-5 border-t pt-4 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ borderColor: "oklch(0.28 0.014 250)", color: dim }}>
+          <div
+            className="mt-5 border-t pt-4 font-mono text-[10px] uppercase tracking-[0.14em]"
+            style={{ borderColor: "oklch(0.28 0.014 250)", color: dim }}
+          >
             Line 004
           </div>
           <dl className="mt-3 space-y-2 font-mono text-[10px]">
@@ -1895,19 +2002,59 @@ function WorkstationMock() {
       </div>
 
       <div className="border-t px-4 py-3" style={{ borderColor: "oklch(0.28 0.014 250)" }}>
-        <div className="mb-2 grid grid-cols-[80px_1fr] gap-3 font-mono text-[9px]" style={{ color: dim }}>
+        <div
+          className="mb-2 grid grid-cols-[80px_1fr] gap-3 font-mono text-[9px]"
+          style={{ color: dim }}
+        >
           <span>00:00:00</span>
-          <div className="flex justify-between"><span>00:00:05</span><span>00:00:10</span><span>00:00:15</span><span>00:00:20</span><span>00:00:25</span></div>
+          <div className="flex justify-between">
+            <span>00:00:05</span>
+            <span>00:00:10</span>
+            <span>00:00:15</span>
+            <span>00:00:20</span>
+            <span>00:00:25</span>
+          </div>
         </div>
         {["Source ref", "Dialogue", "Music bed", "SFX"].map((track, trackIndex) => (
-          <div key={track} className="grid grid-cols-[80px_1fr] items-center gap-3 border-t py-1.5" style={{ borderColor: "oklch(0.25 0.014 250)" }}>
-            <span className="font-mono text-[9px]" style={{ color: trackIndex === 1 ? "oklch(0.74 0.17 62)" : dim }}>{track}</span>
+          <div
+            key={track}
+            className="grid grid-cols-[80px_1fr] items-center gap-3 border-t py-1.5"
+            style={{ borderColor: "oklch(0.25 0.014 250)" }}
+          >
+            <span
+              className="font-mono text-[9px]"
+              style={{ color: trackIndex === 1 ? "oklch(0.74 0.17 62)" : dim }}
+            >
+              {track}
+            </span>
             <svg viewBox="0 0 600 18" className="h-4 w-full" preserveAspectRatio="none">
               {Array.from({ length: 100 }).map((_, i) => {
-                const signal = round3(2 + Math.abs(Math.sin((i + trackIndex * 5) * 0.83) * Math.cos(i * 0.17)) * (trackIndex === 1 ? 14 : 9));
-                return <rect key={i} x={i * 6} y={(18 - signal) / 2} width="2.4" height={signal} fill={trackIndex === 1 ? "oklch(0.72 0.15 50)" : "oklch(0.48 0.02 245)"} />;
+                const signal = round3(
+                  2 +
+                    Math.abs(Math.sin((i + trackIndex * 5) * 0.83) * Math.cos(i * 0.17)) *
+                      (trackIndex === 1 ? 14 : 9),
+                );
+                return (
+                  <rect
+                    key={i}
+                    x={i * 6}
+                    y={(18 - signal) / 2}
+                    width="2.4"
+                    height={signal}
+                    fill={trackIndex === 1 ? "oklch(0.72 0.15 50)" : "oklch(0.48 0.02 245)"}
+                  />
+                );
               })}
-              {trackIndex === 1 && <line x1="280" x2="280" y1="0" y2="18" stroke="oklch(0.78 0.17 62)" strokeWidth="1" />}
+              {trackIndex === 1 && (
+                <line
+                  x1="280"
+                  x2="280"
+                  y1="0"
+                  y2="18"
+                  stroke="oklch(0.78 0.17 62)"
+                  strokeWidth="1"
+                />
+              )}
             </svg>
           </div>
         ))}
@@ -1919,17 +2066,37 @@ function WorkstationMock() {
 /* ---------------- trust strip ---------------- */
 
 function TrustStrip() {
-  const items = ["Local by default", "Deterministic runs", "Cross-platform", "Open manifest", "No account required"];
+  const items = [
+    "Local by default",
+    "Deterministic runs",
+    "Cross-platform",
+    "Open manifest",
+    "No account required",
+    "Per-line regen",
+    "Resumable jobs",
+    "CPU fallback, always",
+    "Your disk, your files",
+  ];
   return (
     <section data-reveal className="reveal border-b border-border bg-surface">
-      <Container className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 py-6 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-        {items.map((t, i) => (
-          <span key={t} className="flex items-center gap-8">
-            <span>{t}</span>
-            {i < items.length - 1 && <span className="text-hairline">·</span>}
-          </span>
-        ))}
-      </Container>
+      <p className="sr-only">{items.join(". ")}.</p>
+      <div className="ticker-mask overflow-hidden py-5" aria-hidden>
+        <div className="ticker-track flex w-max items-center">
+          {[0, 1].map((copy) => (
+            <div
+              key={copy}
+              className="flex items-center font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
+            >
+              {items.map((t) => (
+                <span key={t} className="flex items-center whitespace-nowrap">
+                  <span className="px-6">{t}</span>
+                  <span className="text-accent">·</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -1941,48 +2108,42 @@ const STAGES = [
     n: "01",
     name: "Ingest",
     one: "Probe media. Detect scenes, silence, and speech.",
-    body:
-      "Point Trackdub at a file or folder. It reads the container, extracts audio, detects shot boundaries, and runs voice activity — building the frame every later stage will work against.",
+    body: "Point Trackdub at a file or folder. It reads the container, extracts audio, detects shot boundaries, and runs voice activity, building the frame every later stage will work against.",
     detail: ["ffprobe media", "shot / silence detection", "loudness reference (LUFS)"],
   },
   {
     n: "02",
     name: "Transcribe",
     one: "Time-accurate source transcript with speaker turns.",
-    body:
-      "Source-language ASR with word-level timestamps. The transcript is a real editable document, not an opaque intermediate — fix a word here and every downstream stage picks it up.",
+    body: "Source-language ASR with word-level timestamps. The transcript is a real editable document, not an opaque intermediate. Fix a word here and every downstream stage picks it up.",
     detail: ["word timestamps", "editable transcript", "diarization-ready turns"],
   },
   {
     n: "03",
     name: "Translate",
     one: "Human-editable target script, tied to timecode.",
-    body:
-      "Translation happens per line, not per file. Idioms, names, and jargon go in a project glossary; the target script preserves the source's timing so later stages can align to it.",
+    body: "Translation happens per line, not per file. Idioms, names, and jargon go in a project glossary; the target script preserves the source's timing so later stages can align to it.",
     detail: ["per-line MT", "project glossary", "timecode preserved"],
   },
   {
     n: "04",
     name: "Diarize",
     one: "Assign speakers. Attach a voice reference to each one.",
-    body:
-      "Trackdub clusters voices, then lets you name them, merge them, or split them. Each speaker gets a short reference clip that the voicing stage will match — one clone per person, not one voice for the whole video.",
+    body: "Trackdub clusters voices, then lets you name them, merge them, or split them. Each speaker gets a short reference clip that the voicing stage will match: one clone per person, not one voice for the whole video.",
     detail: ["speaker clustering", "manual merge / split", "voice reference per speaker"],
   },
   {
     n: "05",
     name: "Voice",
     one: "Zero-shot TTS. Regenerate any single line.",
-    body:
-      "Per-speaker voice cloning generates each line at its target duration. Prosody is editable — pace, emphasis, pause — and any line can be regenerated on its own without redoing the rest.",
+    body: "Per-speaker voice cloning generates each line at its target duration. Prosody is editable (pace, emphasis, pause), and any line can be regenerated on its own without redoing the rest.",
     detail: ["per-speaker cloning", "per-line prosody", "regen line 42 in isolation"],
   },
   {
     n: "06",
     name: "Mix",
     one: "Align, duck under music, mux the final file.",
-    body:
-      "Dubbed lines snap to the original beats. Music and SFX from the source are preserved and ducked under dialogue. Export a muxed video, stems, or captions — deterministic given the same project manifest.",
+    body: "Dubbed lines snap to the original beats. Music and SFX from the source are preserved and ducked under dialogue. Export a muxed video, stems, or captions, deterministic given the same project manifest.",
     detail: ["timeline alignment", "music / SFX ducking", "video + stems + captions"],
   },
 ];
@@ -1999,11 +2160,15 @@ function PipelineFeature() {
       <div className="mx-auto w-full max-w-[1600px] px-6 sm:px-10">
         <div className="grid border-b border-border lg:grid-cols-[220px_320px_1fr]">
           <div className="flex items-center border-b border-border py-8 lg:border-b-0 lg:border-r lg:py-10">
-            <span className="font-serif text-[112px] leading-[0.75] tracking-[-0.06em] text-[var(--burgundy)] sm:text-[150px]">01</span>
+            <span className="font-serif text-[112px] leading-[0.75] tracking-[-0.06em] text-[var(--burgundy)] sm:text-[150px]">
+              01
+            </span>
           </div>
           <div className="border-b border-border py-8 lg:border-b-0 lg:border-r lg:px-9 lg:py-10">
             <HeroPulseRail />
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--rust)]">The pipeline</div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--rust)]">
+              The pipeline
+            </div>
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-muted-foreground">
               A clear, inspectable path from source media to final mix. Nothing is hidden.
             </p>
@@ -2014,7 +2179,8 @@ function PipelineFeature() {
                 Built for control at every stage.
               </h2>
               <p className="mt-5 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-                Review every line. Tweak every take. Rerun only what changed. You are always in control.
+                Review every line. Tweak every take. Rerun only what changed. You are always in
+                control.
               </p>
             </div>
           </div>
@@ -2040,7 +2206,7 @@ function PipelineFeature() {
               Six stages. Each one editable, each one rerunnable.
             </h3>
             <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted-foreground">
-              A dubbed video is not a single button. It's a chain of decisions — what someone said,
+              A dubbed video is not a single button. It's a chain of decisions: what someone said,
               what it should say in the target language, whose voice says it, and how it sits in the
               mix. Trackdub exposes that chain, so you can inspect any link and change it in place.
             </p>
@@ -2099,10 +2265,46 @@ const INITIAL_SPEAKERS: Speaker[] = [
 ];
 
 const INITIAL_LINES: Line[] = [
-  { id: 41, t: "00:38.120", speakerId: "s1", source: "Wir haben die Pipeline neu gebaut,", target: "We rebuilt the pipeline", pace: 1.0, pause: 200, duration: 2.86 },
-  { id: 42, t: "00:42.180", speakerId: "s1", source: "damit jede Stufe editierbar bleibt.", target: "so every stage stays editable.", pace: 1.0, pause: 200, duration: 3.14 },
-  { id: 43, t: "00:46.900", speakerId: "s2", source: "Und wenn etwas nicht stimmt —", target: "And if something's off —", pace: 1.0, pause: 220, duration: 2.10 },
-  { id: 44, t: "00:49.640", speakerId: "s2", source: "änderst du nur die eine Zeile.", target: "you only change that one line.", pace: 1.0, pause: 240, duration: 2.55 },
+  {
+    id: 41,
+    t: "00:38.120",
+    speakerId: "s1",
+    source: "Wir haben die Pipeline neu gebaut,",
+    target: "We rebuilt the pipeline",
+    pace: 1.0,
+    pause: 200,
+    duration: 2.86,
+  },
+  {
+    id: 42,
+    t: "00:42.180",
+    speakerId: "s1",
+    source: "damit jede Stufe editierbar bleibt.",
+    target: "so every stage stays editable.",
+    pace: 1.0,
+    pause: 200,
+    duration: 3.14,
+  },
+  {
+    id: 43,
+    t: "00:46.900",
+    speakerId: "s2",
+    source: "Und wenn etwas nicht stimmt …",
+    target: "And if something's off …",
+    pace: 1.0,
+    pause: 220,
+    duration: 2.1,
+  },
+  {
+    id: 44,
+    t: "00:49.640",
+    speakerId: "s2",
+    source: "änderst du nur die eine Zeile.",
+    target: "you only change that one line.",
+    pace: 1.0,
+    pause: 240,
+    duration: 2.55,
+  },
 ];
 
 const STAGE_TABS = [
@@ -2172,8 +2374,7 @@ function Walkthrough() {
     }, 900);
   };
 
-  const staleCount = (s: StageId) =>
-    Object.values(stale).reduce((n, m) => n + (m?.[s] ? 1 : 0), 0);
+  const staleCount = (s: StageId) => Object.values(stale).reduce((n, m) => n + (m?.[s] ? 1 : 0), 0);
 
   return (
     <section id="walkthrough" data-reveal className="reveal border-b border-border bg-surface">
@@ -2187,13 +2388,16 @@ function Walkthrough() {
             <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
               A sample project, running in your browser. Change the transcript, retarget a
               translation, rename a speaker, or regenerate a single voice line. Downstream stages
-              mark themselves stale — nothing else is touched.
+              mark themselves stale; nothing else is touched.
             </p>
             <ul className="mt-8 space-y-2 font-mono text-[12px] text-muted-foreground">
               {STAGE_TABS.map((s) => {
                 const c = staleCount(s.id);
                 return (
-                  <li key={s.id} className="flex items-center justify-between border-b border-hairline py-2">
+                  <li
+                    key={s.id}
+                    className="flex items-center justify-between border-b border-hairline py-2"
+                  >
                     <span>
                       <span className="text-accent">{s.n}</span> &nbsp; {s.label}
                     </span>
@@ -2208,7 +2412,12 @@ function Walkthrough() {
 
           <div className="lg:col-span-8">
             <div className="border border-border shadow-panel" style={{ background: PANEL }}>
-              <div role="tablist" aria-label="Pipeline stage" className="flex flex-wrap border-b" style={{ borderColor: LINE }}>
+              <div
+                role="tablist"
+                aria-label="Pipeline stage"
+                className="flex flex-wrap border-b"
+                style={{ borderColor: LINE }}
+              >
                 {STAGE_TABS.map((s) => {
                   const active = stage === s.id;
                   const c = staleCount(s.id);
@@ -2228,7 +2437,11 @@ function Walkthrough() {
                       <span style={{ color: ACC }}>{s.n}</span>
                       <span>{s.label}</span>
                       {c > 0 && (
-                        <span aria-label={`${c} stale`} className="ml-1 inline-block h-1.5 w-1.5 rounded-full" style={{ background: ACC }} />
+                        <span
+                          aria-label={`${c} stale`}
+                          className="ml-1 inline-block h-1.5 w-1.5 rounded-full"
+                          style={{ background: ACC }}
+                        />
                       )}
                     </button>
                   );
@@ -2237,21 +2450,38 @@ function Walkthrough() {
               <div className="min-h-[380px] p-5">
                 {stage === "ingest" && <IngestPane />}
                 {stage === "transcribe" && (
-                  <TranscribePane lines={lines} speakers={speakers} stale={stale} onEdit={editSource} />
+                  <TranscribePane
+                    lines={lines}
+                    speakers={speakers}
+                    stale={stale}
+                    onEdit={editSource}
+                  />
                 )}
                 {stage === "translate" && (
                   <TranslatePane lines={lines} stale={stale} onEdit={editTarget} />
                 )}
                 {stage === "diarize" && (
-                  <DiarizePane lines={lines} speakers={speakers} onRename={renameSpeaker} onReassign={reassignSpeaker} />
+                  <DiarizePane
+                    lines={lines}
+                    speakers={speakers}
+                    onRename={renameSpeaker}
+                    onReassign={reassignSpeaker}
+                  />
                 )}
                 {stage === "voice" && (
-                  <VoicePane lines={lines} speakers={speakers} stale={stale} regenId={regenId} onRegen={regenerate} />
+                  <VoicePane
+                    lines={lines}
+                    speakers={speakers}
+                    stale={stale}
+                    regenId={regenId}
+                    onRegen={regenerate}
+                  />
                 )}
               </div>
             </div>
             <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Fig. 02 &nbsp;·&nbsp; Interactive sample &nbsp;·&nbsp; state lives in your browser
+              Fig. 02 &nbsp;·&nbsp; Interactive sample &nbsp;·&nbsp; runs in this page, nothing
+              uploaded
             </p>
           </div>
         </div>
@@ -2295,14 +2525,18 @@ function IngestPane() {
             ["loudness", "−14.1 LUFS"],
           ].map(([k, v]) => (
             <tr key={k}>
-              <td className="border-b py-1.5 pr-6" style={{ borderColor: LINE }}>{k}</td>
-              <td className="border-b py-1.5 text-right" style={{ borderColor: LINE, color: INK }}>{v}</td>
+              <td className="border-b py-1.5 pr-6" style={{ borderColor: LINE }}>
+                {k}
+              </td>
+              <td className="border-b py-1.5 text-right" style={{ borderColor: LINE, color: INK }}>
+                {v}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
       <div className="mt-4 text-[11px]">
-        Nothing to edit here — but every later stage inherits this frame. Change the media, and the
+        Nothing to edit here, but every later stage inherits this frame. Change the media, and the
         whole project reprobes.
       </div>
     </div>
@@ -2365,14 +2599,26 @@ function TranscribePane({
           const s = spk(l.speakerId);
           const isStale = !!(stale[l.id]?.translate || stale[l.id]?.voice);
           return (
-            <div key={l.id} className="grid grid-cols-[80px_110px_1fr] items-center gap-3 py-1.5 text-[13px]">
-              <span className="font-mono text-[11px]" style={{ color: DIM }}>{l.t}</span>
-              <span className="flex items-center gap-2 font-mono text-[11px]" style={{ color: DIM }}>
+            <div
+              key={l.id}
+              className="grid grid-cols-[80px_110px_1fr] items-center gap-3 py-1.5 text-[13px]"
+            >
+              <span className="font-mono text-[11px]" style={{ color: DIM }}>
+                {l.t}
+              </span>
+              <span
+                className="flex items-center gap-2 font-mono text-[11px]"
+                style={{ color: DIM }}
+              >
                 <span className="h-2 w-2 rounded-full" style={{ background: s?.color }} />
                 {s?.name}
               </span>
               <span>
-                <EditableSpan value={l.source} onCommit={(v) => onEdit(l.id, v)} ariaLabel={`Edit source line ${l.id}`} />
+                <EditableSpan
+                  value={l.source}
+                  onCommit={(v) => onEdit(l.id, v)}
+                  ariaLabel={`Edit source line ${l.id}`}
+                />
                 {isStale && <StaleTag label="downstream" />}
               </span>
             </div>
@@ -2380,8 +2626,7 @@ function TranscribePane({
         })}
       </div>
       <div className="mt-4 text-[11px]" style={{ color: DIM }}>
-        Tip: change a word, then switch to Translate — that line will be marked stale, the rest
-        stay.
+        Tip: change a word, then switch to Translate; that line will be marked stale, the rest stay.
       </div>
     </div>
   );
@@ -2410,19 +2655,33 @@ function TranslatePane({
       {lines.map((l) => {
         const staleT = !!stale[l.id]?.translate;
         return (
-          <div key={l.id} className="grid grid-cols-[80px_1fr_1fr] items-start gap-3 border-b py-2 text-[13px]" style={{ borderColor: LINE }}>
-            <span className="font-mono text-[11px]" style={{ color: DIM }}>{l.t}</span>
+          <div
+            key={l.id}
+            className="grid grid-cols-[80px_1fr_1fr] items-start gap-3 border-b py-2 text-[13px]"
+            style={{ borderColor: LINE }}
+          >
+            <span className="font-mono text-[11px]" style={{ color: DIM }}>
+              {l.t}
+            </span>
             <span style={{ color: DIM }}>
               {l.source}
               {staleT && <StaleTag label="source changed" />}
             </span>
             <span>
-              <EditableSpan value={l.target} onCommit={(v) => onEdit(l.id, v)} ariaLabel={`Edit target line ${l.id}`} serif />
+              <EditableSpan
+                value={l.target}
+                onCommit={(v) => onEdit(l.id, v)}
+                ariaLabel={`Edit target line ${l.id}`}
+                serif
+              />
             </span>
           </div>
         );
       })}
-      <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: DIM }}>
+      <div
+        className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em]"
+        style={{ color: DIM }}
+      >
         Glossary · 12 terms locked
       </div>
     </div>
@@ -2446,10 +2705,18 @@ function DiarizePane({
       <PaneHeader>Speakers · rename inline</PaneHeader>
       <div className="mb-5 space-y-2">
         {speakers.map((s) => (
-          <div key={s.id} className="flex items-center justify-between border-b py-2" style={{ borderColor: LINE }}>
+          <div
+            key={s.id}
+            className="flex items-center justify-between border-b py-2"
+            style={{ borderColor: LINE }}
+          >
             <div className="flex items-center gap-3">
               <span className="h-6 w-6 rounded-full" style={{ background: s.color }} />
-              <EditableSpan value={s.name} onCommit={(v) => onRename(s.id, v || s.name)} ariaLabel={`Rename ${s.name}`} />
+              <EditableSpan
+                value={s.name}
+                onCommit={(v) => onRename(s.id, v || s.name)}
+                ariaLabel={`Rename ${s.name}`}
+              />
               <span className="font-mono text-[10px]" style={{ color: DIM }}>
                 {count(s.id)} lines in sample · 4.2s reference
               </span>
@@ -2461,17 +2728,28 @@ function DiarizePane({
       <div className="space-y-1 text-[13px]">
         {lines.map((l) => (
           <div key={l.id} className="grid grid-cols-[80px_1fr_160px] items-center gap-3 py-1.5">
-            <span className="font-mono text-[11px]" style={{ color: DIM }}>{l.t}</span>
-            <span style={{ color: DIM }} className="truncate">{l.source}</span>
+            <span className="font-mono text-[11px]" style={{ color: DIM }}>
+              {l.t}
+            </span>
+            <span style={{ color: DIM }} className="truncate">
+              {l.source}
+            </span>
             <select
               value={l.speakerId}
               onChange={(e) => onReassign(l.id, e.target.value)}
               aria-label={`Reassign line ${l.id} speaker`}
               className="font-mono text-[11px] outline-none focus:ring-1"
-              style={{ background: PANEL_HI, color: INK, border: `1px solid ${LINE}`, padding: "4px 6px" }}
+              style={{
+                background: PANEL_HI,
+                color: INK,
+                border: `1px solid ${LINE}`,
+                padding: "4px 6px",
+              }}
             >
               {speakers.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
               ))}
             </select>
           </div>
@@ -2505,7 +2783,10 @@ function VoicePane({
           const busy = regenId === l.id;
           return (
             <div key={l.id} className="border p-3" style={{ borderColor: LINE }}>
-              <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: DIM }}>
+              <div
+                className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em]"
+                style={{ color: DIM }}
+              >
                 <span>
                   Line {l.id} · {l.t} · <span style={{ color: s?.color }}>{s?.name}</span>
                   {isStale && !busy && <StaleTag label="needs regen" />}
@@ -2514,8 +2795,15 @@ function VoicePane({
                 <span>{l.duration.toFixed(2)}s</span>
               </div>
               <div className="mt-2 font-serif text-[16px] leading-snug">"{l.target}"</div>
-              <div className="mt-3 grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 font-mono text-[11px]" style={{ color: DIM }}>
-                <FakeWaveform seed={l.id + Math.round(l.pace * 100)} color={s?.color ?? ACC} busy={busy} />
+              <div
+                className="mt-3 grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 font-mono text-[11px]"
+                style={{ color: DIM }}
+              >
+                <FakeWaveform
+                  seed={l.id + Math.round(l.pace * 100)}
+                  color={s?.color ?? ACC}
+                  busy={busy}
+                />
                 <span>pace {l.pace.toFixed(2)}×</span>
                 <span>pause {l.pause}ms</span>
                 <button
@@ -2570,40 +2858,52 @@ function StageChapters() {
       <Container className="py-20 sm:py-28">
         <SectionNumber n="03" label="Each stage, in detail" />
         <h2 className="mt-2 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Each pipeline stage, in detail.
+          Open the hood on any stage.
         </h2>
-        <div className="mt-14 space-y-16">
-          {STAGES.map((s, i) => (
-            <article
-              key={s.n}
-              id={`stage-${s.n}`}
-              className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16"
-            >
-              <header className="lg:col-span-5">
-                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
-                  {s.n} &nbsp;/&nbsp; {s.name}
+        <div className="mt-14 space-y-16 lg:space-y-24">
+          {STAGES.map((s, i) => {
+            const flipped = i % 2 === 1;
+            return (
+              <article
+                key={s.n}
+                id={`stage-${s.n}`}
+                className="grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-16"
+              >
+                <header className={`lg:col-span-5 ${flipped ? "lg:order-2" : ""}`}>
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-serif text-[44px] leading-none tracking-tight text-accent/80 sm:text-[56px]">
+                      {s.n}
+                    </span>
+                    <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
+                      {s.name}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 font-serif text-3xl leading-[1.1] tracking-tight text-foreground sm:text-4xl">
+                    {s.one}
+                  </h3>
+                  <p className="mt-5 text-[16px] leading-relaxed text-muted-foreground">{s.body}</p>
+                  <ul className="mt-6 space-y-2 font-mono text-[12px] text-muted-foreground">
+                    {s.detail.map((d) => (
+                      <li key={d} className="flex gap-3">
+                        <span className="text-accent">·</span>
+                        <span>{d}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </header>
+                <div
+                  className={`lg:col-span-7 ${flipped ? "lg:order-1" : ""} ${i > 0 ? "lg:mt-6" : ""}`}
+                >
+                  <StageInset stage={s.name} index={i} />
+                  <p
+                    className={`mt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground ${flipped ? "lg:text-right" : ""}`}
+                  >
+                    Fig. 0{i + 2} &nbsp;·&nbsp; {s.name} view
+                  </p>
                 </div>
-                <h3 className="mt-4 font-serif text-3xl leading-[1.1] tracking-tight text-foreground sm:text-4xl">
-                  {s.one}
-                </h3>
-                <p className="mt-5 text-[16px] leading-relaxed text-muted-foreground">{s.body}</p>
-                <ul className="mt-6 space-y-2 font-mono text-[12px] text-muted-foreground">
-                  {s.detail.map((d) => (
-                    <li key={d} className="flex gap-3">
-                      <span className="text-accent">—</span>
-                      <span>{d}</span>
-                    </li>
-                  ))}
-                </ul>
-              </header>
-              <div className="lg:col-span-7">
-                <StageInset stage={s.name} index={i} />
-                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Fig. 0{i + 2} &nbsp;·&nbsp; {s.name} view
-                </p>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </Container>
     </section>
@@ -2634,8 +2934,15 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
                   ["loudness", "−14.1 LUFS"],
                 ].map(([k, v]) => (
                   <tr key={k}>
-                    <td className="border-b py-1.5 pr-6" style={{ borderColor: border }}>{k}</td>
-                    <td className="border-b py-1.5 text-right" style={{ borderColor: border, color: ink }}>{v}</td>
+                    <td className="border-b py-1.5 pr-6" style={{ borderColor: border }}>
+                      {k}
+                    </td>
+                    <td
+                      className="border-b py-1.5 text-right"
+                      style={{ borderColor: border, color: ink }}
+                    >
+                      {v}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -2645,18 +2952,27 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
       case "Transcribe":
         return (
           <div className="p-5 text-[12px]" style={{ color: ink }}>
-            <div className="mb-3 font-mono uppercase tracking-[0.14em] text-[10px]" style={{ color: dim }}>
+            <div
+              className="mb-3 font-mono uppercase tracking-[0.14em] text-[10px]"
+              style={{ color: dim }}
+            >
               Source transcript · de-DE
             </div>
             {[
               ["00:38.120", "Wir haben die", "Pipeline", " neu gebaut,"],
               ["00:42.180", "damit jede Stufe", "editierbar", " bleibt."],
-              ["00:46.900", "Und wenn etwas nicht", "stimmt", " —"],
+              ["00:46.900", "Und wenn etwas nicht", "stimmt", " …"],
             ].map(([t, a, hi, b]) => (
               <div key={t} className="flex gap-4 py-1.5">
-                <span className="font-mono" style={{ color: dim }}>{t}</span>
+                <span className="font-mono" style={{ color: dim }}>
+                  {t}
+                </span>
                 <span>
-                  {a} <span style={{ background: "oklch(0.68 0.14 50 / 0.25)", padding: "0 2px" }}>{hi}</span>{b}
+                  {a}{" "}
+                  <span style={{ background: "oklch(0.68 0.14 50 / 0.25)", padding: "0 2px" }}>
+                    {hi}
+                  </span>
+                  {b}
                 </span>
               </div>
             ))}
@@ -2665,20 +2981,31 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
       case "Translate":
         return (
           <div className="p-5 text-[12px]" style={{ color: ink }}>
-            <div className="mb-3 grid grid-cols-2 gap-6 font-mono uppercase tracking-[0.14em] text-[10px]" style={{ color: dim }}>
-              <span>Source · de-DE</span><span>Target · en-US</span>
+            <div
+              className="mb-3 grid grid-cols-2 gap-6 font-mono uppercase tracking-[0.14em] text-[10px]"
+              style={{ color: dim }}
+            >
+              <span>Source · de-DE</span>
+              <span>Target · en-US</span>
             </div>
             {[
               ["Wir haben die Pipeline neu gebaut,", "We rebuilt the pipeline"],
               ["damit jede Stufe editierbar bleibt.", "so every stage stays editable."],
-              ["Und wenn etwas nicht stimmt —", "And if something's off —"],
+              ["Und wenn etwas nicht stimmt …", "And if something's off …"],
             ].map(([a, b], i) => (
-              <div key={i} className="grid grid-cols-2 gap-6 border-b py-2" style={{ borderColor: border }}>
+              <div
+                key={i}
+                className="grid grid-cols-2 gap-6 border-b py-2"
+                style={{ borderColor: border }}
+              >
                 <span style={{ color: dim }}>{a}</span>
                 <span className="font-serif text-[15px]">{b}</span>
               </div>
             ))}
-            <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+            <div
+              className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em]"
+              style={{ color: dim }}
+            >
               Glossary · 12 terms locked
             </div>
           </div>
@@ -2686,7 +3013,10 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
       case "Diarize":
         return (
           <div className="p-5 text-[12px]" style={{ color: ink }}>
-            <div className="mb-3 font-mono uppercase tracking-[0.14em] text-[10px]" style={{ color: dim }}>
+            <div
+              className="mb-3 font-mono uppercase tracking-[0.14em] text-[10px]"
+              style={{ color: dim }}
+            >
               Speakers detected
             </div>
             {[
@@ -2694,15 +3024,26 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
               { n: "Mateo", turns: 18, c: "oklch(0.70 0.12 190)" },
               { n: "Speaker 3", turns: 2, c: "oklch(0.55 0.03 240)" },
             ].map((s) => (
-              <div key={s.n} className="flex items-center justify-between border-b py-3" style={{ borderColor: border }}>
+              <div
+                key={s.n}
+                className="flex items-center justify-between border-b py-3"
+                style={{ borderColor: border }}
+              >
                 <div className="flex items-center gap-3">
                   <span className="h-8 w-8 rounded-full" style={{ background: s.c }} />
                   <div>
                     <div>{s.n}</div>
-                    <div className="font-mono text-[10px]" style={{ color: dim }}>{s.turns} turns · 4.2s reference</div>
+                    <div className="font-mono text-[10px]" style={{ color: dim }}>
+                      {s.turns} turns · 4.2s reference
+                    </div>
                   </div>
                 </div>
-                <span className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>Rename · Merge</span>
+                <span
+                  className="font-mono text-[10px] uppercase tracking-[0.14em]"
+                  style={{ color: dim }}
+                >
+                  Rename · Merge
+                </span>
               </div>
             ))}
           </div>
@@ -2710,12 +3051,16 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
       case "Voice":
         return (
           <div className="p-5 text-[12px]" style={{ color: ink }}>
-            <div className="mb-3 flex items-center justify-between font-mono uppercase tracking-[0.14em] text-[10px]" style={{ color: dim }}>
+            <div
+              className="mb-3 flex items-center justify-between font-mono uppercase tracking-[0.14em] text-[10px]"
+              style={{ color: dim }}
+            >
               <span>Line 42 · Anna</span>
               <span>duration 3.14s / target 3.20s</span>
             </div>
             <div className="font-serif text-[17px] leading-snug">
-              "so every stage stays <span style={{ borderBottom: "2px solid oklch(0.68 0.15 258)" }}>editable</span>."
+              "so every stage stays{" "}
+              <span style={{ borderBottom: "2px solid oklch(0.68 0.15 258)" }}>editable</span>."
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3 font-mono text-[11px]">
               {[
@@ -2724,12 +3069,17 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
                 ["Pause after", "220 ms"],
               ].map(([k, v]) => (
                 <div key={k} className="border p-2" style={{ borderColor: border }}>
-                  <div className="uppercase tracking-[0.14em] text-[9px]" style={{ color: dim }}>{k}</div>
+                  <div className="uppercase tracking-[0.14em] text-[9px]" style={{ color: dim }}>
+                    {k}
+                  </div>
                   <div className="mt-1">{v}</div>
                 </div>
               ))}
             </div>
-            <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>
+            <div
+              className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em]"
+              style={{ color: dim }}
+            >
               [ Regenerate line ] &nbsp; [ Regenerate speaker ]
             </div>
           </div>
@@ -2737,7 +3087,10 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
       case "Mix":
         return (
           <div className="p-5 text-[12px]" style={{ color: ink }}>
-            <div className="mb-3 font-mono uppercase tracking-[0.14em] text-[10px]" style={{ color: dim }}>
+            <div
+              className="mb-3 font-mono uppercase tracking-[0.14em] text-[10px]"
+              style={{ color: dim }}
+            >
               Timeline
             </div>
             {[
@@ -2746,13 +3099,30 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
               ["SFX", "oklch(0.55 0.03 240)", [40, 62]],
             ].map(([label, color, pts]) => (
               <div key={label as string} className="mb-3">
-                <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: dim }}>{label as string}</div>
-                <div className="relative h-5 w-full" style={{ background: "oklch(0.20 0.012 250)" }}>
+                <div
+                  className="mb-1 font-mono text-[10px] uppercase tracking-[0.14em]"
+                  style={{ color: dim }}
+                >
+                  {label as string}
+                </div>
+                <div
+                  className="relative h-5 w-full"
+                  style={{ background: "oklch(0.20 0.012 250)" }}
+                >
                   {(pts as number[]).reduce<React.ReactNode[]>((acc, p, i, arr) => {
                     if (i % 2 === 1) return acc;
                     const next = arr[i + 1] ?? p + 8;
                     acc.push(
-                      <span key={i} className="absolute top-0 h-full" style={{ left: `${p}%`, width: `${next - p}%`, background: color as string, opacity: 0.85 }} />
+                      <span
+                        key={i}
+                        className="absolute top-0 h-full"
+                        style={{
+                          left: `${p}%`,
+                          width: `${next - p}%`,
+                          background: color as string,
+                          opacity: 0.85,
+                        }}
+                      />,
                     );
                     return acc;
                   }, [])}
@@ -2760,9 +3130,15 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
               </div>
             ))}
             <div className="mt-4 grid grid-cols-3 gap-3 font-mono text-[11px]">
-              {[["Loudness", "−16 LUFS"], ["Duck", "−9 dB"], ["Export", "mp4 + stems"]].map(([k, v]) => (
+              {[
+                ["Loudness", "−16 LUFS"],
+                ["Duck", "−9 dB"],
+                ["Export", "mp4 + stems"],
+              ].map(([k, v]) => (
                 <div key={k} className="border p-2" style={{ borderColor: border }}>
-                  <div className="uppercase tracking-[0.14em] text-[9px]" style={{ color: dim }}>{k}</div>
+                  <div className="uppercase tracking-[0.14em] text-[9px]" style={{ color: dim }}>
+                    {k}
+                  </div>
                   <div className="mt-1">{v}</div>
                 </div>
               ))}
@@ -2776,7 +3152,10 @@ function StageInset({ stage, index }: { stage: string; index: number }) {
 
   return (
     <div className="border border-border shadow-panel" style={{ background: bg }}>
-      <div className="flex items-center justify-between border-b px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ borderColor: border, color: dim, background: "oklch(0.20 0.012 250)" }}>
+      <div
+        className="flex items-center justify-between border-b px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em]"
+        style={{ borderColor: border, color: dim, background: "oklch(0.20 0.012 250)" }}
+      >
         <span>Trackdub · {stage.toLowerCase()}</span>
         <span>{String(index + 1).padStart(2, "0")} of 06</span>
       </div>
@@ -2791,7 +3170,7 @@ function Control() {
   return (
     <section id="control" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="03" label="You can fix anything, and only that thing" />
+        <SectionNumber n="03b" label="You can fix anything, and only that thing" />
         <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <h2 className="font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
@@ -2799,8 +3178,8 @@ function Control() {
             </h2>
             <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted-foreground">
               Change it. The translation invalidates. The affected voice line queues for a regen.
-              Every other line stays exactly as it was — same take, same timing, same mix. That's
-              the whole idea.
+              Every other line stays exactly as it was: same take, same timing, same mix. That's the
+              whole idea.
             </p>
           </div>
           <div className="lg:col-span-7 space-y-6">
@@ -2813,7 +3192,11 @@ function Control() {
             <ControlPlate
               tag="After text + prosody edit"
               t="00:42.180"
-              text={<>so every stage <span className="border-b-2 border-accent">remains editable</span>.</>}
+              text={
+                <>
+                  so every stage <span className="border-b-2 border-accent">remains editable</span>.
+                </>
+              }
               hint="Regen · pace 0.94× · pause 320 ms · this line only"
               accent
             />
@@ -2843,9 +3226,7 @@ function ControlPlate({
         <span className={accent ? "text-accent" : ""}>{tag}</span>
         <span>{t}</span>
       </div>
-      <div className="mt-4 font-serif text-2xl leading-snug text-foreground">
-        "{text}"
-      </div>
+      <div className="mt-4 font-serif text-2xl leading-snug text-foreground">"{text}"</div>
       <figcaption className="mt-4 font-mono text-[11px] text-muted-foreground">{hint}</figcaption>
     </figure>
   );
@@ -2864,45 +3245,98 @@ function Performance() {
               Runs on the hardware you already have.
             </h2>
             <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
-              Trackdub can select TensorRT RTX, CUDA, DirectML, CoreML, MIGraphX, OpenVINO, QNN,
-              or CPU per stage. Pick a policy or let it choose automatically. The tiers below are
+              Trackdub can select TensorRT RTX, CUDA, DirectML, CoreML, MIGraphX, OpenVINO, QNN, or
+              CPU per stage. Pick a policy or let it choose automatically. The tiers below are
               directional; measured benchmarks publish via DubBench ahead of v1 launch.
             </p>
           </div>
           <div className="lg:col-span-8">
-            <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] table-fixed border-collapse text-left">
-              <thead>
-                <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                  <th className="w-[20%] border-b border-border py-3 pr-5 text-left font-normal">Provider</th>
-                  <th className="w-[25%] border-b border-border py-3 pr-5 text-left font-normal">Platform</th>
-                  <th className="w-[20%] border-b border-border py-3 pr-5 text-left font-normal">Relative speed</th>
-                  <th className="w-[35%] border-b border-border py-3 text-left font-normal">Availability</th>
-                </tr>
-              </thead>
-              <tbody className="font-mono text-[13px]">
-                {[
-                  ["TensorRT RTX", "Windows · RTX 30/40/50", "Fastest supported tier", "Selected when the model and RTX runtime are compatible"],
-                  ["CUDA", "Windows / Linux · NVIDIA", "Fast", "NVIDIA fallback when TensorRT RTX is unavailable"],
-                  ["CoreML", "macOS · Apple Silicon", "Fast", "Uses Apple Neural Engine and GPU where supported"],
-                  ["MIGraphX", "Windows 11 · AMD", "Accelerated", "Catalog-delivered AMD GPU lane for compatible ONNX graphs"],
-                  ["OpenVINO", "Windows 11 · Intel", "Accelerated", "Catalog-delivered Intel CPU, GPU, and NPU lane"],
-                  ["QNN", "Windows ARM64 · Snapdragon", "Accelerated", "Qualcomm NPU/GPU lane on compatible devices"],
-                  ["DirectML", "Windows · any DX12 GPU", "Broad coverage", "Intel, AMD, and NVIDIA DirectX 12 hardware"],
-                  ["CPU (ONNX Runtime)", "All platforms", "Portable baseline", "Always available as the per-stage fallback"],
-                ].map(([p, plat, spd, av]) => (
-                  <tr key={p} className="hover:bg-background/60">
-                    <td className="border-b border-border py-4 pr-5 text-left align-top text-foreground">{p}</td>
-                    <td className="border-b border-border py-4 pr-5 text-left align-top text-muted-foreground">{plat}</td>
-                    <td className="border-b border-border py-4 pr-5 text-left align-top text-foreground">{spd}</td>
-                    <td className="border-b border-border py-4 text-left align-top text-muted-foreground">{av}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Tbl. 01 &nbsp;·&nbsp; Provider fallback order, fastest to slowest. Not measured throughput.
+            <ol className="relative">
+              {[
+                [
+                  "TensorRT RTX",
+                  "Windows · RTX 30/40/50",
+                  "Fastest supported tier",
+                  "Selected when the model and RTX runtime are compatible",
+                ],
+                [
+                  "CUDA",
+                  "Windows / Linux · NVIDIA",
+                  "Fast",
+                  "NVIDIA fallback when TensorRT RTX is unavailable",
+                ],
+                [
+                  "CoreML",
+                  "macOS · Apple Silicon",
+                  "Fast",
+                  "Uses Apple Neural Engine and GPU where supported",
+                ],
+                [
+                  "MIGraphX",
+                  "Windows 11 · AMD",
+                  "Accelerated",
+                  "Catalog-delivered AMD GPU lane for compatible ONNX graphs",
+                ],
+                [
+                  "OpenVINO",
+                  "Windows 11 · Intel",
+                  "Accelerated",
+                  "Catalog-delivered Intel CPU, GPU, and NPU lane",
+                ],
+                [
+                  "QNN",
+                  "Windows ARM64 · Snapdragon",
+                  "Accelerated",
+                  "Qualcomm NPU/GPU lane on compatible devices",
+                ],
+                [
+                  "DirectML",
+                  "Windows · any DX12 GPU",
+                  "Broad coverage",
+                  "Intel, AMD, and NVIDIA DirectX 12 hardware",
+                ],
+                [
+                  "CPU (ONNX Runtime)",
+                  "All platforms",
+                  "Portable baseline",
+                  "Always available as the per-stage fallback",
+                ],
+              ].map(([p, plat, spd, av], i, arr) => (
+                <li
+                  key={p}
+                  data-reveal-child
+                  className="reveal-child group/step relative border-b border-border py-4 last:border-b-0 sm:py-5"
+                  style={{ marginLeft: `min(${i * 3.5}%, ${i * 34}px)` }}
+                >
+                  {i > 0 && (
+                    <span
+                      className="absolute -left-5 top-1/2 hidden -translate-y-1/2 font-mono text-[13px] text-accent sm:block"
+                      aria-hidden
+                    >
+                      ↳
+                    </span>
+                  )}
+                  <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                    <span className="font-serif text-[21px] leading-tight text-foreground sm:text-[24px]">
+                      {p}
+                    </span>
+                    <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      {plat}
+                    </span>
+                    <span className="ml-auto whitespace-nowrap border border-border px-2 py-[2px] font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
+                      {spd}
+                    </span>
+                  </div>
+                  <p className="mt-1.5 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
+                    {av}
+                    {i === arr.length - 1 ? ". The ladder always lands somewhere." : ""}
+                  </p>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-5 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Fig. 05 &nbsp;·&nbsp; Per-stage fallback ladder, fastest to most portable. Order, not
+              measured throughput; benchmarks publish via DubBench ahead of v1.
             </p>
           </div>
         </div>
@@ -2915,38 +3349,110 @@ function Performance() {
 
 function WhatYouGet() {
   const items: [string, string][] = [
-    ["Local by default", "Media, transcripts, voice references, and generated audio stay on your disk. Cloud is opt-in per project, per stage."],
-    ["Deterministic runs", "Same project manifest + same models = same output. Every stage records what it consumed."],
-    ["Resumable jobs", "Kill the app mid-run. Reopen the project. Continue from the last completed stage."],
-    ["Per-line regen", "Regenerate one voice line, one speaker, or one stage. Never a full-project redo for a small fix."],
-    ["Editable script", "Transcript and translation are real documents with a glossary, not opaque intermediates."],
-    ["Voice cloning per speaker", "One short reference per speaker. No shared 'AI voice' for the whole video."],
-    ["Source separation", "Vocal and instrumental stems are split out, kept, and ducked under dialogue automatically. Or manually, if you prefer."],
-    ["Lip sync", "Optional viseme-matched lip sync for on-camera speakers. Off by default, gated by license lane."],
-    ["Open model manifest", "Every bundled model, its license lane, and its checksum is declared in one JSON file."],
-    ["CLI and SDK", "The same pipeline the app runs is scriptable — for batch, CI, or on-prem automation."],
+    [
+      "Local by default",
+      "Media, transcripts, voice references, and generated audio stay on your disk. Cloud is opt-in per project, per stage.",
+    ],
+    [
+      "Deterministic runs",
+      "Same project manifest + same models = same output. Every stage records what it consumed.",
+    ],
+    [
+      "Resumable jobs",
+      "Kill the app mid-run. Reopen the project. Continue from the last completed stage.",
+    ],
+    [
+      "Per-line regen",
+      "Regenerate one voice line, one speaker, or one stage. Never a full-project redo for a small fix.",
+    ],
+    [
+      "Editable script",
+      "Transcript and translation are real documents with a glossary, not opaque intermediates.",
+    ],
+    [
+      "Voice cloning per speaker",
+      "One short reference per speaker. No shared 'AI voice' for the whole video.",
+    ],
+    [
+      "Source separation",
+      "Vocal and instrumental stems are split out, kept, and ducked under dialogue automatically. Or manually, if you prefer.",
+    ],
+    [
+      "Lip sync",
+      "Optional viseme-matched lip sync for on-camera speakers. Off by default, gated by license lane.",
+    ],
+    [
+      "Open model manifest",
+      "Every bundled model, its license lane, and its checksum is declared in one JSON file.",
+    ],
+    [
+      "CLI and SDK",
+      "The same pipeline the app runs is scriptable for batch, CI, or on-prem automation.",
+    ],
     ["Cross-platform", "Windows, macOS, Linux. Same project format. Same output."],
-    ["Open-core engine", "Domain, application, inference, SDK, and CLI ship Apache 2.0. The desktop app and licensing layer are source-visible."],
+    [
+      "Open-core engine",
+      "Domain, application, inference, SDK, and CLI ship Apache 2.0. The desktop app and licensing layer are source-visible.",
+    ],
   ];
   return (
-    <section data-reveal className="reveal border-b border-border">
+    <section id="manifest" data-reveal className="reveal scroll-mt-24 border-b border-border">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="05" label="What you get" />
+        <SectionNumber n="06" label="The manifest" />
         <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
           A workstation, not a wrapper around a model.
         </h2>
-        <dl role="list" className="mt-14 grid gap-y-8 gap-x-12 md:grid-cols-2">
-          {items.map(([term, def]) => (
-            <div
-              key={term}
-              role="listitem"
-              className="card-lift group border-t border-border px-1 pt-5 focus-within:bg-surface/40 hover:bg-surface/40"
-            >
-              <dt className="font-serif text-[22px] text-foreground">{term}</dt>
-              <dd className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{def}</dd>
-            </div>
-          ))}
-        </dl>
+        <p className="mt-5 max-w-2xl text-[16px] leading-relaxed text-muted-foreground">
+          Trackdub declares every bundled model in a manifest: source, checksum, license lane.
+          Here's the same idea applied to the product itself: everything in the box, itemized.
+        </p>
+        <div className="relative mt-14 border-2 border-foreground bg-background">
+          <div
+            aria-hidden
+            onClick={replayStamp}
+            className="stamp-in absolute -top-5 right-6 hidden cursor-pointer select-none rotate-[-6deg] border-4 border-double border-accent bg-background px-4 py-2 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-accent sm:block sm:right-12"
+            title="Stamp it again"
+          >
+            Commercial-safe
+            <br />
+            all tiers ✓
+          </div>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b-2 border-foreground px-5 py-4 sm:px-8">
+            <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-foreground">
+              Trackdub · shipping manifest
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Items: {items.length} · Rev. early preview
+            </span>
+          </div>
+          <ol className="grid md:grid-cols-2">
+            {items.map(([term, def], i) => (
+              <li
+                key={term}
+                data-reveal-child
+                className="reveal-child group flex gap-4 border-b border-border px-5 py-4 transition-colors last:border-b-0 hover:bg-surface/50 sm:px-8 md:[&:nth-last-child(2)]:border-b-0 md:odd:border-r"
+              >
+                <span className="pt-1 font-mono text-[11px] text-accent">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <div className="font-serif text-[19px] leading-snug text-foreground">{term}</div>
+                  <div className="mt-1 text-[14px] leading-relaxed text-muted-foreground">
+                    {def}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t-2 border-foreground px-5 py-3 sm:px-8">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Models declared in bundled-models.manifest.json · source · checksum · license lane
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Nothing research-only ships as a default
+            </span>
+          </div>
+        </div>
       </Container>
     </section>
   );
@@ -2959,7 +3465,13 @@ function ComparedTo() {
     ["Runs locally", "Yes", "No", "No", "Yes"],
     ["Editable transcript", "Yes", "Yes", "Yes, in Dubbing Studio", "Yes"],
     ["Per-line / per-clip regen", "Yes", "Composition-level", "Yes, in Dubbing Studio", "Manual"],
-    ["Speaker-aware voicing", "Yes", "Yes, manual speaker→voice map", "Yes, clip or track voice clone", "Manual"],
+    [
+      "Speaker-aware voicing",
+      "Yes",
+      "Yes, manual speaker→voice map",
+      "Yes, clip or track voice clone",
+      "Manual",
+    ],
     ["Deterministic runs", "Yes", "Not published", "Not published", "No"],
     ["Resumable jobs", "Yes", "Not published", "Not published", "No"],
     ["Programmatic access", "CLI + SDK", "Not published", "API, enterprise waitlist", "N/A"],
@@ -2968,7 +3480,7 @@ function ComparedTo() {
   return (
     <section data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="06" label="Compared to" />
+        <SectionNumber n="07" label="Compared to" />
         <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
           Trackdub, next to how dubbing usually gets done.
         </h2>
@@ -2977,20 +3489,28 @@ function ComparedTo() {
             <thead>
               <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
                 <th className="border-b border-border py-4 pr-4 font-normal"></th>
-                <th className="border-b border-border py-4 pr-4 font-normal text-foreground">Trackdub</th>
-                <th className="border-b border-border py-4 pr-4 font-normal">Descript</th>
-                <th className="border-b border-border py-4 pr-4 font-normal">ElevenLabs Dubbing</th>
-                <th className="border-b border-border py-4 font-normal">DIY (Whisper + TTS + DAW)</th>
+                <th className="border-b-2 border-accent bg-background px-4 py-4 font-normal text-accent">
+                  Trackdub
+                </th>
+                <th className="border-b border-border px-4 py-4 font-normal">Descript</th>
+                <th className="border-b border-border px-4 py-4 font-normal">ElevenLabs Dubbing</th>
+                <th className="border-b border-border py-4 pl-4 font-normal">
+                  DIY (Whisper + TTS + DAW)
+                </th>
               </tr>
             </thead>
             <tbody className="font-mono text-[13px]">
               {rows.map(([label, a, b, c, d]) => (
                 <tr key={label}>
-                  <td className="border-b border-border py-4 pr-4 font-serif text-[16px] font-normal text-foreground">{label}</td>
-                  <td className="border-b border-border py-4 pr-4 text-foreground">{a}</td>
-                  <td className="border-b border-border py-4 pr-4 text-muted-foreground">{b}</td>
-                  <td className="border-b border-border py-4 pr-4 text-muted-foreground">{c}</td>
-                  <td className="border-b border-border py-4 text-muted-foreground">{d}</td>
+                  <td className="border-b border-border py-4 pr-4 font-serif text-[16px] font-normal text-foreground">
+                    {label}
+                  </td>
+                  <td className="border-b border-border bg-background px-4 py-4 font-medium text-foreground">
+                    {a}
+                  </td>
+                  <td className="border-b border-border px-4 py-4 text-muted-foreground">{b}</td>
+                  <td className="border-b border-border px-4 py-4 text-muted-foreground">{c}</td>
+                  <td className="border-b border-border py-4 pl-4 text-muted-foreground">{d}</td>
                 </tr>
               ))}
             </tbody>
@@ -2998,7 +3518,7 @@ function ComparedTo() {
         </div>
         <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
           Descript and ElevenLabs Dubbing feature sets per each vendor's public docs, checked July
-          2026. Feature sets change — verify current before deciding.
+          2026. Feature sets change; verify current before deciding.
         </p>
       </Container>
     </section>
@@ -3012,7 +3532,7 @@ function Pricing() {
   return (
     <section id="pricing" data-reveal className="reveal border-b border-border">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="07" label="Pricing" />
+        <SectionNumber n="08" label="Pricing" />
         <h2 className="mt-6 max-w-2xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
           Three ways to run it. All of them local-first.
         </h2>
@@ -3038,7 +3558,9 @@ function Pricing() {
                       </span>
                     )}
                   </header>
-                  <div className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}>
+                  <div
+                    className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}
+                  >
                     {p.price}
                   </div>
                   <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -3055,7 +3577,7 @@ function Pricing() {
                   <div className="mt-10">
                     <a
                       href={p.href}
-                      aria-label={`${p.cta} — ${p.name} plan`}
+                      aria-label={`${p.cta} · ${p.name} plan`}
                       className="inline-flex items-baseline gap-1 rounded-sm border-b border-foreground/40 pb-0.5 text-foreground outline-none hover:border-accent hover:text-accent focus-visible:outline-none"
                     >
                       {p.cta} <span aria-hidden>→</span>
@@ -3067,7 +3589,10 @@ function Pricing() {
           })}
         </ul>
         <p className="mt-8 font-mono text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
-          <Link to="/pricing" className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent">
+          <Link
+            to="/pricing"
+            className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+          >
             Full pricing, license terms, and FAQ →
           </Link>
         </p>
@@ -3085,7 +3610,7 @@ function FAQ() {
       <Container className="py-20 sm:py-28">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
-            <SectionNumber n="08" label="Questions" />
+            <SectionNumber n="09" label="Questions" />
             <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
               Straight answers.
             </h2>
@@ -3106,10 +3631,15 @@ function FAQ() {
           </div>
           <dl className="lg:col-span-8">
             {items.map((it, i) => (
-              <div key={it.q}>
+              <div key={it.q} data-reveal-child className="reveal-child">
                 {i > 0 && <Rule />}
                 <div className="grid gap-4 py-6 md:grid-cols-[220px_1fr] md:gap-8">
-                  <dt className="font-serif text-[20px] leading-snug text-foreground">{it.q}</dt>
+                  <dt className="font-serif text-[20px] leading-snug text-foreground">
+                    <span className="mr-2 font-mono text-[11px] text-accent" aria-hidden>
+                      Q.{String(i + 1).padStart(2, "0")}
+                    </span>
+                    {it.q}
+                  </dt>
                   <dd className="text-[16px] leading-relaxed text-muted-foreground">{it.a}</dd>
                 </div>
               </div>
@@ -3127,10 +3657,10 @@ function Endnote() {
   return (
     <section id="waitlist" data-reveal className="reveal border-b border-border">
       <Container className="py-24 sm:py-36 text-center">
-        <SectionNumber n="09" label="End" />
+        <SectionNumber n="10" label="End" />
         <p className="mx-auto mt-8 max-w-3xl font-serif text-4xl leading-[1.12] tracking-tight text-foreground sm:text-5xl">
-          Dub this in Spanish. Keep the original music. Regenerate line 42 with slower prosody.
-          Ship it before lunch.
+          Dub this in Spanish. Keep the original music. Regenerate line 42 with slower prosody. Ship
+          it before lunch.
         </p>
         <p className="mx-auto mt-6 max-w-xl text-[17px] leading-relaxed text-muted-foreground">
           Interested in Trackdub? Join the launch list and be the first to know when downloads,
@@ -3140,6 +3670,22 @@ function Endnote() {
         <div className="mt-8 flex flex-wrap justify-center gap-6">
           <TextLink href="mailto:hello@trackdub.com">Talk to us →</TextLink>
         </div>
+        <p className="mx-auto mt-10 max-w-xl font-mono text-[11px] uppercase tracking-[0.14em] leading-relaxed text-muted-foreground">
+          Evaluating Trackdub for a program, fund, or partnership?{" "}
+          <a
+            href="mailto:press@trackdub.com"
+            className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+          >
+            press@trackdub.com
+          </a>{" "}
+          · building in public:{" "}
+          <Link
+            to="/changelog"
+            className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+          >
+            read the changelog
+          </Link>
+        </p>
       </Container>
     </section>
   );
@@ -3152,7 +3698,8 @@ function Endnote() {
 // dashboard. The fallback is Cloudflare's published test key, which
 // always passes — fine for local dev/preview but does NOT gate real
 // users in production.
-const TURNSTILE_SITE_KEY: string = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? "0x4AAAAAAD9pNIBkKRhSY098";
+const TURNSTILE_SITE_KEY: string =
+  import.meta.env.VITE_TURNSTILE_SITE_KEY ?? "0x4AAAAAAD9pNIBkKRhSY098";
 
 const waitlistSchema = z.object({
   email: z
@@ -3198,16 +3745,32 @@ function WaitlistForm() {
       return;
     }
     if (!turnstileToken) {
-      toast.error("Still verifying — give it a second and try again.");
+      toast.error("Still verifying. Give it a second and try again.");
       return;
     }
     setStatus("loading");
     const normalized = parsed.data.email.toLowerCase();
+    // trackdub.dev (ChatGPT Sites) has no D1/Turnstile bindings of its own,
+    // so it posts cross-origin to the canonical API on trackdub.com instead
+    // of relying on its own (nonexistent) server env. Every other host
+    // (localhost, Workers preview URLs, QA) keeps the relative endpoint —
+    // the production preflight only allow-lists trackdub.dev origins, so
+    // routing them to the absolute URL would just fail CORS.
+    const apiBase =
+      typeof window !== "undefined" &&
+      (window.location.hostname === "trackdub.dev" ||
+        window.location.hostname === "www.trackdub.dev")
+        ? "https://trackdub.com"
+        : "";
     try {
-      const res = await fetch("/api/waitlist", {
+      const res = await fetch(`${apiBase}/api/waitlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: normalized, turnstileToken, interest: interest ?? undefined }),
+        body: JSON.stringify({
+          email: normalized,
+          turnstileToken,
+          interest: interest ?? undefined,
+        }),
       });
       const data: { ok: boolean; error?: string } | null = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
@@ -3227,7 +3790,7 @@ function WaitlistForm() {
   if (status === "done") {
     return (
       <p className="mx-auto mt-12 max-w-md font-mono text-[13px] uppercase tracking-[0.14em] text-accent">
-        You're on the list — we'll email you when Trackdub ships.
+        You're on the list. We'll email you when Trackdub ships.
       </p>
     );
   }
@@ -3327,7 +3890,9 @@ function Colophon() {
           </div>
           {cols.map(([h, links]) => (
             <div key={h} className="lg:col-span-2">
-              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{h}</div>
+              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                {h}
+              </div>
               <ul className="mt-4 space-y-2 text-[14px]">
                 {links.map(([label, href]) => (
                   <li key={label}>
@@ -3340,10 +3905,16 @@ function Colophon() {
             </div>
           ))}
           <div className="lg:col-span-2">
-            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Status</div>
+            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Status
+            </div>
             <ul className="mt-4 space-y-2 font-mono text-[12px] text-muted-foreground">
               <li>Early preview</li>
-              <li>Building in public</li>
+              <li>
+                <a href="/changelog" className="hover:text-accent">
+                  Building in public →
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -3356,14 +3927,47 @@ function Colophon() {
   );
 }
 
-/* ---------------- privacy ---------------- */
+/* ---------------- local-first (privacy + architecture + requirements) ---------------- */
 
-function Privacy() {
-  const local: {
-    item: string;
-    what: string;
-    retention: string;
-  }[] = [
+function LocalFirst() {
+  const pipeline = ["Ingest", "Transcribe", "Translate", "Diarize", "Voice", "Mix", "Export"];
+
+  const stays: { item: string; note: string }[] = [
+    { item: "Source media", note: "Never uploaded. Decode, analysis, and export are local." },
+    {
+      item: "Transcripts & translations",
+      note: "Editable local files, plus glossary and speaker maps.",
+    },
+    { item: "Voice references", note: "Per-project only. Never used to train a shared model." },
+    { item: "Generated audio & stems", note: "Written to the output folder you choose." },
+    { item: "Project files", note: "SQLite state and manifests, in a folder you control." },
+    { item: "Model cache", note: "ONNX models and engine caches. Clearable in Preferences." },
+  ];
+
+  const optin: { item: string; what: string; how: string }[] = [
+    {
+      item: "Cloud translation",
+      what: "Source text for the lines you route to a hosted provider.",
+      how: "Off by default · per project, per stage",
+    },
+    {
+      item: "Cloud voice generation",
+      what: "Target text and optional speaker reference for hosted TTS.",
+      how: "Off by default · per project, per stage",
+    },
+    {
+      item: "Telemetry",
+      what: "Anonymous crash reports and usage counters.",
+      how: "Disabled on install",
+    },
+    {
+      item: "Update checks",
+      what: "App version and OS info only. No media, no project data.",
+      how: "On launch · can be disabled",
+    },
+  ];
+
+  const retention: { item: string; what: string; retention: string }[] = [
     {
       item: "Project files",
       what: "SQLite project state, manifests, and stage snapshots.",
@@ -3396,323 +4000,79 @@ function Privacy() {
     },
   ];
 
-  const never: {
-    item: string;
-    why: string;
-  }[] = [
-    {
-      item: "Source video or audio",
-      why: "Decoding, analysis, and export happen locally.",
-    },
-    {
-      item: "Transcripts and translations",
-      why: "Local MT runs against your editable script by default.",
-    },
-    {
-      item: "Voice references",
-      why: "Speaker clips are used only for per-project voicing.",
-    },
-    {
-      item: "Generated output",
-      why: "Final mix and stems are written to your disk.",
-    },
-  ];
-
-  const optin: {
-    item: string;
-    what: string;
-    how: string;
-  }[] = [
-    {
-      item: "Cloud translation",
-      what: "Source text for the lines you route to a hosted provider.",
-      how: "Off by default. Enabled per project, per stage, in Settings.",
-    },
-    {
-      item: "Cloud voice generation",
-      what: "Target text and optional speaker reference for hosted TTS.",
-      how: "Off by default. Enabled per project, per stage, in Settings.",
-    },
-    {
-      item: "Telemetry",
-      what: "Anonymous crash reports and usage counters.",
-      how: "Disabled on install. Turn on in Preferences if you want to help.",
-    },
-    {
-      item: "Update checks",
-      what: "App version and OS info to the update server.",
-      how: "Checks on launch unless disabled. No media or project data is sent.",
-    },
-  ];
-
-  return (
-    <section id="privacy" data-reveal className="reveal border-b border-border bg-surface">
-      <Container className="py-20 sm:py-28">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-4">
-            <SectionNumber n="04b" label="Privacy & retention" />
-            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-              Your media is yours. Full stop.
-            </h2>
-            <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
-              Trackdub is built local-first. That is not a feature — it is the default.
-              The app stores project data where you tell it to, and it does not send
-              your media, transcripts, or voice references anywhere unless you
-              explicitly opt in.
-            </p>
-            <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-              When you do opt in, only the minimum data needed for that stage leaves
-              your machine. Everything else stays local.
-            </p>
-          </div>
-
-          <div className="lg:col-span-8 space-y-14">
-            <div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                Tbl. 04 &nbsp;·&nbsp; Stored locally
-              </div>
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full min-w-[640px] border-collapse text-left">
-                  <thead>
-                    <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                      <th className="border-b border-border py-3 pr-4 font-normal">Data</th>
-                      <th className="border-b border-border py-3 pr-4 font-normal">What it is</th>
-                      <th className="border-b border-border py-3 font-normal">Retention</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {local.map((l) => (
-                      <tr key={l.item} className="hover:bg-background/60">
-                        <td className="border-b border-border py-4 pr-4 align-top font-serif text-[18px] text-foreground">
-                          {l.item}
-                        </td>
-                        <td className="border-b border-border py-4 pr-4 align-top text-[14px] leading-relaxed text-muted-foreground">
-                          {l.what}
-                        </td>
-                        <td className="border-b border-border py-4 align-top font-mono text-[12px] text-foreground">
-                          {l.retention}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="grid gap-10 md:grid-cols-2">
-              <div>
-                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Fig. 04b-i &nbsp;·&nbsp; Never leaves the machine
-                </div>
-                <ul className="mt-3 space-y-3 border-t border-border pt-4">
-                  {never.map((n) => (
-                    <li key={n.item} className="grid gap-1">
-                      <div className="font-serif text-[18px] text-foreground">{n.item}</div>
-                      <div className="text-[14px] leading-relaxed text-muted-foreground">{n.why}</div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Fig. 04b-ii &nbsp;·&nbsp; Opt-in only
-                </div>
-                <ul className="mt-3 space-y-4 border-t border-border pt-4">
-                  {optin.map((o) => (
-                    <li key={o.item} className="grid gap-1">
-                      <div className="font-serif text-[18px] text-foreground">{o.item}</div>
-                      <div className="text-[14px] leading-relaxed text-muted-foreground">{o.what}</div>
-                      <div className="font-mono text-[11px] leading-relaxed text-accent">{o.how}</div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Container>
-    </section>
-  );
-}
-
-/* ---------------- architecture ---------------- */
-
-function Architecture() {
-  const layers: {
-    where: string;
-    tag: string;
-    stages: string;
-    what: string;
-    leaves: string;
-  }[] = [
-    {
-      where: "On device",
-      tag: "Default",
-      stages: "Ingest · Probe · VAD",
-      what: "FFmpeg-backed decode, scene split, voice-activity detection. Runs entirely on your CPU.",
-      leaves: "Nothing leaves the machine.",
-    },
-    {
-      where: "On device",
-      tag: "Default",
-      stages: "Transcribe · Diarize",
-      what: "ASR and speaker separation via bundled ONNX models. A compatible execution provider is selected for the current platform and model; CPU remains the fallback.",
-      leaves: "Nothing leaves the machine.",
-    },
-    {
-      where: "On device",
-      tag: "Default",
-      stages: "Translate",
-      what: "Local MT model runs against the editable script. Glossary and per-speaker style are applied locally.",
-      leaves: "Nothing leaves the machine.",
-    },
-    {
-      where: "On device",
-      tag: "Default",
-      stages: "Voice · Mix · Export",
-      what: "TTS with per-speaker voice reference, alignment, ducking, and mux. GPU-accelerated where a provider is present; CPU fallback is always available.",
-      leaves: "Nothing leaves the machine.",
-    },
-    {
-      where: "Off device",
-      tag: "Opt-in",
-      stages: "Cloud translation · Cloud voice",
-      what: "A stage can be routed to a hosted provider you configure (DeepL, ElevenLabs, your own endpoint). Off by default; set per project, per stage.",
-      leaves: "Only the stage's input for that stage. Media and other stages stay local.",
-    },
-    {
-      where: "Off device",
-      tag: "Off by default",
-      stages: "Telemetry",
-      what: "Crash reports and anonymous usage counters. Disabled unless you turn them on in Preferences.",
-      leaves: "Stack traces and counters. No media, no transcripts.",
-    },
-  ];
-
-  return (
-    <section id="architecture" data-reveal className="reveal border-b border-border">
-      <Container className="py-20 sm:py-28">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-4">
-            <SectionNumber n="04a" label="Local-first architecture" />
-            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-              What runs where, and why.
-            </h2>
-            <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
-              Every stage of the pipeline runs on your machine by default. Cloud
-              providers are something you plug in per stage, not a place your
-              media silently ends up.
-            </p>
-            <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-              Acceleration is layered: Trackdub prefers the fastest provider your
-              hardware supports and falls back stage-by-stage, never
-              project-by-project.
-            </p>
-          </div>
-
-          <div className="lg:col-span-8">
-            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Fig. 04a-i &nbsp;·&nbsp; Data plane
-            </div>
-            <div className="mt-3 rounded-none border border-border bg-surface">
-              <div className="grid grid-cols-12 border-b border-hairline px-5 py-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                <div className="col-span-3">Where</div>
-                <div className="col-span-4">Stages</div>
-                <div className="col-span-5">What leaves the machine</div>
-              </div>
-              {layers.map((l, i) => (
-                <div
-                  key={i}
-                  className="grid grid-cols-12 items-start gap-x-4 border-b border-hairline px-5 py-5 last:border-b-0"
-                >
-                  <div className="col-span-3">
-                    <div className="font-serif text-[18px] text-foreground">
-                      {l.where}
-                    </div>
-                    <div className="mt-1 inline-block border border-border px-2 py-[2px] font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                      {l.tag}
-                    </div>
-                  </div>
-                  <div className="col-span-4">
-                    <div className="font-mono text-[12px] text-foreground">
-                      {l.stages}
-                    </div>
-                    <div className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
-                      {l.what}
-                    </div>
-                  </div>
-                  <div className="col-span-5 font-mono text-[12px] leading-relaxed text-foreground">
-                    {l.leaves}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </Container>
-    </section>
-  );
-}
-
-/* ---------------- system requirements ---------------- */
-
-function SystemRequirements() {
-  const specs: {
-    item: string;
-    minimum: string;
-    recommended: string;
-    notes?: string;
-  }[] = [
-    {
-      item: "OS",
-      minimum: "Windows 10 22H2 (x64 or ARM64)",
-      recommended: "Windows 11 23H2 or later",
-      notes: "Native x64 and ARM64 builds are intended. Acceleration depends on provider and device support, with CPU fallback where needed.",
-    },
-    {
-      item: "CPU",
-      minimum: "64-bit x64 or ARM64 CPU",
-      recommended: "Modern 8-core x64 CPU or Snapdragon X-class ARM64 device",
-      notes: "Used for ingest, probe, VAD, and CPU fallback inference.",
-    },
-    {
-      item: "RAM",
-      minimum: "16 GB",
-      recommended: "32 GB",
-      notes: "Larger projects (20 min+, 4K source, many speakers) benefit from more RAM.",
-    },
-    {
-      item: "GPU",
-      minimum: "DirectX 12 capable GPU for DirectML",
-      recommended: "NVIDIA RTX 3060 / 4060 / 5060 or better",
-      notes: "TensorRT RTX requires RTX 30 series or newer. Intel Arc and AMD Radeon work via DirectML.",
-    },
-    {
-      item: "VRAM",
-      minimum: "4 GB",
-      recommended: "8 GB (1080p) · 12 GB+ (4K / long form)",
-      notes: "ASR and diarization models are the heaviest VRAM users. TTS is lighter per line.",
-    },
-    {
-      item: "Storage",
-      minimum: "10 GB for app + bundled models",
-      recommended: "SSD with 50 GB free for cache",
-      notes: "HDD is usable but ingest and model load times increase significantly.",
-    },
-  ];
-
-  const accelerators: {
+  const tiers: {
+    id: string;
+    eyebrow: string;
     name: string;
-    requirement: string;
-    speedup: string;
-    caveat: string;
+    tagline: string;
+    featured?: boolean;
+    stamp?: string;
+    rows: [string, string][];
   }[] = [
+    {
+      id: "floor",
+      eyebrow: "Trim 01 · CPU-only or cloud-routed",
+      name: "Bare minimum",
+      tagline: "Slow is fine. Stuck is not.",
+      rows: [
+        ["OS", "Windows 10 Enterprise LTSC 2021 (build 19044), or Windows 11"],
+        ["CPU", "Any 64-bit x64 or ARM64"],
+        ["GPU", "None. CPU inference, or route the heavy stages to a cloud provider"],
+        ["RAM", "16 GB · 8 GB workable when heavy stages are cloud-routed"],
+        ["VRAM", "none needed"],
+        ["Storage", "10 GB for app + bundled models"],
+      ],
+    },
+    {
+      id: "recommended",
+      eyebrow: "Trim 02 · The daily driver",
+      name: "Recommended",
+      tagline: "Comfortable for 1080p projects.",
+      featured: true,
+      rows: [
+        ["OS", "Windows 11 24H2 (build 26100)"],
+        ["CPU", "Modern 8-core x64, or Snapdragon X-class ARM64"],
+        ["GPU", "RTX 3060 / 4060 class, or any DirectX 12 GPU via DirectML"],
+        ["RAM", "32 GB"],
+        ["VRAM", "8 GB"],
+        ["Storage", "SSD · 50 GB free for model + engine cache"],
+      ],
+    },
+    {
+      id: "premium",
+      eyebrow: "Trim 03 · The studio rig",
+      name: "Premium",
+      tagline: "4K, long-form, many speakers, no waiting.",
+      stamp: "Overkill: approved ✓",
+      rows: [
+        ["OS", "Windows 11 24H2 (build 26100)"],
+        ["CPU", "12 cores or better"],
+        ["GPU", "RTX 4080 / 5080 class, TensorRT RTX lane"],
+        ["RAM", "64 GB"],
+        ["VRAM", "16 GB+"],
+        ["Storage", "NVMe SSD · 100 GB free"],
+      ],
+    },
+  ];
+
+  const otherPlatforms: [string, string][] = [
+    [
+      "macOS",
+      "macOS 14 Sonoma or later. Apple Silicon recommended; the CoreML lane uses the Neural Engine; Intel Macs run the CPU lane.",
+    ],
+    [
+      "Linux",
+      "Ubuntu 22.04+ / Debian 12+ or equivalent glibc distro, x64 or arm64. NVIDIA CUDA for acceleration; CPU otherwise.",
+    ],
+  ];
+
+  const accelerators: { name: string; requirement: string; speedup: string; caveat: string }[] = [
     {
       name: "TensorRT RTX",
       requirement: "Windows or Linux · NVIDIA RTX 30 / 40 / 50 series",
       speedup: "Fastest on supported hardware",
-      caveat: "Requires a compatible model, driver, and installed provider bundle. First run can compile an engine cache.",
+      caveat:
+        "Requires a compatible model, driver, and installed provider bundle. First run can compile an engine cache.",
     },
     {
       name: "CUDA",
@@ -3724,31 +4084,36 @@ function SystemRequirements() {
       name: "CoreML",
       requirement: "macOS · Apple Silicon",
       speedup: "Apple Neural Engine + GPU",
-      caveat: "Model compatibility determines whether a stage stays on CoreML or falls back to CPU.",
+      caveat:
+        "Model compatibility determines whether a stage stays on CoreML or falls back to CPU.",
     },
     {
       name: "MIGraphX",
       requirement: "Windows 11 24H2+ · supported AMD GPU",
       speedup: "AMD catalog acceleration",
-      caveat: "Installed through the Windows ML provider catalog; availability is model and device dependent.",
+      caveat:
+        "Installed through the Windows ML provider catalog; availability is model and device dependent.",
     },
     {
       name: "OpenVINO",
       requirement: "Windows 11 24H2+ · supported Intel CPU, GPU, or NPU",
       speedup: "Intel catalog acceleration",
-      caveat: "Installed through the Windows ML provider catalog and used only for compatible stages.",
+      caveat:
+        "Installed through the Windows ML provider catalog and used only for compatible stages.",
     },
     {
       name: "QNN",
       requirement: "Windows ARM64 · compatible Snapdragon device",
       speedup: "Qualcomm NPU/GPU acceleration",
-      caveat: "Catalog availability and model support determine whether a stage can use the QNN lane.",
+      caveat:
+        "Catalog availability and model support determine whether a stage can use the QNN lane.",
     },
     {
       name: "DirectML",
       requirement: "Windows · any DirectX 12 GPU · 4 GB+ VRAM",
       speedup: "Broadest Windows GPU coverage",
-      caveat: "Legacy-compatible fallback for Intel, AMD, and NVIDIA hardware; model support varies by stage.",
+      caveat:
+        "Legacy-compatible fallback for Intel, AMD, and NVIDIA hardware; model support varies by stage.",
     },
     {
       name: "CPU fallback",
@@ -3759,100 +4124,247 @@ function SystemRequirements() {
   ];
 
   return (
-    <section id="requirements" data-reveal className="reveal border-b border-border bg-surface">
+    <section
+      id="architecture"
+      data-reveal
+      className="reveal scroll-mt-24 border-b border-border bg-surface"
+    >
       <Container className="py-20 sm:py-28">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-4">
-            <SectionNumber n="04c" label="System requirements" />
-            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-              Runs on a wide range of Windows hardware.
-            </h2>
-            <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
-              Trackdub is built for the machines creators already own. A discrete
-              GPU speeds things up, but it is not required — every stage has a CPU
-              fallback.
-            </p>
-            <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-              Specifics below are for the Windows desktop app. macOS and Linux
-              builds have similar tiers and are documented in the release notes.
-            </p>
+        <SectionNumber n="05" label="Local-first, drawn as a map" />
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <h2 className="max-w-2xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
+            Your media is yours. Here is the whole map.
+          </h2>
+          <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
+            Every stage runs on your machine by default. A cloud provider is something you plug in
+            per stage, never a place your media silently ends up.
+          </p>
+        </div>
+
+        <div className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:gap-12">
+          {/* inside the machine */}
+          <div className="relative border-2 border-foreground bg-background p-6 sm:p-8">
+            <span className="absolute -top-[11px] left-6 bg-background px-2 font-mono text-[10px] uppercase tracking-[0.22em] text-foreground">
+              Your machine
+            </span>
+            <div className="flex flex-wrap items-center gap-y-2 font-mono text-[11px]">
+              {pipeline.map((s, i) => (
+                <span key={s} data-reveal-child className="reveal-child flex items-center">
+                  {i > 0 && (
+                    <span className="px-1.5 text-accent" aria-hidden>
+                      →
+                    </span>
+                  )}
+                  <span className="border border-border px-2 py-1 uppercase tracking-[0.12em] text-foreground">
+                    {s}
+                  </span>
+                </span>
+              ))}
+            </div>
+            <div className="mt-8 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Stays on this side of the line
+            </div>
+            <ul className="mt-4 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+              {stays.map((s) => (
+                <li
+                  key={s.item}
+                  data-reveal-child
+                  className="reveal-child border-t border-border pt-3"
+                >
+                  <div className="font-serif text-[17px] text-foreground">{s.item}</div>
+                  <div className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                    {s.note}
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <div className="lg:col-span-8">
-            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Tbl. 02 &nbsp;·&nbsp; Minimum and recommended specs
+          {/* across the boundary */}
+          <div className="relative border-2 border-dashed border-border p-6 sm:p-8">
+            <span className="absolute -top-[11px] left-6 bg-surface px-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              Across the line · opt-in only
+            </span>
+            <ul className="space-y-6">
+              {optin.map((o) => (
+                <li key={o.item} data-reveal-child className="reveal-child">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-mono text-[13px] text-accent" aria-hidden>
+                      ⇠
+                    </span>
+                    <span className="font-serif text-[18px] text-foreground">{o.item}</span>
+                  </div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{o.what}</p>
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
+                    {o.how}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <p className="mt-5 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          Fig. 06 &nbsp;·&nbsp; The default data plane. Nothing crosses the dashed line unless you
+          route it there, one stage at a time.
+        </p>
+
+        {/* three trims */}
+        <div id="requirements" className="mt-16 scroll-mt-24">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <h3 className="font-serif text-3xl leading-tight tracking-tight text-foreground sm:text-4xl">
+              Pick your trim level.
+            </h3>
+            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Tbl. 03 &nbsp;·&nbsp; System requirements
+            </span>
+          </div>
+          <div className="mt-8 grid divide-y divide-border border border-border md:grid-cols-3 md:divide-x md:divide-y-0">
+            {tiers.map((t) => (
+              <article
+                key={t.id}
+                data-reveal-child
+                className={`reveal-child relative p-6 sm:p-7 ${t.featured ? "bg-background" : ""}`}
+              >
+                {t.stamp && (
+                  <div
+                    aria-hidden
+                    onClick={replayStamp}
+                    className="stamp-in absolute -top-4 right-4 hidden cursor-pointer select-none rotate-[5deg] border-[3px] border-double border-accent bg-background px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-accent sm:block"
+                    title="Stamp it again"
+                  >
+                    {t.stamp}
+                  </div>
+                )}
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
+                  {t.eyebrow}
+                </div>
+                <div className="mt-2 font-serif text-[26px] leading-tight text-foreground">
+                  {t.name}
+                </div>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                  {t.tagline}
+                </p>
+                <dl className="mt-5 space-y-2.5">
+                  {t.rows.map(([k, v]) => (
+                    <div
+                      key={k}
+                      className="grid grid-cols-[64px_1fr] gap-3 border-t border-border/70 pt-2.5"
+                    >
+                      <dt className="pt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                        {k}
+                      </dt>
+                      <dd className="text-[13px] leading-relaxed text-foreground">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </article>
+            ))}
+          </div>
+          <div className="mt-6 border border-dashed border-border p-5 sm:p-6">
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Other platforms · provisional until those builds ship
             </div>
-            <div className="mt-3 overflow-x-auto">
+            <dl className="mt-3 grid gap-x-10 gap-y-3 md:grid-cols-2">
+              {otherPlatforms.map(([name, desc]) => (
+                <div key={name} className="grid grid-cols-[64px_1fr] gap-3">
+                  <dt className="pt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-foreground">
+                    {name}
+                  </dt>
+                  <dd className="text-[13px] leading-relaxed text-muted-foreground">{desc}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            No accelerator required; every stage has a CPU fallback. HDD works; it just makes you
+            wait.
+          </p>
+        </div>
+
+        {/* the fine print, foldable */}
+        <div className="mt-14 border-t border-border">
+          <details id="privacy" className="group scroll-mt-24 border-b border-border">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-mono text-[11px] uppercase tracking-[0.14em] text-foreground transition-colors hover:text-accent [&::-webkit-details-marker]:hidden">
+              <span>Tbl. 02 &nbsp;·&nbsp; What's stored locally, and for how long</span>
+              <span
+                className="text-[16px] leading-none text-accent transition-transform group-open:rotate-45"
+                aria-hidden
+              >
+                +
+              </span>
+            </summary>
+            <div className="overflow-x-auto pb-8">
               <table className="w-full min-w-[640px] border-collapse text-left">
                 <thead>
                   <tr className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                    <th className="border-b border-border py-3 pr-4 font-normal">Component</th>
-                    <th className="border-b border-border py-3 pr-4 font-normal">Minimum</th>
-                    <th className="border-b border-border py-3 pr-4 font-normal">Recommended</th>
+                    <th className="border-b border-border py-3 pr-4 font-normal">Data</th>
+                    <th className="border-b border-border py-3 pr-4 font-normal">What it is</th>
+                    <th className="border-b border-border py-3 font-normal">Retention</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {specs.map((s) => (
-                    <tr key={s.item} className="hover:bg-background/60">
-                      <td className="border-b border-border py-4 pr-4 align-top font-serif text-[20px] text-foreground">
-                        {s.item}
+                  {retention.map((l) => (
+                    <tr key={l.item} className="hover:bg-background/60">
+                      <td className="border-b border-border py-4 pr-4 align-top font-serif text-[17px] text-foreground">
+                        {l.item}
                       </td>
-                      <td className="border-b border-border py-4 pr-4 align-top font-mono text-[13px] text-foreground">
-                        {s.minimum}
+                      <td className="border-b border-border py-4 pr-4 align-top text-[14px] leading-relaxed text-muted-foreground">
+                        {l.what}
                       </td>
-                      <td className="border-b border-border py-4 pr-4 align-top font-mono text-[13px] text-muted-foreground">
-                        {s.recommended}
+                      <td className="border-b border-border py-4 align-top font-mono text-[12px] text-foreground">
+                        {l.retention}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <div className="mt-8 space-y-4 border-t border-border pt-6">
-              {specs.map(
-                (s) =>
-                  s.notes && (
-                    <div key={`${s.item}-note`} className="grid gap-2 md:grid-cols-[140px_1fr]">
-                      <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                        {s.item}
-                      </div>
-                      <p className="text-[15px] leading-relaxed text-muted-foreground">{s.notes}</p>
-                    </div>
-                  )
-              )}
-            </div>
+          </details>
 
-            <div className="mt-14 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Tbl. 03 &nbsp;·&nbsp; Acceleration notes
-            </div>
-            <div className="mt-3 grid gap-px bg-border md:grid-cols-2">
+          <details className="group border-b border-border">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-mono text-[11px] uppercase tracking-[0.14em] text-foreground transition-colors hover:text-accent [&::-webkit-details-marker]:hidden">
+              <span>Tbl. 04 &nbsp;·&nbsp; Acceleration lanes, in detail</span>
+              <span
+                className="text-[16px] leading-none text-accent transition-transform group-open:rotate-45"
+                aria-hidden
+              >
+                +
+              </span>
+            </summary>
+            <div className="grid gap-px bg-border md:grid-cols-2">
               {accelerators.map((a) => (
-                <div key={a.name} className="bg-background p-5">
-                  <div className="font-serif text-[22px] text-foreground">{a.name}</div>
-                  <dl className="mt-4 space-y-3">
+                <div key={a.name} className="bg-surface p-5">
+                  <div className="font-serif text-[20px] text-foreground">{a.name}</div>
+                  <dl className="mt-3 space-y-2">
                     <div>
                       <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                         Requirement
                       </dt>
-                      <dd className="mt-1 text-[14px] leading-relaxed text-foreground">{a.requirement}</dd>
+                      <dd className="mt-0.5 text-[14px] leading-relaxed text-foreground">
+                        {a.requirement}
+                      </dd>
                     </div>
                     <div>
                       <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                         Speedup
                       </dt>
-                      <dd className="mt-1 text-[14px] leading-relaxed text-foreground">{a.speedup}</dd>
+                      <dd className="mt-0.5 text-[14px] leading-relaxed text-foreground">
+                        {a.speedup}
+                      </dd>
                     </div>
                     <div>
                       <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                         Caveat
                       </dt>
-                      <dd className="mt-1 text-[14px] leading-relaxed text-muted-foreground">{a.caveat}</dd>
+                      <dd className="mt-0.5 text-[14px] leading-relaxed text-muted-foreground">
+                        {a.caveat}
+                      </dd>
                     </div>
                   </dl>
                 </div>
               ))}
             </div>
-          </div>
+          </details>
         </div>
       </Container>
     </section>

@@ -20,6 +20,21 @@ const bodySchema = z.object({
 
 const DEFAULT_FROM = "Trackdub <noreply@trackdub.com>";
 
+// trackdub.dev (ChatGPT Sites) has no server bindings of its own, so its
+// waitlist form posts cross-origin to this canonical API. Everything else
+// (same-origin requests, curl, etc.) needs no CORS header at all.
+const ALLOWED_ORIGINS = new Set(["https://trackdub.dev", "https://www.trackdub.dev"]);
+
+function corsHeaders(origin: string | null): HeadersInit {
+  if (!origin || !ALLOWED_ORIGINS.has(origin)) return {};
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    Vary: "Origin",
+  };
+}
+
 const INTEREST_LABEL: Record<"personal" | "pro" | "studio", string> = {
   personal: "Personal",
   pro: "Pro",
@@ -84,21 +99,30 @@ async function sendWaitlistConfirmation(
 export const Route = createFileRoute("/api/waitlist")({
   server: {
     handlers: {
+      OPTIONS: async ({ request }) => {
+        const origin = request.headers.get("origin");
+        return new Response(null, { status: 204, headers: corsHeaders(origin) });
+      },
       POST: async ({ request }) => {
+        const origin = request.headers.get("origin");
+        const cors = corsHeaders(origin);
         const env = (globalThis as { __env__?: CloudflareEnv }).__env__;
 
         let body: unknown;
         try {
           body = await request.json();
         } catch {
-          return Response.json({ ok: false, error: "Invalid request body" }, { status: 400 });
+          return Response.json(
+            { ok: false, error: "Invalid request body" },
+            { status: 400, headers: cors },
+          );
         }
 
         const parsed = bodySchema.safeParse(body);
         if (!parsed.success) {
           return Response.json(
             { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid email" },
-            { status: 400 },
+            { status: 400, headers: cors },
           );
         }
         const { email, turnstileToken, interest } = parsed.data;
@@ -106,19 +130,28 @@ export const Route = createFileRoute("/api/waitlist")({
         const turnstileSecret = env?.TURNSTILE_SECRET;
         if (!turnstileSecret) {
           console.error("[waitlist] Missing TURNSTILE_SECRET binding");
-          return Response.json({ ok: false, error: "Server misconfigured" }, { status: 500 });
+          return Response.json(
+            { ok: false, error: "Server misconfigured" },
+            { status: 500, headers: cors },
+          );
         }
 
         const remoteIp = request.headers.get("cf-connecting-ip") ?? "";
         const human = await verifyTurnstile(turnstileToken, turnstileSecret, remoteIp);
         if (!human) {
-          return Response.json({ ok: false, error: "Verification failed" }, { status: 403 });
+          return Response.json(
+            { ok: false, error: "Verification failed" },
+            { status: 403, headers: cors },
+          );
         }
 
         const db = env?.WAITLIST_DB;
         if (!db) {
           console.error("[waitlist] Missing WAITLIST_DB binding");
-          return Response.json({ ok: false, error: "Server misconfigured" }, { status: 500 });
+          return Response.json(
+            { ok: false, error: "Server misconfigured" },
+            { status: 500, headers: cors },
+          );
         }
 
         try {
@@ -132,7 +165,10 @@ export const Route = createFileRoute("/api/waitlist")({
             .run();
         } catch (err) {
           console.error("[waitlist] D1 insert failed", err);
-          return Response.json({ ok: false, error: "Could not save email" }, { status: 500 });
+          return Response.json(
+            { ok: false, error: "Could not save email" },
+            { status: 500, headers: cors },
+          );
         }
 
         // Email confirmation is non-blocking: the D1 row is already saved, so a
@@ -150,7 +186,7 @@ export const Route = createFileRoute("/api/waitlist")({
           }
         }
 
-        return Response.json({ ok: true });
+        return Response.json({ ok: true }, { headers: cors });
       },
     },
   },
