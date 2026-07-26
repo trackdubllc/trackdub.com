@@ -3757,7 +3757,9 @@ function WaitlistForm() {
     // the production preflight only allow-lists trackdub.dev origins, so
     // routing them to the absolute URL would just fail CORS.
     const apiBase =
-      typeof window !== "undefined" && /(^|\.)trackdub\.dev$/.test(window.location.hostname)
+      typeof window !== "undefined" &&
+      (window.location.hostname === "trackdub.dev" ||
+        window.location.hostname === "www.trackdub.dev")
         ? "https://trackdub.com"
         : "";
     try {
