@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { proxyRequest } from "./index.js";
+import worker, { proxyRequest } from "./index.js";
 
 test("forwards the path and query to trackdub.com", async () => {
   let upstreamRequest;
@@ -62,4 +62,16 @@ test("preserves redirects to external sites", async () => {
   );
 
   assert.equal(response.headers.get("location"), "https://github.com/trackdubllc");
+});
+
+test("ignores the Sites env argument passed to the worker entrypoint", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response("proxied");
+
+  try {
+    const response = await worker.fetch(new Request("https://trackdub.dev/"), { WAITLIST_DB: {} });
+    assert.equal(await response.text(), "proxied");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

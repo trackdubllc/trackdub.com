@@ -34,5 +34,8 @@ export async function proxyRequest(request, fetchImpl = fetch) {
 }
 
 export default {
-  fetch: proxyRequest,
+  fetch(request) {
+    // Sites passes (request, env, ctx); keep env from replacing fetchImpl.
+    return proxyRequest(request);
+  },
 };
