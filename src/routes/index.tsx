@@ -5,6 +5,14 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { PRICING_PLANS } from "@/lib/pricing";
 
+// Math.sin/Math.cos can differ in the last bit between Bun (SSR) and the
+// browser's JS engine, which trips React hydration mismatch warnings for
+// decorative SVG generators. Rounding right after the trig call keeps SSR
+// and client markup byte-identical.
+function round3(n: number) {
+  return Number(n.toFixed(3));
+}
+
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: "Does my video get uploaded anywhere?",
@@ -1097,7 +1105,7 @@ function HeroPulseRail() {
       <span className="font-mono text-[9px] tracking-[0.14em] text-accent">00:00:14:12</span>
       <svg viewBox="0 0 1000 20" className="h-5 min-w-0 flex-1" preserveAspectRatio="none">
         {Array.from({ length: 160 }).map((_, i) => {
-          const energy = Math.max(1, Math.abs(Math.sin(i * 0.73) * Math.cos(i * 0.19)) * 15);
+          const energy = round3(Math.max(1, Math.abs(Math.sin(i * 0.73) * Math.cos(i * 0.19)) * 15));
           return (
             <rect
               key={i}
@@ -1827,7 +1835,7 @@ function WorkstationMock() {
             <svg viewBox="0 0 600 60" className="h-14 w-full" preserveAspectRatio="none">
               {Array.from({ length: 120 }).map((_, i) => {
                 const seed = Math.sin(i * 1.37) * Math.cos(i * 0.51);
-                const h = 8 + Math.abs(seed) * 42;
+                const h = round3(8 + Math.abs(seed) * 42);
                 const isActive = i > 44 && i < 78;
                 return (
                   <rect
@@ -1896,7 +1904,7 @@ function WorkstationMock() {
             <span className="font-mono text-[9px]" style={{ color: trackIndex === 1 ? "oklch(0.74 0.17 62)" : dim }}>{track}</span>
             <svg viewBox="0 0 600 18" className="h-4 w-full" preserveAspectRatio="none">
               {Array.from({ length: 100 }).map((_, i) => {
-                const signal = 2 + Math.abs(Math.sin((i + trackIndex * 5) * 0.83) * Math.cos(i * 0.17)) * (trackIndex === 1 ? 14 : 9);
+                const signal = round3(2 + Math.abs(Math.sin((i + trackIndex * 5) * 0.83) * Math.cos(i * 0.17)) * (trackIndex === 1 ? 14 : 9));
                 return <rect key={i} x={i * 6} y={(18 - signal) / 2} width="2.4" height={signal} fill={trackIndex === 1 ? "oklch(0.72 0.15 50)" : "oklch(0.48 0.02 245)"} />;
               })}
               {trackIndex === 1 && <line x1="280" x2="280" y1="0" y2="18" stroke="oklch(0.78 0.17 62)" strokeWidth="1" />}
@@ -2535,7 +2543,7 @@ function FakeWaveform({ seed, color, busy }: { seed: number; color: string; busy
   const bars = Array.from({ length: 48 }, (_, i) => {
     const x = Math.sin(seed * 3.1 + i * 0.7) * 0.5 + 0.5;
     const y = Math.cos(seed * 1.7 + i * 0.31) * 0.35 + 0.55;
-    return Math.max(0.15, Math.min(1, (x + y) / 1.4));
+    return round3(Math.max(0.15, Math.min(1, (x + y) / 1.4)));
   });
   return (
     <div className="flex h-6 items-center gap-[2px]" aria-hidden>
