@@ -3741,11 +3741,14 @@ function WaitlistForm() {
     const normalized = parsed.data.email.toLowerCase();
     // trackdub.dev (ChatGPT Sites) has no D1/Turnstile bindings of its own,
     // so it posts cross-origin to the canonical API on trackdub.com instead
-    // of relying on its own (nonexistent) server env.
+    // of relying on its own (nonexistent) server env. Every other host
+    // (localhost, Workers preview URLs, QA) keeps the relative endpoint —
+    // the production preflight only allow-lists trackdub.dev origins, so
+    // routing them to the absolute URL would just fail CORS.
     const apiBase =
-      typeof window !== "undefined" && /(^|\.)trackdub\.com$/.test(window.location.hostname)
-        ? ""
-        : "https://trackdub.com";
+      typeof window !== "undefined" && /(^|\.)trackdub\.dev$/.test(window.location.hostname)
+        ? "https://trackdub.com"
+        : "";
     try {
       const res = await fetch(`${apiBase}/api/waitlist`, {
         method: "POST",
