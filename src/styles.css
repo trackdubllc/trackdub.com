@@ -489,7 +489,19 @@ html.reduce-motion section.reveal[data-reveal] h2::after {
     animation: sheen-sweep 900ms cubic-bezier(0.22, 1, 0.36, 1) 1;
   }
   &:active {
-    transform: translateY(0);
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 2px 6px -4px color-mix(in oklab, var(--foreground) 30%, transparent);
+    transition-duration: 80ms;
+  }
+}
+
+@utility btn-press {
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 180ms ease-out,
+              background-color 180ms ease-out;
+  &:active:not(:disabled) {
+    transform: scale(0.96);
+    transition-duration: 80ms;
   }
 }
 
@@ -519,7 +531,8 @@ html.reduce-motion section.reveal[data-reveal] h2::after {
 @media (prefers-reduced-motion: reduce) {
   .btn-sheen:hover,
   .btn-sheen:active,
-  .card-lift:hover { transform: none !important; }
+  .card-lift:hover,
+  .btn-press:active { transform: none !important; }
   .btn-sheen::after { display: none !important; }
 }
 
@@ -572,6 +585,7 @@ html.reduce-motion .btn-sheen::after,
 html.reduce-motion .btn-sheen:hover::after,
 html.reduce-motion .btn-sheen:focus-visible::after,
 html.reduce-motion .pulse-once { animation: none !important; }
+html.reduce-motion .btn-press:active { transform: none !important; }
 
 /* ---------- chapter themes ----------
    Each section gets its own palette by overriding the semantic tokens on
