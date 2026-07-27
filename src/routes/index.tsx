@@ -4,6 +4,10 @@ import { useReveal } from "@/hooks/use-reveal";
 import { toast } from "sonner";
 import { z } from "zod";
 import { PRICING_PLANS } from "@/lib/pricing";
+import { Github } from "lucide-react";
+import trackdubIcon from "@/assets/icon.png";
+
+const GITHUB_REPO = "https://github.com/trackdubllc/trackdub.com";
 
 // Math.sin/Math.cos can differ in the last bit between Bun (SSR) and the
 // browser's JS engine, which trips React hydration mismatch warnings for
@@ -961,9 +965,11 @@ function Masthead() {
       <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between gap-6 px-6 sm:h-[88px] sm:px-10">
         <a
           href="#top"
-          className="shrink-0 font-serif text-2xl leading-none tracking-tight text-foreground sm:text-[38px]"
+          className="flex shrink-0 items-center gap-3 font-serif text-2xl leading-none tracking-tight text-foreground sm:text-[38px]"
+          aria-label="Trackdub home"
         >
-          Trackdub<span className="text-accent">.</span>
+          <img src={trackdubIcon} alt="" className="h-9 w-9 object-contain sm:h-12 sm:w-12" />
+          <span>Trackdub<span className="text-accent">.</span></span>
         </a>
         <nav
           className="hidden flex-1 items-center justify-center gap-x-7 md:flex"
@@ -982,6 +988,15 @@ function Masthead() {
           ))}
         </nav>
         <div className="hidden shrink-0 items-center gap-4 md:flex lg:gap-5">
+          <a
+            href={GITHUB_REPO}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Trackdub on GitHub"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Github className="h-5 w-5" aria-hidden="true" />
+          </a>
           <div className="hidden lg:block">
             <MotionToggle />
           </div>
@@ -1012,6 +1027,14 @@ function Masthead() {
             <div className="py-2">
               <MotionToggle />
             </div>
+            <a
+              href={GITHUB_REPO}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
+            >
+              <Github className="h-4 w-4" aria-hidden="true" /> GitHub
+            </a>
             <InkButton href="#waitlist">Join launch list</InkButton>
           </Container>
         </div>
@@ -1737,11 +1760,11 @@ function ProductPlate() {
             <figure className="overflow-hidden border border-border">
               <img
                 src="/screenshots/app-shell-early-build.png"
-                alt="Trackdub desktop app shell, early build: pipeline stage list with separation, cleanup, transcribe, and identify stages, stem separation and speaker diarization toggles, voice selector"
+                alt="Trackdub desktop dubbing workstation with pipeline controls, video preview, translated segments, and per-line playback controls"
                 className="w-full"
                 loading="lazy"
-                width={2766}
-                height={1118}
+                width={1920}
+                height={1050}
               />
             </figure>
             <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -3714,6 +3737,7 @@ declare global {
     turnstile?: {
       render: (container: HTMLElement, options: Record<string, unknown>) => string;
       remove: (widgetId: string) => void;
+      reset: (widgetId?: string) => void;
     };
     __onTurnstileLoad__?: () => void;
   }
@@ -3725,6 +3749,9 @@ function WaitlistForm() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [verificationState, setVerificationState] = useState<"required" | "ready" | "error">(
+    "required",
+  );
   const [interest, setInterest] = useState<string | null>(null);
   const widgetContainerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -3749,7 +3776,21 @@ function WaitlistForm() {
       widgetIdRef.current = window.turnstile.render(widgetContainerRef.current, {
         sitekey: TURNSTILE_SITE_KEY,
         action: "waitlist_signup",
-        callback: (token: string) => setTurnstileToken(token),
+        callback: (token: string) => {
+          setTurnstileToken(token);
+          setVerificationState("ready");
+        },
+        "error-callback": (errorCode: string) => {
+          console.warn("[waitlist] Turnstile error", errorCode);
+          setTurnstileToken(null);
+          setVerificationState("error");
+          return true;
+        },
+        "expired-callback": () => {
+          setTurnstileToken(null);
+          setVerificationState("required");
+          window.turnstile?.reset(widgetIdRef.current ?? undefined);
+        },
       });
     };
     if (window.turnstile) {
@@ -3764,6 +3805,12 @@ function WaitlistForm() {
     };
   }, []);
 
+  function resetVerification() {
+    setTurnstileToken(null);
+    setVerificationState("required");
+    window.turnstile?.reset(widgetIdRef.current ?? undefined);
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (status === "loading") return;
@@ -3773,7 +3820,8 @@ function WaitlistForm() {
       return;
     }
     if (!turnstileToken) {
-      toast.error("Still verifying. Give it a second and try again.");
+      widgetContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      toast.error("Complete the security check below to join the launch list.");
       return;
     }
     setStatus("loading");
@@ -3803,6 +3851,11 @@ function WaitlistForm() {
       const data: { ok: boolean; error?: string } | null = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
         setStatus("idle");
+        if (res.status === 403) {
+          resetVerification();
+          toast.error("Verification expired. Please complete it again.");
+          return;
+        }
         toast.error(data?.error || "Could not join the list. Try again in a moment.");
         return;
       }
@@ -3854,13 +3907,34 @@ function WaitlistForm() {
           />
           <button
             type="submit"
-            disabled={status === "loading"}
+            disabled={status === "loading" || !turnstileToken}
+            aria-describedby="waitlist-verification-status"
             className="inline-flex items-center justify-center rounded-sm bg-foreground px-6 py-3 font-mono text-[12px] uppercase tracking-[0.16em] text-background outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
           >
-            {status === "loading" ? "Adding…" : "Join launch list"}
+            {status === "loading" ? "Adding…" : turnstileToken ? "Join launch list" : "Verify below"}
           </button>
         </div>
         <div ref={widgetContainerRef} />
+        <p
+          id="waitlist-verification-status"
+          className="text-center font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground"
+          aria-live="polite"
+        >
+          {verificationState === "ready"
+            ? "Security check complete. You can join the list."
+            : verificationState === "error"
+              ? "Security check needs attention. Retry below."
+              : "Complete the security check to enable the join button."}
+        </p>
+        {verificationState === "error" && (
+          <button
+            type="button"
+            onClick={resetVerification}
+            className="font-mono text-[11px] uppercase tracking-[0.12em] text-accent underline underline-offset-4"
+          >
+            Retry security check
+          </button>
+        )}
       </form>
     </>
   );
@@ -3908,9 +3982,10 @@ function Colophon() {
       <Container className="py-16">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <div className="font-serif text-3xl leading-none text-foreground">
-              Trackdub<span className="text-accent">.</span>
-            </div>
+            <a href="#top" className="flex items-center gap-3 font-serif text-3xl leading-none text-foreground" aria-label="Trackdub home">
+              <img src={trackdubIcon} alt="" className="h-10 w-10 object-contain" />
+              <span>Trackdub<span className="text-accent">.</span></span>
+            </a>
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-muted-foreground">
               A desktop workstation for dubbing video. Local-first. Editable at every stage.
             </p>
@@ -3948,6 +4023,15 @@ function Colophon() {
         <Rule className="mt-14" />
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
           <span>© 2026 Trackdub</span>
+          <a
+            href={GITHUB_REPO}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Trackdub on GitHub"
+            className="inline-flex items-center gap-2 text-foreground hover:text-accent"
+          >
+            <Github className="h-4 w-4" aria-hidden="true" /> GitHub
+          </a>
         </div>
       </Container>
     </footer>
