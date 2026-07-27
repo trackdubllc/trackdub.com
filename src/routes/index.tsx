@@ -3642,7 +3642,14 @@ function FAQ() {
               <TextLink href="mailto:hello@trackdub.com">hello@trackdub.com</TextLink>.
             </p>
             <p className="mt-4 text-[14px] leading-relaxed text-muted-foreground">
-              Data handling questions are covered in full in the{" "}
+              New to how AI dubbing works stage by stage? Read the{" "}
+              <Link
+                to="/guides/ai-dubbing-guide"
+                className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 text-foreground transition-colors hover:border-accent hover:text-accent"
+              >
+                AI dubbing guide
+              </Link>
+              . Data handling is covered in full in the{" "}
               <Link
                 to="/privacy"
                 className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 text-foreground transition-colors hover:border-accent hover:text-accent"
@@ -3958,6 +3965,14 @@ function Colophon() {
       ],
     ],
     [
+      "Resources",
+      [
+        ["AI dubbing guide", "/guides/ai-dubbing-guide"],
+        ["Docs", "/docs"],
+        ["Local-first checklist", "/downloads/trackdub-local-first-dubbing-checklist.pdf"],
+      ],
+    ],
+    [
       "Developers",
       [
         ["CLI", "/docs#quickstart"],
@@ -3989,6 +4004,12 @@ function Colophon() {
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-muted-foreground">
               A desktop workstation for dubbing video. Local-first. Editable at every stage.
             </p>
+            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Early preview ·{" "}
+              <a href="/changelog" className="text-foreground hover:text-accent">
+                Building in public →
+              </a>
+            </p>
           </div>
           {cols.map(([h, links]) => (
             <div key={h} className="lg:col-span-2">
@@ -4006,19 +4027,6 @@ function Colophon() {
               </ul>
             </div>
           ))}
-          <div className="lg:col-span-2">
-            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Status
-            </div>
-            <ul className="mt-4 space-y-2 font-mono text-[12px] text-muted-foreground">
-              <li>Early preview</li>
-              <li>
-                <a href="/changelog" className="hover:text-accent">
-                  Building in public →
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
         <Rule className="mt-14" />
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
