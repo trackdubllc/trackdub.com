@@ -15,6 +15,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuidesIndexRouteImport } from './routes/guides/index'
 import { Route as GuidesAiDubbingGuideRouteImport } from './routes/guides/ai-dubbing-guide'
 import { Route as ApiWaitlistRouteImport } from './routes/api/waitlist'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -50,6 +51,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesIndexRoute = GuidesIndexRouteImport.update({
+  id: '/guides/',
+  path: '/guides/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GuidesAiDubbingGuideRoute = GuidesAiDubbingGuideRouteImport.update({
   id: '/guides/ai-dubbing-guide',
   path: '/guides/ai-dubbing-guide',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/waitlist': typeof ApiWaitlistRoute
   '/guides/ai-dubbing-guide': typeof GuidesAiDubbingGuideRoute
+  '/guides/': typeof GuidesIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/waitlist': typeof ApiWaitlistRoute
   '/guides/ai-dubbing-guide': typeof GuidesAiDubbingGuideRoute
+  '/guides': typeof GuidesIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/waitlist': typeof ApiWaitlistRoute
   '/guides/ai-dubbing-guide': typeof GuidesAiDubbingGuideRoute
+  '/guides/': typeof GuidesIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/waitlist'
     | '/guides/ai-dubbing-guide'
+    | '/guides/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/waitlist'
     | '/guides/ai-dubbing-guide'
+    | '/guides'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   id:
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/waitlist'
     | '/guides/ai-dubbing-guide'
+    | '/guides/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
@@ -156,6 +168,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiWaitlistRoute: typeof ApiWaitlistRoute
   GuidesAiDubbingGuideRoute: typeof GuidesAiDubbingGuideRoute
+  GuidesIndexRoute: typeof GuidesIndexRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/': {
+      id: '/guides/'
+      path: '/guides'
+      fullPath: '/guides/'
+      preLoaderRoute: typeof GuidesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guides/ai-dubbing-guide': {
       id: '/guides/ai-dubbing-guide'
       path: '/guides/ai-dubbing-guide'
@@ -244,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiWaitlistRoute: ApiWaitlistRoute,
   GuidesAiDubbingGuideRoute: GuidesAiDubbingGuideRoute,
+  GuidesIndexRoute: GuidesIndexRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }

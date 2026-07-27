@@ -3967,6 +3967,7 @@ function Colophon() {
     [
       "Resources",
       [
+        ["Guides", "/guides"],
         ["AI dubbing guide", "/guides/ai-dubbing-guide"],
         ["Docs", "/docs"],
         ["Local-first checklist", "/downloads/trackdub-local-first-dubbing-checklist.pdf"],

@@ -259,7 +259,14 @@ function MoreDocs() {
           Full API and SDK reference lands with v1.
         </p>
         <p className="mx-auto mt-6 max-w-xl text-[16px] leading-relaxed text-muted-foreground">
-          Building something against the pipeline now? Write to{" "}
+          New to how the pipeline fits together? Read the{" "}
+          <Link
+            to="/guides/ai-dubbing-guide"
+            className="border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+          >
+            AI dubbing guide
+          </Link>
+          . Building something against the pipeline now? Write to{" "}
           <a
             href="mailto:hello@trackdub.com?subject=Trackdub%20SDK"
             className="border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent"

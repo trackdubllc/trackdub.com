@@ -246,6 +246,13 @@ function Contact() {
           >
             hello@trackdub.com
           </a>
+          . Comparing cloud vs local cost models? See the{" "}
+          <Link
+            to="/guides/ai-dubbing-guide"
+            className="border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+          >
+            AI dubbing guide
+          </Link>
           .
         </p>
       </Container>
