@@ -7,7 +7,7 @@ import { PRICING_PLANS } from "@/lib/pricing";
 import { Github } from "lucide-react";
 import trackdubIcon from "@/assets/icon.png";
 
-const GITHUB_REPO = "https://github.com/trackdubllc/trackdub.com";
+const GITHUB_REPO = "https://github.com/trackdubllc/Trackdub";
 
 // Math.sin/Math.cos can differ in the last bit between Bun (SSR) and the
 // browser's JS engine, which trips React hydration mismatch warnings for
