@@ -1,5 +1,15 @@
 import "./lib/error-capture";
 
+import {
+  matchAgentDiscovery,
+  withHomepageLinkHeaders,
+} from "./lib/agent-discovery";
+import {
+  markdownForPath,
+  markdownResponseFromHtml,
+  requestPrefersMarkdown,
+  rewriteAcceptForHtmlOrigin,
+} from "./lib/agent-discovery/markdown";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
@@ -26,9 +36,9 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   if (!contentType.includes("application/json")) return response;
 
   const body = await response.clone().text();
-  if (!isH3SwallowedErrorBody(body)) return response;
+  if (!isH3SwallowedErrorBody(body) && !isAssetsHtmlOnlyError(body)) return response;
 
-  console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
+  console.error(consumeLastCapturedError() ?? new Error(`origin error response: ${body}`));
   return new Response(renderErrorPage(), {
     status: 500,
     headers: { "content-type": "text/html; charset=utf-8" },
@@ -44,12 +54,73 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+function isAssetsHtmlOnlyError(body: string): boolean {
+  try {
+    const payload = JSON.parse(body) as { error?: unknown };
+    return payload.error === "Only HTML requests are supported here";
+  } catch {
+    return false;
+  }
+}
+
+function isDocumentPath(pathname: string): boolean {
+  if (pathname.startsWith("/api/")) return false;
+  if (pathname.startsWith("/assets/")) return false;
+  if (pathname.startsWith("/.well-known/")) return false;
+  if (pathname === "/mcp") return false;
+  if (pathname.includes(".")) {
+    // Allow extensionless app routes; skip static files like /og.png
+    return false;
+  }
+  return true;
+}
+
+async function maybeMarkdownResponse(
+  request: Request,
+  env: unknown,
+  ctx: unknown,
+): Promise<Response | null> {
+  if (!requestPrefersMarkdown(request)) return null;
+
+  const url = new URL(request.url);
+  const curated = markdownForPath(url.pathname);
+  if (curated) return curated;
+
+  if (!isDocumentPath(url.pathname)) return null;
+
+  // Assets / some edge paths 500 when Accept is markdown-only. Always fetch HTML
+  // from the app origin, then convert locally so agents get text/markdown.
+  const handler = await getServerEntry();
+  const htmlRequest = rewriteAcceptForHtmlOrigin(request);
+  const htmlResponse = await handler.fetch(htmlRequest, env, ctx);
+  const normalized = await normalizeCatastrophicSsrResponse(htmlResponse);
+  if (!normalized.ok) return normalized;
+
+  const contentType = normalized.headers.get("content-type") ?? "";
+  if (!contentType.includes("text/html")) return normalized;
+
+  const html = await normalized.text();
+  return markdownResponseFromHtml(html, url);
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const discovery = await matchAgentDiscovery(request);
+      if (discovery) return discovery;
+
+      const markdown = await maybeMarkdownResponse(request, env, ctx);
+      if (markdown) return withHomepageLinkHeaders(request, markdown);
+
+      // Prevent Cloudflare Assets from rejecting markdown-only Accept on HTML routes.
+      const appRequest = requestPrefersMarkdown(request)
+        ? rewriteAcceptForHtmlOrigin(request)
+        : request;
+
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const response = await handler.fetch(appRequest, env, ctx);
+      const normalized = await normalizeCatastrophicSsrResponse(response);
+      return withHomepageLinkHeaders(request, normalized);
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
