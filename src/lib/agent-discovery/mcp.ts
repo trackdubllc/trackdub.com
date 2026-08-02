@@ -146,7 +146,10 @@ export async function handleMcpRequest(request: Request): Promise<Response> {
   }
 
   if (request.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405, headers: { allow: "GET, HEAD, POST" } });
+    return new Response("Method Not Allowed", {
+      status: 405,
+      headers: { allow: "GET, HEAD, POST" },
+    });
   }
 
   let payload: unknown;

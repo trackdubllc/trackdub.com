@@ -1,9 +1,6 @@
 import "./lib/error-capture";
 
-import {
-  matchAgentDiscovery,
-  withHomepageLinkHeaders,
-} from "./lib/agent-discovery";
+import { matchAgentDiscovery, withHomepageLinkHeaders } from "./lib/agent-discovery";
 import {
   markdownForPath,
   markdownResponseFromHtml,

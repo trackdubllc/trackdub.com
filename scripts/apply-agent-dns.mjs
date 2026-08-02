@@ -17,7 +17,9 @@ const ZONE_NAME = "trackdub.com";
 function api(path, { method = "GET", body } = {}) {
   const token = process.env.CLOUDFLARE_API_TOKEN;
   if (!token) {
-    throw new Error("CLOUDFLARE_API_TOKEN is required (run wrangler login, or export a Zone-capable token)");
+    throw new Error(
+      "CLOUDFLARE_API_TOKEN is required (run wrangler login, or export a Zone-capable token)",
+    );
   }
   return fetch(`https://api.cloudflare.com/client/v4${path}`, {
     method,
@@ -45,7 +47,9 @@ async function getZoneId() {
 
 async function upsertHttpsRecord(zoneId, name, target, svcParams) {
   const fqdn = name.endsWith(".") ? name : `${name}.${ZONE_NAME}`;
-  const list = await api(`/zones/${zoneId}/dns_records?type=HTTPS&name=${encodeURIComponent(fqdn)}`);
+  const list = await api(
+    `/zones/${zoneId}/dns_records?type=HTTPS&name=${encodeURIComponent(fqdn)}`,
+  );
   const existing = list.result?.[0];
   const payload = {
     type: "HTTPS",
@@ -78,7 +82,10 @@ async function enableMarkdownForAgents(zoneId) {
 async function main() {
   // Prefer freshly logged-in wrangler token if env token lacks zone perms.
   try {
-    const whoami = execSync("npx wrangler whoami", { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    const whoami = execSync("npx wrangler whoami", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
     console.log(whoami.split("\n").slice(0, 12).join("\n"));
   } catch {
     console.warn("wrangler whoami failed; continuing with CLOUDFLARE_API_TOKEN");
@@ -88,29 +95,24 @@ async function main() {
   console.log("zone", zoneId);
 
   // Organizational index + MCP agent entry (DNS-AID / RFC 9460 HTTPS).
-  await upsertHttpsRecord(
-    zoneId,
-    "_index._agents",
-    "trackdub.com",
-    'alpn="h2,h3" port=443',
-  );
-  await upsertHttpsRecord(
-    zoneId,
-    "_mcp._agents",
-    "trackdub.com",
-    'alpn="h2,h3" port=443',
-  );
+  await upsertHttpsRecord(zoneId, "_index._agents", "trackdub.com", 'alpn="h2,h3" port=443');
+  await upsertHttpsRecord(zoneId, "_mcp._agents", "trackdub.com", 'alpn="h2,h3" port=443');
 
   try {
     await enableMarkdownForAgents(zoneId);
   } catch (error) {
-    console.warn("Markdown for Agents setting skipped:", error instanceof Error ? error.message : error);
-    console.warn("Enable manually: Dashboard → trackdub.com → AI Crawl Control → Markdown for Agents");
+    console.warn(
+      "Markdown for Agents setting skipped:",
+      error instanceof Error ? error.message : error,
+    );
+    console.warn(
+      "Enable manually: Dashboard → trackdub.com → AI Crawl Control → Markdown for Agents",
+    );
   }
 
   console.log("Done. Verify:");
-  console.log('  dig HTTPS _index._agents.trackdub.com');
-  console.log('  dig HTTPS _mcp._agents.trackdub.com');
+  console.log("  dig HTTPS _index._agents.trackdub.com");
+  console.log("  dig HTTPS _mcp._agents.trackdub.com");
   console.log('  curl -sI -H "Accept: text/markdown" https://trackdub.com/');
 }
 

@@ -106,10 +106,7 @@ export function oauthAuthorizationServerDocument() {
     token_endpoint: `${SITE_ORIGIN}/oauth/token`,
     jwks_uri: `${SITE_ORIGIN}/.well-known/jwks.json`,
     response_types_supported: ["code"],
-    grant_types_supported: [
-      "authorization_code",
-      "urn:ietf:params:oauth:grant-type:jwt-bearer",
-    ],
+    grant_types_supported: ["authorization_code", "urn:ietf:params:oauth:grant-type:jwt-bearer"],
     code_challenge_methods_supported: ["S256"],
     token_endpoint_auth_methods_supported: ["none"],
     service_documentation: `${SITE_ORIGIN}/auth.md`,
@@ -150,8 +147,7 @@ export function mcpServerCardDocument() {
       name: MCP_SERVER_NAME,
       version: MCP_VERSION,
       title: "Trackdub marketing site",
-      description:
-        "Read-only MCP tools for Trackdub product pages, pricing summary, and llms.txt.",
+      description: "Read-only MCP tools for Trackdub product pages, pricing summary, and llms.txt.",
     },
     transport: {
       type: "streamable-http",
