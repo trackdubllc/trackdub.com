@@ -1,0 +1,50 @@
+scripts/apply-agent-dns.mjs
+  s_22f3236e2a9873::t_aeeb18426e3ef0 1-120
+src/lib/agent-discovery/mcp.ts
+  s_22f3236e2a9873::t_f35b85a33cb4ff 1-49,57-63,65-171
+  s_22f3236e2a9873::t_1c5d448da905b0 50-56,64
+src/routes/__root.tsx
+  s_22f3236e2a9873::t_a39e554933f238 15
+  s_22f3236e2a9873::t_8a98aa8e09c9e5 189
+package.json
+  s_22f3236e2a9873::t_f319b752648e86 16-17
+src/lib/agent-discovery/documents.ts
+  s_22f3236e2a9873::t_90b4492535b898 109-112,116-117,121-128
+  s_22f3236e2a9873::t_16e210c9c5480a 266,269,271,277,279
+  s_22f3236e2a9873::t_7fdb5f9bf90a0d 1-94,97-108,113-115,118-120,129-202,255-265,267,281,283,285,287,289,295-301,303-309,311,313-316
+  s_22f3236e2a9873::t_8559c68fdc1851 95-96
+  s_22f3236e2a9873::t_d8a59fc1c1ce68 203-206
+  s_22f3236e2a9873::t_3bc5d62f347ada 207-254
+  s_22f3236e2a9873::t_ce77522001ca43 268,270,272-276,278,280,282,284,286,288,290-294,302,310,312
+src/lib/agent-discovery/markdown.ts
+  s_22f3236e2a9873::t_62910ec36c0799 1-217
+src/components/webmcp-provider.tsx
+  s_22f3236e2a9873::t_64b54b0f89a624 1-107
+src/lib/agent-discovery/constants.ts
+  s_22f3236e2a9873::t_9c18d0fddc267f 1-15
+src/lib/agent-discovery/index.ts
+  s_22f3236e2a9873::t_b5dcd0f68156cb 1-5,7-90,93-97,119,128-144,147-159,163-185
+  s_22f3236e2a9873::t_e383f25192d8d7 91-92,98-118,120-127,160-162
+  s_22f3236e2a9873::t_2818c718dfe123 6
+  s_22f3236e2a9873::t_62702e3e10292f 145-146
+src/server.ts
+  s_22f3236e2a9873::t_cdde831e4a2b20 3-12,39,41,57-105,109-119,121-123
+public/robots.txt
+  s_22f3236e2a9873::t_c541b9955409ba 1-23,26,28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "2cbd355e7e66d20348aac2331ac148eb462cbe7e",
+  "prompts": {},
+  "sessions": {
+    "s_22f3236e2a9873": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "d09df23c-1117-422a-9acd-19a76a64f357",
+        "model": "default"
+      },
+      "human_author": "tonythethompson <github@trackdub.com>"
+    }
+  }
+}
