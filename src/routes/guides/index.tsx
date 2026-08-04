@@ -59,7 +59,9 @@ function GuidesIndex() {
           {GUIDES.map((g) => (
             <li key={g.to} className="py-6">
               <Link to={g.to} className="group block space-y-2 hover:opacity-90">
-                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{g.meta}</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                  {g.meta}
+                </p>
                 <h2 className="font-serif text-2xl text-foreground group-hover:text-accent">
                   {g.title}
                 </h2>

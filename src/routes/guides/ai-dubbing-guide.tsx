@@ -270,7 +270,9 @@ function GuidePage() {
             aria-label="On this page"
             className="rounded-md border border-border bg-muted/20 p-5 md:p-6"
           >
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">On this page</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              On this page
+            </p>
             <ol className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
               {TOC.map((item, i) => (
                 <li key={item.id}>
@@ -443,8 +445,8 @@ function GuidePage() {
             <p>
               If your deliverable is a talking-head with perfect mouth match in twenty languages by
               tomorrow morning, a lip-sync-first cloud stack may be the right first pass. If your
-              deliverable is a season under NDA with glossary control and per-line fixes, local-first
-              audio dubbing is the durable workstation.
+              deliverable is a season under NDA with glossary control and per-line fixes,
+              local-first audio dubbing is the durable workstation.
             </p>
           </section>
 
