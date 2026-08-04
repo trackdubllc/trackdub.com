@@ -824,8 +824,8 @@ section#resume,
 section#control,
 section#performance,
 section#architecture,
-section#privacy,
-section#requirements,
+#privacy,
+#requirements,
 section#pricing,
 section#faq {
   isolation: isolate;
@@ -840,8 +840,8 @@ section#resume::after,
 section#control::after,
 section#performance::after,
 section#architecture::after,
-section#privacy::after,
-section#requirements::after,
+#privacy::after,
+#requirements::after,
 section#pricing::after,
 section#faq::after {
   /* the reveal system already owns ::after for a hairline sweep. */
@@ -866,8 +866,8 @@ section#resume,
 section#control,
 section#performance,
 section#architecture,
-section#privacy,
-section#requirements,
+#privacy,
+#requirements,
 section#pricing,
 section#faq {
   box-shadow: inset 0 1px 0 0 color-mix(in oklch, var(--accent) 35%, transparent);

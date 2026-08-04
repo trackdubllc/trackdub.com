@@ -37,5 +37,5 @@ export default tseslint.config(
       "no-empty": ["error", { allowEmptyCatch: true }],
     },
   },
-  { ...eslintPluginPrettier, files: ["**/*.{ts,tsx}"] },
+  { ...eslintPluginPrettier, files: ["**/*.{ts,tsx,js,mjs,cjs}"] },
 );
