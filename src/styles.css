@@ -791,10 +791,10 @@ section#performance {
 section#architecture {
   @apply chapter-paper;
 }
-section#privacy {
+#privacy {
   @apply chapter-burgundy;
 }
-section#requirements {
+#requirements {
   @apply chapter-rust;
 }
 section#pricing {
