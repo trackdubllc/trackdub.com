@@ -164,7 +164,13 @@ function TopBar() {
   );
 }
 
-function Container({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Container({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
 }
 
@@ -187,19 +193,21 @@ function Header() {
           Your media is yours. This page says so in plain language.
         </h1>
         <p className="mt-8 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-          Trackdub is a desktop app. It runs on your machine, reads media from
-          folders you point it at, and writes output to folders you choose.
-          Nothing about your projects is uploaded unless you explicitly turn on
-          a cloud stage.
+          Trackdub is a desktop app. It runs on your machine, reads media from folders you point it
+          at, and writes output to folders you choose. Nothing about your projects is uploaded
+          unless you explicitly turn on a cloud stage.
         </p>
         <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
-          This page is maintained by the Trackdub team to answer common
-          questions about how the app handles your data. It mirrors the{" "}
-          <a href="/#privacy" className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent">
+          This page is maintained by the Trackdub team to answer common questions about how the app
+          handles your data. It mirrors the{" "}
+          <a
+            href="/#privacy"
+            className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+          >
             Privacy &amp; retention
           </a>{" "}
-          section on the main site with fuller explanations. It is not legal
-          advice and it is not a certification of any kind.
+          section on the main site with fuller explanations. It is not legal advice and it is not a
+          certification of any kind.
         </p>
         <div className="mt-10 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
           Last updated · 2026-07-23
@@ -211,12 +219,30 @@ function Header() {
 
 function Principles() {
   const items: [string, string][] = [
-    ["Local-first is the default", "The pipeline runs on your CPU or GPU. We do not need a server to dub a video, and we do not route your files through one to work."],
-    ["No account required", "You do not sign up to use Trackdub. There is no user profile on our side because there is no server keeping one."],
-    ["Opt-in, per project, per stage", "If you enable a cloud translation or cloud voice provider, it applies to the specific project and stage you turned it on for — not to the whole app."],
-    ["Minimum data when you do opt in", "When a stage is cloud-backed, Trackdub sends only what that stage needs. Other stages, other lines, and your media stay local."],
-    ["You control retention", "Everything Trackdub writes lives in folders you chose. Delete the folder, delete the data. There is no hidden mirror."],
-    ["No training on your data", "Your media, transcripts, and voice references are not used to train shared models."],
+    [
+      "Local-first is the default",
+      "The pipeline runs on your CPU or GPU. We do not need a server to dub a video, and we do not route your files through one to work.",
+    ],
+    [
+      "No account required",
+      "You do not sign up to use Trackdub. There is no user profile on our side because there is no server keeping one.",
+    ],
+    [
+      "Opt-in, per project, per stage",
+      "If you enable a cloud translation or cloud voice provider, it applies to the specific project and stage you turned it on for — not to the whole app.",
+    ],
+    [
+      "Minimum data when you do opt in",
+      "When a stage is cloud-backed, Trackdub sends only what that stage needs. Other stages, other lines, and your media stay local.",
+    ],
+    [
+      "You control retention",
+      "Everything Trackdub writes lives in folders you chose. Delete the folder, delete the data. There is no hidden mirror.",
+    ],
+    [
+      "No training on your data",
+      "Your media, transcripts, and voice references are not used to train shared models.",
+    ],
   ];
   return (
     <section className="border-b border-border bg-surface/40">
@@ -247,8 +273,8 @@ function StoredLocally() {
           What Trackdub writes to your disk.
         </h2>
         <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground">
-          This is the exhaustive list. If it is not here, Trackdub is not
-          writing it — and the pieces that are here go to folders you pick.
+          This is the exhaustive list. If it is not here, Trackdub is not writing it — and the
+          pieces that are here go to folders you pick.
         </p>
 
         <div className="mt-12 overflow-x-auto">
@@ -280,7 +306,10 @@ function StoredLocally() {
 
         <div className="mt-14 space-y-10">
           {LOCAL.map((l) => (
-            <div key={l.item} className="grid gap-4 border-t border-border pt-6 md:grid-cols-[220px_1fr] md:gap-10">
+            <div
+              key={l.item}
+              className="grid gap-4 border-t border-border pt-6 md:grid-cols-[220px_1fr] md:gap-10"
+            >
               <div className="font-serif text-[20px] leading-snug text-foreground">{l.item}</div>
               <p className="text-[15px] leading-relaxed text-muted-foreground">{l.plain}</p>
             </div>
@@ -300,10 +329,12 @@ function NeverLeaves() {
           Data the app will not transmit, period.
         </h2>
         <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground">
-          The following categories are never sent to Trackdub or to any third
-          party by the default pipeline. Turning on a cloud stage does not
-          change these categories — see{" "}
-          <a href="#optin" className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent">
+          The following categories are never sent to Trackdub or to any third party by the default
+          pipeline. Turning on a cloud stage does not change these categories — see{" "}
+          <a
+            href="#optin"
+            className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+          >
             Opt-in only
           </a>{" "}
           for what an enabled cloud stage actually sends.
@@ -332,14 +363,16 @@ function OptIn() {
           The four things you can turn on. Nothing else phones home.
         </h2>
         <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground">
-          Each is off out of the box. Turning one on is a deliberate choice you
-          make in Preferences or per project, and turning it off stops the
-          transmission on the next run.
+          Each is off out of the box. Turning one on is a deliberate choice you make in Preferences
+          or per project, and turning it off stops the transmission on the next run.
         </p>
 
         <div className="mt-12 space-y-10">
           {OPTIN.map((o) => (
-            <div key={o.item} className="grid gap-4 border-t border-border pt-6 md:grid-cols-[240px_1fr] md:gap-10">
+            <div
+              key={o.item}
+              className="grid gap-4 border-t border-border pt-6 md:grid-cols-[240px_1fr] md:gap-10"
+            >
               <div>
                 <div className="font-serif text-[22px] text-foreground">{o.item}</div>
                 <div className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
@@ -371,11 +404,12 @@ function Details() {
     [
       "Uninstalling",
       <>
-        Your projects, source media, and generated output live in folders you
-        chose, so they stay where they are until you delete them. The app data
-        directory — model cache, preferences, and logs — can be removed during
-        uninstall or manually from{" "}
-        <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-[12px] text-foreground">%LOCALAPPDATA%\Trackdub</code>{" "}
+        Your projects, source media, and generated output live in folders you chose, so they stay
+        where they are until you delete them. The app data directory — model cache, preferences, and
+        logs — can be removed during uninstall or manually from{" "}
+        <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-[12px] text-foreground">
+          %LOCALAPPDATA%\Trackdub
+        </code>{" "}
         on Windows.
       </>,
     ],

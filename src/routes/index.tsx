@@ -969,7 +969,9 @@ function Masthead() {
           aria-label="Trackdub home"
         >
           <img src={trackdubIcon} alt="" className="h-9 w-9 object-contain sm:h-12 sm:w-12" />
-          <span>Trackdub<span className="text-accent">.</span></span>
+          <span>
+            Trackdub<span className="text-accent">.</span>
+          </span>
         </a>
         <nav
           className="hidden flex-1 items-center justify-center gap-x-7 md:flex"
@@ -3918,7 +3920,11 @@ function WaitlistForm() {
             aria-describedby="waitlist-verification-status"
             className="inline-flex items-center justify-center rounded-sm bg-foreground px-6 py-3 font-mono text-[12px] uppercase tracking-[0.16em] text-background outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
           >
-            {status === "loading" ? "Adding…" : turnstileToken ? "Join launch list" : "Verify below"}
+            {status === "loading"
+              ? "Adding…"
+              : turnstileToken
+                ? "Join launch list"
+                : "Verify below"}
           </button>
         </div>
         <div ref={widgetContainerRef} />
@@ -3998,9 +4004,15 @@ function Colophon() {
       <Container className="py-16">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <a href="#top" className="flex items-center gap-3 font-serif text-3xl leading-none text-foreground" aria-label="Trackdub home">
+            <a
+              href="#top"
+              className="flex items-center gap-3 font-serif text-3xl leading-none text-foreground"
+              aria-label="Trackdub home"
+            >
               <img src={trackdubIcon} alt="" className="h-10 w-10 object-contain" />
-              <span>Trackdub<span className="text-accent">.</span></span>
+              <span>
+                Trackdub<span className="text-accent">.</span>
+              </span>
             </a>
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-muted-foreground">
               A desktop workstation for dubbing video. Local-first. Editable at every stage.
