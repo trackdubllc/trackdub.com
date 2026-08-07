@@ -40,3 +40,4 @@ dist-ssr
 *.sw?
 /.dirac-cache
 Trackdub-Monorepo-Archive/
+/.freebuff
