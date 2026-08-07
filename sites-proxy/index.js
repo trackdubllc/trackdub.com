@@ -1,16 +1,32 @@
 const DEFAULT_UPSTREAM_ORIGIN = "https://trackdub.com";
 
-function upstreamHostSet(upstreamOrigin) {
-  const hostname = new URL(upstreamOrigin).hostname;
-  return new Set([hostname, hostname.startsWith("www.") ? hostname.slice(4) : `www.${hostname}`]);
+function upstreamOriginSet(upstreamOrigin) {
+  const base = new URL(upstreamOrigin);
+  const hostnames = [
+    base.hostname,
+    base.hostname.startsWith("www.") ? base.hostname.slice(4) : `www.${base.hostname}`,
+  ];
+  return new Set(
+    hostnames.map((hostname) => {
+      const candidate = new URL(upstreamOrigin);
+      candidate.hostname = hostname;
+      return candidate.origin;
+    }),
+  );
 }
 
-function rewriteLocation(location, upstreamUrl, downstreamUrl, hosts) {
+function rewriteLocation(location, upstreamUrl, downstreamUrl, origins) {
   const target = new URL(location, upstreamUrl);
-  if (!hosts.has(target.hostname)) return location;
+  // Compare origin (scheme + host + port), not hostname alone, so a redirect like
+  // https://trackdub.com:8443/path is left alone instead of being rewritten to the
+  // mirror's default port.
+  if (!origins.has(target.origin)) return location;
 
   target.protocol = downstreamUrl.protocol;
-  target.host = downstreamUrl.host;
+  // Assign hostname and port separately. Setting `host` alone can retain an
+  // upstream non-default port (e.g. :8443) on the mirror URL.
+  target.hostname = downstreamUrl.hostname;
+  target.port = downstreamUrl.port;
   return target.toString();
 }
 
@@ -29,7 +45,7 @@ export async function proxyRequest(
   if (location) {
     headers.set(
       "location",
-      rewriteLocation(location, upstreamUrl, downstreamUrl, upstreamHostSet(upstreamOrigin)),
+      rewriteLocation(location, upstreamUrl, downstreamUrl, upstreamOriginSet(upstreamOrigin)),
     );
   }
 

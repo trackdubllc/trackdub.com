@@ -51,6 +51,46 @@ test("keeps same-site redirects on trackdub.dev", async () => {
   assert.equal(response.headers.get("location"), "https://trackdub.dev/new?from=old");
 });
 
+test("does not rewrite same-hostname redirects on a different port", async () => {
+  const response = await proxyRequest(
+    new Request("https://trackdub.dev/old"),
+    async () =>
+      new Response(null, {
+        status: 302,
+        headers: { location: "https://trackdub.com:8443/internal" },
+      }),
+  );
+
+  assert.equal(response.headers.get("location"), "https://trackdub.com:8443/internal");
+});
+
+test("rewrites www upstream redirects that share the configured origin port", async () => {
+  const response = await proxyRequest(
+    new Request("https://trackdub.dev/old"),
+    async () =>
+      new Response(null, {
+        status: 302,
+        headers: { location: "https://www.trackdub.com/new" },
+      }),
+  );
+
+  assert.equal(response.headers.get("location"), "https://trackdub.dev/new");
+});
+
+test("clears an upstream explicit port when rewriting to the mirror", async () => {
+  const response = await proxyRequest(
+    new Request("https://trackdub.dev/old"),
+    async () =>
+      new Response(null, {
+        status: 302,
+        headers: { location: "https://staging.trackdub.com:9443/new" },
+      }),
+    "https://staging.trackdub.com:9443",
+  );
+
+  assert.equal(response.headers.get("location"), "https://trackdub.dev/new");
+});
+
 test("preserves redirects to external sites", async () => {
   const response = await proxyRequest(
     new Request("https://trackdub.dev/docs"),
