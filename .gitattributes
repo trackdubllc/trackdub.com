@@ -22,6 +22,9 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 
+# Dotfiles — LF too (prettier checks .prettierrc, lint uses .eslintrc, etc.)
+.* text eol=lf
+
 # PowerShell — normalize in the repo, keep native checkout EOL
 *.ps1 text
 
