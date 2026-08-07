@@ -6,7 +6,21 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", ".output", ".vinxi"] },
+  {
+    ignores: [
+      "dist",
+      ".output",
+      ".vinxi",
+      ".dryrun",
+      ".lovable",
+      ".serena",
+      ".openai",
+      // Tool directories — not project source (git-ignored or app data)
+      ".claude",
+      ".remember",
+      ".freebuff",
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -34,7 +48,8 @@ export default tseslint.config(
       ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      "no-empty": ["error", { allowEmptyCatch: true }],
     },
   },
-  eslintPluginPrettier,
+  { ...eslintPluginPrettier, files: ["**/*.{ts,tsx,js,mjs,cjs}"] },
 );

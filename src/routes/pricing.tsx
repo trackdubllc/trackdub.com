@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PRICING_PLANS } from "@/lib/pricing";
+import { PlanCard } from "@/components/plan-card";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -125,53 +126,15 @@ function Plans() {
           role="list"
           className="grid list-none divide-y divide-border border-y border-border md:grid-cols-3 md:divide-x md:divide-y-0"
         >
-          {plans.map((p) => {
-            const titleId = `plan-${p.name.toLowerCase().replace(/\s+/g, "-")}`;
-            return (
-              <li key={p.name} className="contents">
-                <article
-                  aria-labelledby={titleId}
-                  className="relative bg-background p-8 transition-colors hover:bg-surface/50 focus-within:bg-surface/50"
-                >
-                  <header className="flex items-center gap-3">
-                    <h2 id={titleId} className="font-serif text-2xl text-foreground">
-                      {p.name}
-                    </h2>
-                    {p.featured && (
-                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
-                        Recommended
-                      </span>
-                    )}
-                  </header>
-                  <div
-                    className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}
-                  >
-                    {p.price}
-                  </div>
-                  <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                    {p.note}
-                  </p>
-                  <ul className="mt-8 space-y-3 text-[15px] text-foreground">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex gap-3">
-                        <span className="mt-2 h-px w-4 flex-none bg-accent" aria-hidden />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-10">
-                    <a
-                      href={p.href}
-                      aria-label={`${p.cta} · ${p.name} plan`}
-                      className="inline-flex items-baseline gap-1 border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent"
-                    >
-                      {p.cta} <span aria-hidden>→</span>
-                    </a>
-                  </div>
-                </article>
-              </li>
-            );
-          })}
+          {plans.map((p) => (
+            <PlanCard
+              key={p.name}
+              plan={p}
+              heading="h2"
+              className="relative bg-background p-8 transition-colors hover:bg-surface/50 focus-within:bg-surface/50"
+              ctaClassName="inline-flex items-baseline gap-1 border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+            />
+          ))}
         </ul>
       </Container>
     </section>
@@ -246,6 +209,13 @@ function Contact() {
           >
             hello@trackdub.com
           </a>
+          . Comparing cloud vs local cost models? See the{" "}
+          <Link
+            to="/guides/ai-dubbing-guide"
+            className="border-b border-foreground/40 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+          >
+            AI dubbing guide
+          </Link>
           .
         </p>
       </Container>

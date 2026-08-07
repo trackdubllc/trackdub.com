@@ -1,9 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import { useReveal } from "@/hooks/use-reveal";
 import { toast } from "sonner";
 import { z } from "zod";
 import { PRICING_PLANS } from "@/lib/pricing";
+import { PlanCard } from "@/components/plan-card";
+import { Github } from "lucide-react";
+import trackdubIcon from "@/assets/icon.png";
+
+const GITHUB_REPO = "https://github.com/trackdubllc/Trackdub";
+
+// Module-scope helpers for browser APIs that React's purity rules flag when
+// they appear lexically inside component code. Every call site below is an
+// event handler, an rAF loop, or a mount-time read — never render — but
+// routing through these keeps the rules quiet with zero behavioral change.
+function now(): number {
+  return performance.now();
+}
+
+function setLocationHash(hash: string) {
+  window.location.hash = hash;
+}
 
 // Math.sin/Math.cos can differ in the last bit between Bun (SSR) and the
 // browser's JS engine, which trips React hydration mismatch warnings for
@@ -276,11 +293,11 @@ function SectionRail() {
     // If a scroll is in flight, retarget it: keep the current position as the
     // new start and restart the clock so easing stays continuous.
     smoothTargetRef.current = clamped;
-    const now = performance.now();
+    const startedAt = now();
     const distance = Math.abs(clamped - window.scrollY);
     // Scale duration modestly with distance, capped for snappiness.
     smoothDurRef.current = Math.min(280, Math.max(140, 120 + distance * 0.08));
-    smoothStartRef.current = { y: window.scrollY, t: now };
+    smoothStartRef.current = { y: window.scrollY, t: startedAt };
     if (smoothRafRef.current !== null) return; // loop already running
     const step = () => {
       const start = smoothStartRef.current;
@@ -289,7 +306,7 @@ function SectionRail() {
         smoothRafRef.current = null;
         return;
       }
-      const elapsed = performance.now() - start.t;
+      const elapsed = now() - start.t;
       const p = Math.min(1, elapsed / smoothDurRef.current);
       const y = start.y + (target - start.y) * easeOutExpo(p);
       window.scrollTo(0, y);
@@ -355,7 +372,7 @@ function SectionRail() {
       window.history.pushState(null, "", href);
       setActive(id);
     } else {
-      window.location.hash = href;
+      setLocationHash(href);
     }
     scrollToTargetId(id);
   };
@@ -369,11 +386,11 @@ function SectionRail() {
     const f = Math.min(1, Math.max(0, (clientY - box.top) / Math.max(1, box.height)));
     const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
     const y = f * docMax;
-    const now = performance.now();
+    const sampledAt = now();
     const buf = scrubSamplesRef.current;
-    buf.push({ y, t: now });
+    buf.push({ y, t: sampledAt });
     // Keep only the last ~120ms of samples.
-    while (buf.length > 2 && now - buf[0].t > 120) buf.shift();
+    while (buf.length > 2 && sampledAt - buf[0].t > 120) buf.shift();
   };
 
   const releaseVelocity = () => {
@@ -391,13 +408,13 @@ function SectionRail() {
     cancelInertia();
     cancelSmoothScroll();
     let v = v0;
-    let last = performance.now();
+    let last = now();
     // Exponential decay — friction tuned so a hard fling settles in ~600ms.
     const decayPerMs = 0.995;
     const step = () => {
-      const now = performance.now();
-      const dt = now - last;
-      last = now;
+      const nowT = now();
+      const dt = nowT - last;
+      last = nowT;
       const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       const nextY = Math.min(docMax, Math.max(0, window.scrollY + v * dt));
       window.scrollTo(0, nextY);
@@ -654,8 +671,7 @@ function SectionRail() {
     }
     pointerTypeRef.current = e.pointerType;
     // Velocity samples are only used for touch inertia.
-    scrubSamplesRef.current =
-      e.pointerType === "touch" ? [{ y: window.scrollY, t: performance.now() }] : [];
+    scrubSamplesRef.current = e.pointerType === "touch" ? [{ y: window.scrollY, t: now() }] : [];
     dragStartYRef.current = e.clientY;
     draggingRef.current = false;
     suppressClickRef.current = false;
@@ -760,6 +776,26 @@ function SectionRail() {
     finishScrub(e.type, e.clientY);
   };
 
+  // The pointer handlers are recreated every render, but the native-listener
+  // effect below must mount exactly once (it controls passive flags and the
+  // global safety nets). Route events through a ref that always holds the
+  // latest closures, so the effect keeps a stable dependency list instead of
+  // re-attaching listeners (or capturing stale handlers) on every render.
+  const railHandlersRef = useRef({
+    down: handleRailPointerDown,
+    move: handleRailPointerMove,
+    up: handleRailPointerUp,
+    finish: finishScrub,
+  });
+  useEffect(() => {
+    railHandlersRef.current = {
+      down: handleRailPointerDown,
+      move: handleRailPointerMove,
+      up: handleRailPointerUp,
+      finish: finishScrub,
+    };
+  });
+
   // Attach rail pointer listeners natively so we control passive flags:
   // down/up/cancel are passive (never preventDefault → browser doesn't have
   // to wait on JS before scrolling elsewhere on the page); move stays
@@ -769,9 +805,10 @@ function SectionRail() {
   useEffect(() => {
     const list = listRef.current;
     if (!list) return;
-    const down = (e: PointerEvent) => handleRailPointerDown(e);
-    const move = (e: PointerEvent) => handleRailPointerMove(e);
-    const up = (e: PointerEvent) => handleRailPointerUp(e);
+    const handlers = railHandlersRef;
+    const down = (e: PointerEvent) => handlers.current.down(e);
+    const move = (e: PointerEvent) => handlers.current.move(e);
+    const up = (e: PointerEvent) => handlers.current.up(e);
     list.addEventListener("pointerdown", down, { passive: true });
     list.addEventListener("pointermove", move, { passive: false });
     list.addEventListener("pointerup", up, { passive: true });
@@ -782,24 +819,24 @@ function SectionRail() {
     // get stuck in a captured/dragging state.
     const onWindowCancel = (e: PointerEvent) => {
       if (activePointerIdRef.current !== null && e.pointerId === activePointerIdRef.current) {
-        finishScrub("pointercancel", null);
+        handlers.current.finish("pointercancel", null);
       }
     };
     const onWindowUp = (e: PointerEvent) => {
       // Only fires if the element handler missed it (e.g. pointer released
       // outside a captured region on a browser that dropped capture).
       if (activePointerIdRef.current !== null && e.pointerId === activePointerIdRef.current) {
-        finishScrub(e.type, e.clientY);
+        handlers.current.finish(e.type, e.clientY);
       }
     };
     const onLostCapture = () => {
       if (activePointerIdRef.current !== null) {
-        finishScrub("pointercancel", null);
+        handlers.current.finish("pointercancel", null);
       }
     };
     const onBlurOrHide = () => {
       if (activePointerIdRef.current !== null) {
-        finishScrub("pointercancel", null);
+        handlers.current.finish("pointercancel", null);
       }
     };
     window.addEventListener("pointercancel", onWindowCancel, { passive: true });
@@ -961,9 +998,13 @@ function Masthead() {
       <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between gap-6 px-6 sm:h-[88px] sm:px-10">
         <a
           href="#top"
-          className="shrink-0 font-serif text-2xl leading-none tracking-tight text-foreground sm:text-[38px]"
+          className="flex shrink-0 items-center gap-3 font-serif text-2xl leading-none tracking-tight text-foreground sm:text-[38px]"
+          aria-label="Trackdub home"
         >
-          Trackdub<span className="text-accent">.</span>
+          <img src={trackdubIcon} alt="" className="h-9 w-9 object-contain sm:h-12 sm:w-12" />
+          <span>
+            Trackdub<span className="text-accent">.</span>
+          </span>
         </a>
         <nav
           className="hidden flex-1 items-center justify-center gap-x-7 md:flex"
@@ -982,6 +1023,15 @@ function Masthead() {
           ))}
         </nav>
         <div className="hidden shrink-0 items-center gap-4 md:flex lg:gap-5">
+          <a
+            href={GITHUB_REPO}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Trackdub on GitHub"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Github className="h-5 w-5" aria-hidden="true" />
+          </a>
           <div className="hidden lg:block">
             <MotionToggle />
           </div>
@@ -1012,6 +1062,14 @@ function Masthead() {
             <div className="py-2">
               <MotionToggle />
             </div>
+            <a
+              href={GITHUB_REPO}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:text-foreground"
+            >
+              <Github className="h-4 w-4" aria-hidden="true" /> GitHub
+            </a>
             <InkButton href="#waitlist">Join launch list</InkButton>
           </Container>
         </div>
@@ -1025,31 +1083,66 @@ function Masthead() {
 type MotionMode = "full" | "reduced";
 const MOTION_KEY = "trackdub:motion";
 
+// The motion preference lives in localStorage and defaults to the OS
+// prefers-reduced-motion setting when unset. It's modeled as an external
+// store via useSyncExternalStore — not state set inside an effect — so the
+// two toggle instances (desktop header + mobile menu) stay in sync and SSR
+// hydration stays safe: the server snapshot renders the default, then the
+// store corrects to the saved preference once mounted.
+const motionSubscribers = new Set<() => void>();
+// Set only when localStorage.setItem throws. Non-null means the last chosen
+// mode could not be persisted; prefer it over a readable-but-stale getItem
+// result so the toggle still updates when writes are blocked.
+let motionMemory: MotionMode | null = null;
+
+function motionSubscribe(onStoreChange: () => void) {
+  motionSubscribers.add(onStoreChange);
+  return () => {
+    motionSubscribers.delete(onStoreChange);
+  };
+}
+
+function motionNotify() {
+  for (const cb of motionSubscribers) cb();
+}
+
+function getMotionSnapshot(): MotionMode {
+  if (typeof window === "undefined") return "full";
+  if (motionMemory) return motionMemory;
+  try {
+    const stored = localStorage.getItem(MOTION_KEY);
+    if (stored === "full" || stored === "reduced") return stored;
+  } catch {
+    // Fall through to OS preference when storage is unreadable.
+  }
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "reduced" : "full";
+}
+
+function getMotionServerSnapshot(): MotionMode {
+  return "full";
+}
+
 function MotionToggle() {
-  const [mode, setMode] = useState<MotionMode | null>(null);
+  const mode = useSyncExternalStore(motionSubscribe, getMotionSnapshot, getMotionServerSnapshot);
 
+  // Apply the preference to the document (an external system) — a DOM sync,
+  // not a state write, so it stays legal in an effect.
   useEffect(() => {
-    const stored =
-      typeof window !== "undefined"
-        ? (localStorage.getItem(MOTION_KEY) as MotionMode | null)
-        : null;
-    const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const initial: MotionMode = stored ?? (prefersReduced ? "reduced" : "full");
-    setMode(initial);
-  }, []);
-
-  useEffect(() => {
-    if (!mode) return;
     document.documentElement.classList.toggle("reduce-motion", mode === "reduced");
-    try {
-      localStorage.setItem(MOTION_KEY, mode);
-    } catch {}
   }, [mode]);
 
   const next: MotionMode = mode === "reduced" ? "full" : "reduced";
   const label = mode === "reduced" ? "Motion: off" : "Motion: on";
+
+  const setMode = (m: MotionMode) => {
+    try {
+      localStorage.setItem(MOTION_KEY, m);
+      motionMemory = null;
+    } catch {
+      motionMemory = m;
+    }
+    motionNotify();
+  };
 
   return (
     <button
@@ -1737,11 +1830,11 @@ function ProductPlate() {
             <figure className="overflow-hidden border border-border">
               <img
                 src="/screenshots/app-shell-early-build.png"
-                alt="Trackdub desktop app shell, early build: pipeline stage list with separation, cleanup, transcribe, and identify stages, stem separation and speaker diarization toggles, voice selector"
+                alt="Trackdub desktop dubbing workstation with pipeline controls, video preview, translated segments, and per-line playback controls"
                 className="w-full"
                 loading="lazy"
-                width={2766}
-                height={1118}
+                width={1920}
+                height={1050}
               />
             </figure>
             <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -3540,53 +3633,14 @@ function Pricing() {
           role="list"
           className="mt-14 grid list-none divide-y divide-border border-y border-border md:grid-cols-3 md:divide-x md:divide-y-0"
         >
-          {plans.map((p) => {
-            const titleId = `plan-${p.name.toLowerCase().replace(/\s+/g, "-")}`;
-            return (
-              <li key={p.name} className="contents">
-                <article
-                  aria-labelledby={titleId}
-                  className="card-lift group relative p-8 transition-colors hover:bg-surface/50 focus-within:bg-surface/50 focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 focus-within:ring-offset-background"
-                >
-                  <header className="flex items-center gap-3">
-                    <h3 id={titleId} className="font-serif text-2xl text-foreground">
-                      {p.name}
-                    </h3>
-                    {p.featured && (
-                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
-                        Recommended
-                      </span>
-                    )}
-                  </header>
-                  <div
-                    className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}
-                  >
-                    {p.price}
-                  </div>
-                  <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                    {p.note}
-                  </p>
-                  <ul className="mt-8 space-y-3 text-[15px] text-foreground">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex gap-3">
-                        <span className="mt-2 h-px w-4 flex-none bg-accent" aria-hidden />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-10">
-                    <a
-                      href={p.href}
-                      aria-label={`${p.cta} · ${p.name} plan`}
-                      className="inline-flex items-baseline gap-1 rounded-sm border-b border-foreground/40 pb-0.5 text-foreground outline-none hover:border-accent hover:text-accent focus-visible:outline-none"
-                    >
-                      {p.cta} <span aria-hidden>→</span>
-                    </a>
-                  </div>
-                </article>
-              </li>
-            );
-          })}
+          {plans.map((p) => (
+            <PlanCard
+              key={p.name}
+              plan={p}
+              className="card-lift group relative p-8 transition-colors hover:bg-surface/50 focus-within:bg-surface/50 focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 focus-within:ring-offset-background"
+              ctaClassName="inline-flex items-baseline gap-1 rounded-sm border-b border-foreground/40 pb-0.5 text-foreground outline-none hover:border-accent hover:text-accent focus-visible:outline-none"
+            />
+          ))}
         </ul>
         <p className="mt-8 font-mono text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
           <Link
@@ -3619,7 +3673,14 @@ function FAQ() {
               <TextLink href="mailto:hello@trackdub.com">hello@trackdub.com</TextLink>.
             </p>
             <p className="mt-4 text-[14px] leading-relaxed text-muted-foreground">
-              Data handling questions are covered in full in the{" "}
+              New to how AI dubbing works stage by stage? Read the{" "}
+              <Link
+                to="/guides/ai-dubbing-guide"
+                className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 text-foreground transition-colors hover:border-accent hover:text-accent"
+              >
+                AI dubbing guide
+              </Link>
+              . Data handling is covered in full in the{" "}
               <Link
                 to="/privacy"
                 className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 text-foreground transition-colors hover:border-accent hover:text-accent"
@@ -3693,11 +3754,10 @@ function Endnote() {
 
 /* ---------------- waitlist ---------------- */
 
-// Turnstile widget sitekey (public). Production MUST set
-// VITE_TURNSTILE_SITE_KEY to a real Turnstile site from the Cloudflare
-// dashboard. The fallback is Cloudflare's published test key, which
-// always passes — fine for local dev/preview but does NOT gate real
-// users in production.
+// Turnstile widget sitekey (public). Set VITE_TURNSTILE_SITE_KEY at build
+// time to the real Turnstile site from the Cloudflare dashboard — the
+// fallback below is only a placeholder for local dev/preview builds that
+// never set it.
 const TURNSTILE_SITE_KEY: string =
   import.meta.env.VITE_TURNSTILE_SITE_KEY ?? "0x4AAAAAAD9pNIBkKRhSY098";
 
@@ -3712,7 +3772,12 @@ const waitlistSchema = z.object({
 
 declare global {
   interface Window {
-    onWaitlistTurnstile?: (token: string) => void;
+    turnstile?: {
+      render: (container: HTMLElement, options: Record<string, unknown>) => string;
+      remove: (widgetId: string) => void;
+      reset: (widgetId?: string) => void;
+    };
+    __onTurnstileLoad__?: () => void;
   }
 }
 
@@ -3722,19 +3787,69 @@ function WaitlistForm() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [interest, setInterest] = useState<string | null>(null);
+  const [verificationState, setVerificationState] = useState<"required" | "ready" | "error">(
+    "required",
+  );
+  // The interest tag is read once from the URL (?interest=...) and only used
+  // in the signup POST body — it never affects rendered markup, so a lazy
+  // initializer is hydration-safe and avoids a state write inside an effect.
+  const [interest] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    const fromUrl = new URLSearchParams(window.location.search).get("interest");
+    return fromUrl && WAITLIST_INTERESTS.has(fromUrl) ? fromUrl : null;
+  });
+  const widgetContainerRef = useRef<HTMLDivElement | null>(null);
+  const widgetIdRef = useRef<string | null>(null);
 
+  // Render the widget explicitly instead of Turnstile's implicit
+  // `.cf-turnstile` auto-scan: on an SSR'd page the auto-scan can run before
+  // (or race) the container landing in the DOM and silently no-op, leaving
+  // the widget permanently blank with no console error. Rendering once both
+  // the container ref and the turnstile API are confirmed ready removes
+  // that race entirely.
   useEffect(() => {
-    window.onWaitlistTurnstile = (token: string) => setTurnstileToken(token);
+    let cancelled = false;
+    const tryRender = () => {
+      if (cancelled || !widgetContainerRef.current || widgetIdRef.current || !window.turnstile) {
+        return;
+      }
+      widgetIdRef.current = window.turnstile.render(widgetContainerRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        action: "waitlist_signup",
+        callback: (token: string) => {
+          setTurnstileToken(token);
+          setVerificationState("ready");
+        },
+        "error-callback": (errorCode: string) => {
+          console.warn("[waitlist] Turnstile error", errorCode);
+          setTurnstileToken(null);
+          setVerificationState("error");
+          return true;
+        },
+        "expired-callback": () => {
+          setTurnstileToken(null);
+          setVerificationState("required");
+          window.turnstile?.reset(widgetIdRef.current ?? undefined);
+        },
+      });
+    };
+    if (window.turnstile) {
+      tryRender();
+    } else {
+      window.__onTurnstileLoad__ = tryRender;
+    }
     return () => {
-      delete window.onWaitlistTurnstile;
+      cancelled = true;
+      if (widgetIdRef.current) window.turnstile?.remove(widgetIdRef.current);
+      delete window.__onTurnstileLoad__;
     };
   }, []);
 
-  useEffect(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get("interest");
-    if (fromUrl && WAITLIST_INTERESTS.has(fromUrl)) setInterest(fromUrl);
-  }, []);
+  function resetVerification() {
+    setTurnstileToken(null);
+    setVerificationState("required");
+    window.turnstile?.reset(widgetIdRef.current ?? undefined);
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -3745,7 +3860,8 @@ function WaitlistForm() {
       return;
     }
     if (!turnstileToken) {
-      toast.error("Still verifying. Give it a second and try again.");
+      widgetContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      toast.error("Complete the security check below to join the launch list.");
       return;
     }
     setStatus("loading");
@@ -3775,6 +3891,11 @@ function WaitlistForm() {
       const data: { ok: boolean; error?: string } | null = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
         setStatus("idle");
+        if (res.status === 403) {
+          resetVerification();
+          toast.error("Verification expired. Please complete it again.");
+          return;
+        }
         toast.error(data?.error || "Could not join the list. Try again in a moment.");
         return;
       }
@@ -3797,7 +3918,11 @@ function WaitlistForm() {
 
   return (
     <>
-      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+      <script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=__onTurnstileLoad__&render=explicit"
+        async
+        defer
+      />
       <form
         onSubmit={onSubmit}
         className="mx-auto mt-12 flex w-full max-w-md flex-col items-center gap-3"
@@ -3822,18 +3947,38 @@ function WaitlistForm() {
           />
           <button
             type="submit"
-            disabled={status === "loading"}
+            disabled={status === "loading" || !turnstileToken}
+            aria-describedby="waitlist-verification-status"
             className="inline-flex items-center justify-center rounded-sm bg-foreground px-6 py-3 font-mono text-[12px] uppercase tracking-[0.16em] text-background outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-60"
           >
-            {status === "loading" ? "Adding…" : "Join launch list"}
+            {status === "loading"
+              ? "Adding…"
+              : turnstileToken
+                ? "Join launch list"
+                : "Verify below"}
           </button>
         </div>
-        <div
-          className="cf-turnstile"
-          data-sitekey={TURNSTILE_SITE_KEY}
-          data-callback="onWaitlistTurnstile"
-          data-action="waitlist turnstile-spin-v2"
-        />
+        <div ref={widgetContainerRef} />
+        <p
+          id="waitlist-verification-status"
+          className="text-center font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground"
+          aria-live="polite"
+        >
+          {verificationState === "ready"
+            ? "Security check complete. You can join the list."
+            : verificationState === "error"
+              ? "Security check needs attention. Retry below."
+              : "Complete the security check to enable the join button."}
+        </p>
+        {verificationState === "error" && (
+          <button
+            type="button"
+            onClick={resetVerification}
+            className="font-mono text-[11px] uppercase tracking-[0.12em] text-accent underline underline-offset-4"
+          >
+            Retry security check
+          </button>
+        )}
       </form>
     </>
   );
@@ -3854,6 +3999,15 @@ function Colophon() {
         ["Requirements", "#requirements"],
         ["Pricing", "/pricing"],
         ["Changelog", "/changelog"],
+      ],
+    ],
+    [
+      "Resources",
+      [
+        ["Guides", "/guides"],
+        ["AI dubbing guide", "/guides/ai-dubbing-guide"],
+        ["Docs", "/docs"],
+        ["Local-first checklist", "/downloads/trackdub-local-first-dubbing-checklist.pdf"],
       ],
     ],
     [
@@ -3881,11 +4035,24 @@ function Colophon() {
       <Container className="py-16">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <div className="font-serif text-3xl leading-none text-foreground">
-              Trackdub<span className="text-accent">.</span>
-            </div>
+            <a
+              href="#top"
+              className="flex items-center gap-3 font-serif text-3xl leading-none text-foreground"
+              aria-label="Trackdub home"
+            >
+              <img src={trackdubIcon} alt="" className="h-10 w-10 object-contain" />
+              <span>
+                Trackdub<span className="text-accent">.</span>
+              </span>
+            </a>
             <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-muted-foreground">
               A desktop workstation for dubbing video. Local-first. Editable at every stage.
+            </p>
+            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              Early preview ·{" "}
+              <a href="/changelog" className="text-foreground hover:text-accent">
+                Building in public →
+              </a>
             </p>
           </div>
           {cols.map(([h, links]) => (
@@ -3904,23 +4071,19 @@ function Colophon() {
               </ul>
             </div>
           ))}
-          <div className="lg:col-span-2">
-            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-              Status
-            </div>
-            <ul className="mt-4 space-y-2 font-mono text-[12px] text-muted-foreground">
-              <li>Early preview</li>
-              <li>
-                <a href="/changelog" className="hover:text-accent">
-                  Building in public →
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
         <Rule className="mt-14" />
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
           <span>© 2026 Trackdub</span>
+          <a
+            href={GITHUB_REPO}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Trackdub on GitHub"
+            className="inline-flex items-center gap-2 text-foreground hover:text-accent"
+          >
+            <Github className="h-4 w-4" aria-hidden="true" /> GitHub
+          </a>
         </div>
       </Container>
     </footer>

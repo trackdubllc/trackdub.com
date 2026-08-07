@@ -144,40 +144,40 @@
   /* Trackdub — Autumn Harvest: warm cream paper, charred ink, amber/gold accents */
 
   /* Palette anchors (raw brand colors, reused by chapter themes) */
-  --paper:    oklch(0.955 0.024 78);   /* #f5ede0 warm cream */
-  --paper-2:  oklch(0.915 0.032 74);   /* deeper cream */
-  --ink-raw:  oklch(0.14 0.028 45);    /* charred brown-black — deeper for contrast */
-  --ash:      oklch(0.215 0.028 46);   /* warm graphite — slightly deeper */
-  --burgundy: oklch(0.32 0.115 32);    /* deep wine — darker for text contrast */
-  --rust:     oklch(0.44 0.14 42);     /* mid rust — darker so cream sits above 4.5:1 */
-  --amber:    oklch(0.74 0.17 62);     /* warm amber accent */
-  --gold:     oklch(0.86 0.15 82);     /* soft gold accent */
-  --cream:    oklch(0.965 0.024 78);   /* text on dark chapters — brighter */
+  --paper: oklch(0.955 0.024 78); /* #f5ede0 warm cream */
+  --paper-2: oklch(0.915 0.032 74); /* deeper cream */
+  --ink-raw: oklch(0.14 0.028 45); /* charred brown-black — deeper for contrast */
+  --ash: oklch(0.215 0.028 46); /* warm graphite — slightly deeper */
+  --burgundy: oklch(0.32 0.115 32); /* deep wine — darker for text contrast */
+  --rust: oklch(0.44 0.14 42); /* mid rust — darker so cream sits above 4.5:1 */
+  --amber: oklch(0.74 0.17 62); /* warm amber accent */
+  --gold: oklch(0.86 0.15 82); /* soft gold accent */
+  --cream: oklch(0.965 0.024 78); /* text on dark chapters — brighter */
 
   /* Default (paper) chapter — used by the page shell and any un-themed section */
   --background: var(--paper);
-  --surface:    var(--paper-2);
-  --surface-2:  var(--ash);
+  --surface: var(--paper-2);
+  --surface-2: var(--ash);
   --foreground: var(--ink-raw);
-  --ink:        var(--ink-raw);
-  --card:            color-mix(in oklch, var(--paper) 92%, var(--ink-raw) 8%);
+  --ink: var(--ink-raw);
+  --card: color-mix(in oklch, var(--paper) 92%, var(--ink-raw) 8%);
   --card-foreground: var(--ink-raw);
-  --popover:         var(--paper);
+  --popover: var(--paper);
   --popover-foreground: var(--ink-raw);
-  --primary:            var(--ink-raw);
+  --primary: var(--ink-raw);
   --primary-foreground: var(--paper);
-  --secondary:            var(--paper-2);
+  --secondary: var(--paper-2);
   --secondary-foreground: var(--ink-raw);
-  --muted:            var(--paper-2);
+  --muted: var(--paper-2);
   --muted-foreground: color-mix(in oklch, var(--ink-raw) 72%, var(--paper) 28%);
-  --accent:            var(--amber);
+  --accent: var(--amber);
   --accent-foreground: var(--ink-raw);
-  --destructive:            oklch(0.55 0.2 27);
+  --destructive: oklch(0.55 0.2 27);
   --destructive-foreground: var(--paper);
-  --border:   color-mix(in oklch, var(--ink-raw) 28%, var(--paper) 72%);
+  --border: color-mix(in oklch, var(--ink-raw) 28%, var(--paper) 72%);
   --hairline: color-mix(in oklch, var(--ink-raw) 28%, var(--paper) 72%);
-  --input:    color-mix(in oklch, var(--ink-raw) 22%, var(--paper) 78%);
-  --ring:     var(--amber);
+  --input: color-mix(in oklch, var(--ink-raw) 22%, var(--paper) 78%);
+  --ring: var(--amber);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -247,14 +247,20 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    *, *::before, *::after {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.001ms !important;
       transition-duration: 0.001ms !important;
     }
   }
 
-  html.reduce-motion { scroll-behavior: auto; }
+  html.reduce-motion {
+    scroll-behavior: auto;
+  }
   html.reduce-motion *,
   html.reduce-motion *::before,
   html.reduce-motion *::after {
@@ -264,8 +270,14 @@
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @utility animate-fade-up {
@@ -284,36 +296,73 @@
   border-color: var(--hairline);
 }
 @utility shadow-panel {
-  box-shadow: 0 1px 0 oklch(1 0 0 / 0.03) inset, 0 24px 60px -30px oklch(0 0 0 / 0.45);
+  box-shadow:
+    0 1px 0 oklch(1 0 0 / 0.03) inset,
+    0 24px 60px -30px oklch(0 0 0 / 0.45);
 }
 
 /* ---------- kinetic layer ---------- */
 
 @keyframes reveal-up {
-  from { opacity: 0; transform: translate3d(0, 18px, 0); filter: blur(6px); }
-  to   { opacity: 1; transform: translate3d(0, 0, 0);    filter: blur(0); }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
 }
 @keyframes wave-drift {
-  0%, 100% { transform: scaleY(0.55); }
-  50%      { transform: scaleY(1); }
+  0%,
+  100% {
+    transform: scaleY(0.55);
+  }
+  50% {
+    transform: scaleY(1);
+  }
 }
 @keyframes flow-dot {
-  0%   { offset-distance: 0%; opacity: 0; }
-  8%   { opacity: 1; }
-  92%  { opacity: 1; }
-  100% { offset-distance: 100%; opacity: 0; }
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
 }
 @keyframes underline-in {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 @keyframes pulse-once {
-  0%   { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent); }
-  100% { box-shadow: 0 0 0 10px transparent; }
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
 }
 @keyframes sheen-sweep {
-  0%   { transform: translateX(-120%) skewX(-18deg); }
-  100% { transform: translateX(220%) skewX(-18deg); }
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(220%) skewX(-18deg);
+  }
 }
 
 @utility reveal {
@@ -355,7 +404,9 @@
 }
 
 /* chapter accent tick — anchors each revealed section to the page's grid */
-section.reveal[data-reveal] { position: relative; }
+section.reveal[data-reveal] {
+  position: relative;
+}
 section.reveal[data-reveal]::before {
   content: "";
   position: absolute;
@@ -456,11 +507,12 @@ html.reduce-motion section.reveal[data-reveal] h2::after {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 220ms ease-out,
-              background-color 180ms ease-out,
-              border-color 180ms ease-out,
-              color 180ms ease-out;
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease-out,
+    background-color 180ms ease-out,
+    border-color 180ms ease-out,
+    color 180ms ease-out;
   &::after {
     content: "";
     position: absolute;
@@ -489,16 +541,30 @@ html.reduce-motion section.reveal[data-reveal] h2::after {
     animation: sheen-sweep 900ms cubic-bezier(0.22, 1, 0.36, 1) 1;
   }
   &:active {
-    transform: translateY(0);
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 2px 6px -4px color-mix(in oklab, var(--foreground) 30%, transparent);
+    transition-duration: 80ms;
+  }
+}
+
+@utility btn-press {
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms ease-out,
+    background-color 180ms ease-out;
+  &:active:not(:disabled) {
+    transform: scale(0.96);
+    transition-duration: 80ms;
   }
 }
 
 @utility card-lift {
   position: relative;
   isolation: isolate;
-  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 220ms ease-out,
-              background-color 220ms ease-out;
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms ease-out,
+    background-color 220ms ease-out;
   &::before {
     content: "";
     position: absolute;
@@ -519,24 +585,36 @@ html.reduce-motion section.reveal[data-reveal] h2::after {
 @media (prefers-reduced-motion: reduce) {
   .btn-sheen:hover,
   .btn-sheen:active,
-  .card-lift:hover { transform: none !important; }
-  .btn-sheen::after { display: none !important; }
+  .card-lift:hover,
+  .btn-press:active {
+    transform: none !important;
+  }
+  .btn-sheen::after {
+    display: none !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .reveal-child {
+  .reveal,
+  .reveal-child {
     opacity: 1 !important;
     transform: none !important;
     filter: none !important;
     transition: none !important;
   }
-  .wave-bar { animation: none !important; }
+  .wave-bar {
+    animation: none !important;
+  }
 }
 
 html.reduce-motion .btn-sheen:hover,
 html.reduce-motion .btn-sheen:active,
-html.reduce-motion .card-lift:hover { transform: none !important; }
-html.reduce-motion .btn-sheen::after { display: none !important; }
+html.reduce-motion .card-lift:hover {
+  transform: none !important;
+}
+html.reduce-motion .btn-sheen::after {
+  display: none !important;
+}
 
 html.reduce-motion .reveal,
 html.reduce-motion .reveal-child {
@@ -547,7 +625,9 @@ html.reduce-motion .reveal-child {
 }
 html.reduce-motion .wave-bar,
 html.reduce-motion .flow-dot,
-html.reduce-motion [class*="animate-"] { animation: none !important; }
+html.reduce-motion [class*="animate-"] {
+  animation: none !important;
+}
 
 /* Catch-all: any element inside a reduce-motion document loses every
    animation and transition — including inline style={{ transition }},
@@ -571,7 +651,12 @@ html.reduce-motion *::after {
 html.reduce-motion .btn-sheen::after,
 html.reduce-motion .btn-sheen:hover::after,
 html.reduce-motion .btn-sheen:focus-visible::after,
-html.reduce-motion .pulse-once { animation: none !important; }
+html.reduce-motion .pulse-once {
+  animation: none !important;
+}
+html.reduce-motion .btn-press:active {
+  transform: none !important;
+}
 
 /* ---------- chapter themes ----------
    Each section gets its own palette by overriding the semantic tokens on
@@ -586,98 +671,98 @@ html.reduce-motion .pulse-once { animation: none !important; }
 /* Reusable chapter recipes */
 @utility chapter-paper {
   --background: var(--paper);
-  --surface:    var(--paper-2);
-  --surface-2:  var(--ash);
+  --surface: var(--paper-2);
+  --surface-2: var(--ash);
   --foreground: var(--ink-raw);
-  --card:            color-mix(in oklch, var(--paper) 90%, var(--ink-raw) 10%);
+  --card: color-mix(in oklch, var(--paper) 90%, var(--ink-raw) 10%);
   --card-foreground: var(--ink-raw);
-  --popover:         var(--paper);
+  --popover: var(--paper);
   --popover-foreground: var(--ink-raw);
-  --muted:            var(--paper-2);
+  --muted: var(--paper-2);
   --muted-foreground: color-mix(in oklch, var(--ink-raw) 72%, var(--paper) 28%);
-  --accent:            var(--amber);
+  --accent: var(--amber);
   --accent-foreground: var(--ink-raw);
-  --border:   color-mix(in oklch, var(--ink-raw) 28%, var(--paper) 72%);
+  --border: color-mix(in oklch, var(--ink-raw) 28%, var(--paper) 72%);
   --hairline: color-mix(in oklch, var(--ink-raw) 28%, var(--paper) 72%);
   background-color: var(--background);
   color: var(--foreground);
 }
 @utility chapter-cream {
   --background: color-mix(in oklch, var(--paper) 88%, var(--gold) 12%);
-  --surface:    color-mix(in oklch, var(--paper) 80%, var(--gold) 20%);
-  --surface-2:  var(--burgundy);
+  --surface: color-mix(in oklch, var(--paper) 80%, var(--gold) 20%);
+  --surface-2: var(--burgundy);
   --foreground: var(--ink-raw);
-  --card:            color-mix(in oklch, var(--paper) 84%, var(--gold) 16%);
+  --card: color-mix(in oklch, var(--paper) 84%, var(--gold) 16%);
   --card-foreground: var(--ink-raw);
-  --muted:            color-mix(in oklch, var(--paper) 82%, var(--gold) 18%);
+  --muted: color-mix(in oklch, var(--paper) 82%, var(--gold) 18%);
   --muted-foreground: color-mix(in oklch, var(--ink-raw) 72%, var(--paper) 28%);
-  --accent:            var(--burgundy);
+  --accent: var(--burgundy);
   --accent-foreground: var(--paper);
-  --border:   color-mix(in oklch, var(--ink-raw) 32%, var(--paper) 68%);
+  --border: color-mix(in oklch, var(--ink-raw) 32%, var(--paper) 68%);
   --hairline: color-mix(in oklch, var(--ink-raw) 32%, var(--paper) 68%);
   background-color: var(--background);
   color: var(--foreground);
 }
 @utility chapter-ash {
   --background: var(--ash);
-  --surface:    color-mix(in oklch, var(--ash) 78%, var(--ink-raw) 22%);
-  --surface-2:  var(--ink-raw);
+  --surface: color-mix(in oklch, var(--ash) 78%, var(--ink-raw) 22%);
+  --surface-2: var(--ink-raw);
   --foreground: var(--cream);
-  --card:            color-mix(in oklch, var(--ash) 84%, var(--cream) 16%);
+  --card: color-mix(in oklch, var(--ash) 84%, var(--cream) 16%);
   --card-foreground: var(--cream);
-  --muted:            color-mix(in oklch, var(--ash) 80%, var(--cream) 20%);
+  --muted: color-mix(in oklch, var(--ash) 80%, var(--cream) 20%);
   --muted-foreground: color-mix(in oklch, var(--cream) 82%, var(--ash) 18%);
-  --accent:            var(--gold);
+  --accent: var(--gold);
   --accent-foreground: var(--ink-raw);
-  --border:   color-mix(in oklch, var(--cream) 32%, var(--ash) 68%);
+  --border: color-mix(in oklch, var(--cream) 32%, var(--ash) 68%);
   --hairline: color-mix(in oklch, var(--cream) 32%, var(--ash) 68%);
   background-color: var(--background);
   color: var(--foreground);
 }
 @utility chapter-ink {
   --background: var(--ink-raw);
-  --surface:    color-mix(in oklch, var(--ink-raw) 84%, var(--cream) 16%);
-  --surface-2:  color-mix(in oklch, var(--ink-raw) 70%, var(--gold) 30%);
+  --surface: color-mix(in oklch, var(--ink-raw) 84%, var(--cream) 16%);
+  --surface-2: color-mix(in oklch, var(--ink-raw) 70%, var(--gold) 30%);
   --foreground: var(--cream);
-  --card:            color-mix(in oklch, var(--ink-raw) 86%, var(--cream) 14%);
+  --card: color-mix(in oklch, var(--ink-raw) 86%, var(--cream) 14%);
   --card-foreground: var(--cream);
-  --muted:            color-mix(in oklch, var(--ink-raw) 82%, var(--cream) 18%);
+  --muted: color-mix(in oklch, var(--ink-raw) 82%, var(--cream) 18%);
   --muted-foreground: color-mix(in oklch, var(--cream) 82%, var(--ink-raw) 18%);
-  --accent:            var(--gold);
+  --accent: var(--gold);
   --accent-foreground: var(--ink-raw);
-  --border:   color-mix(in oklch, var(--cream) 30%, var(--ink-raw) 70%);
+  --border: color-mix(in oklch, var(--cream) 30%, var(--ink-raw) 70%);
   --hairline: color-mix(in oklch, var(--cream) 30%, var(--ink-raw) 70%);
   background-color: var(--background);
   color: var(--foreground);
 }
 @utility chapter-burgundy {
   --background: var(--burgundy);
-  --surface:    color-mix(in oklch, var(--burgundy) 84%, var(--ink-raw) 16%);
-  --surface-2:  var(--ink-raw);
+  --surface: color-mix(in oklch, var(--burgundy) 84%, var(--ink-raw) 16%);
+  --surface-2: var(--ink-raw);
   --foreground: var(--cream);
-  --card:            color-mix(in oklch, var(--burgundy) 86%, var(--cream) 14%);
+  --card: color-mix(in oklch, var(--burgundy) 86%, var(--cream) 14%);
   --card-foreground: var(--cream);
-  --muted:            color-mix(in oklch, var(--burgundy) 82%, var(--cream) 18%);
+  --muted: color-mix(in oklch, var(--burgundy) 82%, var(--cream) 18%);
   --muted-foreground: color-mix(in oklch, var(--cream) 85%, var(--burgundy) 15%);
-  --accent:            var(--gold);
+  --accent: var(--gold);
   --accent-foreground: var(--ink-raw);
-  --border:   color-mix(in oklch, var(--cream) 34%, var(--burgundy) 66%);
+  --border: color-mix(in oklch, var(--cream) 34%, var(--burgundy) 66%);
   --hairline: color-mix(in oklch, var(--cream) 34%, var(--burgundy) 66%);
   background-color: var(--background);
   color: var(--foreground);
 }
 @utility chapter-rust {
   --background: color-mix(in oklch, var(--ash) 78%, var(--rust) 22%);
-  --surface:    color-mix(in oklch, var(--ash) 86%, var(--rust) 14%);
-  --surface-2:  var(--ink-raw);
+  --surface: color-mix(in oklch, var(--ash) 86%, var(--rust) 14%);
+  --surface-2: var(--ink-raw);
   --foreground: var(--cream);
-  --card:            color-mix(in oklch, var(--ash) 82%, var(--rust) 18%);
+  --card: color-mix(in oklch, var(--ash) 82%, var(--rust) 18%);
   --card-foreground: var(--cream);
-  --muted:            color-mix(in oklch, var(--ash) 82%, var(--rust) 18%);
+  --muted: color-mix(in oklch, var(--ash) 82%, var(--rust) 18%);
   --muted-foreground: color-mix(in oklch, var(--cream) 84%, var(--rust) 16%);
-  --accent:            var(--gold);
+  --accent: var(--gold);
   --accent-foreground: var(--ink-raw);
-  --border:   color-mix(in oklch, var(--cream) 34%, var(--rust) 66%);
+  --border: color-mix(in oklch, var(--cream) 34%, var(--rust) 66%);
   --hairline: color-mix(in oklch, var(--cream) 34%, var(--rust) 66%);
   background-color: var(--background);
   color: var(--foreground);
@@ -685,17 +770,39 @@ html.reduce-motion .pulse-once { animation: none !important; }
 
 /* Assign chapters to existing section ids — no index.tsx changes required.
    Rotation ordered so adjacent sections always contrast strongly. */
-section#top         { @apply chapter-paper; }
-section#pipeline    { @apply chapter-paper; }
-section#walkthrough { @apply chapter-ink; }
-section#resume      { @apply chapter-burgundy; }
-section#control     { @apply chapter-cream; }
-section#performance { @apply chapter-ink; }
-section#architecture{ @apply chapter-paper; }
-section#privacy     { @apply chapter-burgundy; }
-section#requirements{ @apply chapter-rust; }
-section#pricing     { @apply chapter-cream; }
-section#faq         { @apply chapter-ink; }
+section#top {
+  @apply chapter-paper;
+}
+section#pipeline {
+  @apply chapter-paper;
+}
+section#walkthrough {
+  @apply chapter-ink;
+}
+section#resume {
+  @apply chapter-burgundy;
+}
+section#control {
+  @apply chapter-cream;
+}
+section#performance {
+  @apply chapter-ink;
+}
+section#architecture {
+  @apply chapter-paper;
+}
+#privacy {
+  @apply chapter-burgundy;
+}
+#requirements {
+  @apply chapter-rust;
+}
+section#pricing {
+  @apply chapter-cream;
+}
+section#faq {
+  @apply chapter-ink;
+}
 
 /* Sections without a dedicated id (ProductPlate, TrustStrip, StageChapters,
    WhatYouGet, ComparedTo, Endnote, PipelineFeature interior blocks) alternate
@@ -717,8 +824,8 @@ section#resume,
 section#control,
 section#performance,
 section#architecture,
-section#privacy,
-section#requirements,
+#privacy,
+#requirements,
 section#pricing,
 section#faq {
   isolation: isolate;
@@ -733,8 +840,8 @@ section#resume::after,
 section#control::after,
 section#performance::after,
 section#architecture::after,
-section#privacy::after,
-section#requirements::after,
+#privacy::after,
+#requirements::after,
 section#pricing::after,
 section#faq::after {
   /* the reveal system already owns ::after for a hairline sweep. */
@@ -746,7 +853,9 @@ section#faq::after {
 .chapter-ash::before,
 .chapter-ink::before,
 .chapter-burgundy::before,
-.chapter-rust::before { /* reserved: tick already uses ::before */ }
+.chapter-rust::before {
+  /* reserved: tick already uses ::before */
+}
 
 /* A dedicated pseudo on a nested wrapper isn't available — use box-shadow
    trick to tint the top hairline of every themed chapter with its accent. */
@@ -757,8 +866,8 @@ section#resume,
 section#control,
 section#performance,
 section#architecture,
-section#privacy,
-section#requirements,
+#privacy,
+#requirements,
 section#pricing,
 section#faq {
   box-shadow: inset 0 1px 0 0 color-mix(in oklch, var(--accent) 35%, transparent);
@@ -775,8 +884,12 @@ section#faq {
    automatically gets its own underline hue. Nothing extra needed. */
 
 /* Bump serif rendering weight since Instrument Serif is a hairline face. */
-h1.font-serif, h2.font-serif, h3.font-serif,
-.font-serif h1, .font-serif h2, .font-serif h3 {
+h1.font-serif,
+h2.font-serif,
+h3.font-serif,
+.font-serif h1,
+.font-serif h2,
+.font-serif h3 {
   font-synthesis: none;
 }
 
@@ -785,67 +898,132 @@ h1.font-serif, h2.font-serif, h3.font-serif,
    a bar-sweep. All utility-safe and reduced-motion aware.
 */
 @keyframes snap-in {
-  0%   { opacity: 0; transform: translate3d(0, 6px, 0) scale(0.985); }
-  60%  { opacity: 1; transform: translate3d(0, -2px, 0) scale(1.01); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) scale(0.985);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, -2px, 0) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
 }
 @keyframes margin-slide {
-  from { opacity: 0; transform: translate3d(-12px, 0, 0); }
-  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  from {
+    opacity: 0;
+    transform: translate3d(-12px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 @keyframes bar-sweep {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 @keyframes tilt-in {
-  0%   { opacity: 0; transform: translate3d(-10px, 4px, 0) rotate(-1.2deg); }
-  70%  { opacity: 1; transform: translate3d(2px, 0, 0) rotate(0.4deg); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
+  0% {
+    opacity: 0;
+    transform: translate3d(-10px, 4px, 0) rotate(-1.2deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(2px, 0, 0) rotate(0.4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
 }
 @keyframes drop-settle {
-  0%   { opacity: 0; transform: translate3d(0, -14px, 0); }
-  55%  { opacity: 1; transform: translate3d(0, 3px, 0); }
-  80%  { transform: translate3d(0, -1px, 0); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -14px, 0);
+  }
+  55% {
+    opacity: 1;
+    transform: translate3d(0, 3px, 0);
+  }
+  80% {
+    transform: translate3d(0, -1px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 @keyframes letter-rise {
-  0%   { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.96); letter-spacing: 0.04em; }
-  60%  { opacity: 1; letter-spacing: -0.015em; }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); letter-spacing: -0.01em; }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.96);
+    letter-spacing: 0.04em;
+  }
+  60% {
+    opacity: 1;
+    letter-spacing: -0.015em;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    letter-spacing: -0.01em;
+  }
 }
 @keyframes ink-wipe {
-  0%   { clip-path: inset(0 100% 0 0); opacity: 0.2; }
-  100% { clip-path: inset(0 0 0 0); opacity: 1; }
+  0% {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.2;
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
 }
 @keyframes wobble-in {
-  0%   { opacity: 0; transform: translate3d(6px, 0, 0) skewX(-3deg); }
-  50%  { opacity: 1; transform: translate3d(-2px, 0, 0) skewX(1deg); }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) skewX(0); }
+  0% {
+    opacity: 0;
+    transform: translate3d(6px, 0, 0) skewX(-3deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translate3d(-2px, 0, 0) skewX(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) skewX(0);
+  }
 }
 
 .chapter-ink.revealed .reveal-child {
-  animation: snap-in 360ms cubic-bezier(0.22, 1, 0.36, 1)
-             calc(60ms + var(--reveal-i, 0) * 40ms) both;
+  animation: snap-in 360ms cubic-bezier(0.22, 1, 0.36, 1) calc(60ms + var(--reveal-i, 0) * 40ms)
+    both;
 }
 .chapter-burgundy.revealed .reveal-child {
   animation: margin-slide 360ms cubic-bezier(0.22, 1, 0.36, 1)
-             calc(60ms + var(--reveal-i, 0) * 40ms) both;
+    calc(60ms + var(--reveal-i, 0) * 40ms) both;
 }
 .chapter-ash.revealed .reveal-child {
-  animation: snap-in 320ms cubic-bezier(0.22, 1, 0.36, 1)
-             calc(60ms + var(--reveal-i, 0) * 30ms) both;
+  animation: snap-in 320ms cubic-bezier(0.22, 1, 0.36, 1) calc(60ms + var(--reveal-i, 0) * 30ms)
+    both;
 }
 .chapter-paper.revealed .reveal-child {
-  animation: tilt-in 420ms cubic-bezier(0.22, 1, 0.36, 1)
-             calc(60ms + var(--reveal-i, 0) * 40ms) both;
+  animation: tilt-in 420ms cubic-bezier(0.22, 1, 0.36, 1) calc(60ms + var(--reveal-i, 0) * 40ms)
+    both;
 }
 .chapter-cream.revealed .reveal-child {
   animation: drop-settle 460ms cubic-bezier(0.34, 1.3, 0.55, 1)
-             calc(60ms + var(--reveal-i, 0) * 40ms) both;
+    calc(60ms + var(--reveal-i, 0) * 40ms) both;
 }
 .chapter-rust.revealed .reveal-child {
-  animation: wobble-in 380ms cubic-bezier(0.22, 1, 0.36, 1)
-             calc(60ms + var(--reveal-i, 0) * 40ms) both;
+  animation: wobble-in 380ms cubic-bezier(0.22, 1, 0.36, 1) calc(60ms + var(--reveal-i, 0) * 40ms)
+    both;
 }
 
 /* Chapter heading intro — a distinct flourish per palette that plays once
@@ -857,12 +1035,25 @@ section.reveal.revealed h2 {
   animation-duration: 520ms;
   animation-delay: 40ms;
 }
-.chapter-paper.revealed h2       { animation-name: letter-rise; }
-.chapter-cream.revealed h2       { animation-name: drop-settle; animation-timing-function: cubic-bezier(0.34, 1.3, 0.55, 1); }
-.chapter-ash.revealed h2         { animation-name: ink-wipe; }
-.chapter-ink.revealed h2         { animation-name: letter-rise; }
-.chapter-burgundy.revealed h2    { animation-name: margin-slide; }
-.chapter-rust.revealed h2        { animation-name: wobble-in; }
+.chapter-paper.revealed h2 {
+  animation-name: letter-rise;
+}
+.chapter-cream.revealed h2 {
+  animation-name: drop-settle;
+  animation-timing-function: cubic-bezier(0.34, 1.3, 0.55, 1);
+}
+.chapter-ash.revealed h2 {
+  animation-name: ink-wipe;
+}
+.chapter-ink.revealed h2 {
+  animation-name: letter-rise;
+}
+.chapter-burgundy.revealed h2 {
+  animation-name: margin-slide;
+}
+.chapter-rust.revealed h2 {
+  animation-name: wobble-in;
+}
 
 html.reduce-motion .chapter-ink.revealed .reveal-child,
 html.reduce-motion .chapter-burgundy.revealed .reveal-child,
@@ -906,12 +1097,24 @@ section.reveal[data-reveal].revealed [data-lead] ~ *:not(h1):not(h2) {
   transform: none;
 }
 /* stagger tuned to land after the chapter's h2 flourish (~180ms) */
-section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(2)  { transition-delay: 180ms; }
-section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(3)  { transition-delay: 240ms; }
-section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(4)  { transition-delay: 300ms; }
-section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(5)  { transition-delay: 360ms; }
-section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(6)  { transition-delay: 420ms; }
-section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(n+7){ transition-delay: 480ms; }
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(2) {
+  transition-delay: 180ms;
+}
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(3) {
+  transition-delay: 240ms;
+}
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(4) {
+  transition-delay: 300ms;
+}
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(5) {
+  transition-delay: 360ms;
+}
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(6) {
+  transition-delay: 420ms;
+}
+section.reveal[data-reveal].revealed [data-lead] ~ *:nth-child(n + 7) {
+  transition-delay: 480ms;
+}
 
 html.reduce-motion section.reveal[data-reveal] [data-lead],
 html.reduce-motion section.reveal[data-reveal] [data-lead] ~ * {
@@ -922,36 +1125,62 @@ html.reduce-motion section.reveal[data-reveal] [data-lead] ~ * {
 
 /* Trust ticker — continuous tape, pauses on hover, frozen under reduce-motion */
 @keyframes ticker-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 .ticker-track {
   animation: ticker-scroll 38s linear infinite;
   will-change: transform;
 }
-.ticker-mask:hover .ticker-track { animation-play-state: paused; }
-html.reduce-motion .ticker-track { animation: none !important; }
+.ticker-mask:hover .ticker-track {
+  animation-play-state: paused;
+}
+html.reduce-motion .ticker-track {
+  animation: none !important;
+}
 
 /* Rubber-stamp thunk: slams in shortly after its section reveals.
    Base state is fully visible, so reduce-motion (animation: none) shows it static. */
 @keyframes stamp-thunk {
-  0%   { opacity: 0; transform: scale(2.1); }
-  55%  { opacity: 1; transform: scale(0.92); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .revealed .stamp-in {
   animation: stamp-thunk 460ms cubic-bezier(0.34, 1.2, 0.5, 1) 480ms backwards;
 }
-html.reduce-motion .stamp-in { animation: none !important; }
+html.reduce-motion .stamp-in {
+  animation: none !important;
+}
 
 /* Hero rail playhead: a full-width wrapper slides across so the 1px line
    inside travels the rail. Composited transform only. */
 @keyframes playhead-sweep {
-  from { transform: translateX(0); }
-  to   { transform: translateX(100%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 .playhead-wrap {
   animation: playhead-sweep 14s linear infinite;
   will-change: transform;
 }
-html.reduce-motion .playhead-wrap { animation: none !important; display: none; }
+html.reduce-motion .playhead-wrap {
+  animation: none !important;
+  display: none;
+}

@@ -11,4 +11,5 @@ Trackdub runs the entire dubbing pipeline — ASR, translation, diarization, TTS
 - [Docs](/docs): CLI usage, pipeline stages, execution providers, and the bundled model manifest.
 - [Changelog](/changelog): Real, dated engineering milestones. Building in public pre-launch.
 - [Privacy](/privacy): What Trackdub stores, what stays on your machine, and what is opt-in.
-- [AI dubbing guide](/guides/ai-dubbing-guide): How dubbing AI works stage by stage, and how local compares to cloud.
+- [Guides](/guides): Index of practical AI video dubbing explainers.
+- [AI dubbing guide](/guides/ai-dubbing-guide): How dubbing AI works stage by stage, buyer criteria, limitations, and how local compares to cloud.
