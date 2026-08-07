@@ -1,0 +1,40 @@
+# Line-ending policy: store LF in the repo and check out LF on every OS.
+# This stops Windows checkouts (core.autocrlf / editors) from turning
+# source files into CRLF, which broke prettier/lint and produced phantom
+# git diffs. The repo is already normalized to LF — this just enforces it.
+* text=auto
+
+# Source & config files — always LF (matches prettier's default endOfLine)
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+*.jsonc text eol=lf
+*.md text eol=lf
+*.sql text eol=lf
+*.svg text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# PowerShell — normalize in the repo, keep native checkout EOL
+*.ps1 text
+
+# Assets — never run line-ending conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.db binary
+*.sqlite binary

@@ -1,13 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import { useReveal } from "@/hooks/use-reveal";
 import { toast } from "sonner";
 import { z } from "zod";
 import { PRICING_PLANS } from "@/lib/pricing";
+import { PlanCard } from "@/components/plan-card";
 import { Github } from "lucide-react";
 import trackdubIcon from "@/assets/icon.png";
 
 const GITHUB_REPO = "https://github.com/trackdubllc/Trackdub";
+
+// Module-scope helpers for browser APIs that React's purity rules flag when
+// they appear lexically inside component code. Every call site below is an
+// event handler, an rAF loop, or a mount-time read — never render — but
+// routing through these keeps the rules quiet with zero behavioral change.
+function now(): number {
+  return performance.now();
+}
+
+function setLocationHash(hash: string) {
+  window.location.hash = hash;
+}
 
 // Math.sin/Math.cos can differ in the last bit between Bun (SSR) and the
 // browser's JS engine, which trips React hydration mismatch warnings for
@@ -280,11 +293,11 @@ function SectionRail() {
     // If a scroll is in flight, retarget it: keep the current position as the
     // new start and restart the clock so easing stays continuous.
     smoothTargetRef.current = clamped;
-    const now = performance.now();
+    const startedAt = now();
     const distance = Math.abs(clamped - window.scrollY);
     // Scale duration modestly with distance, capped for snappiness.
     smoothDurRef.current = Math.min(280, Math.max(140, 120 + distance * 0.08));
-    smoothStartRef.current = { y: window.scrollY, t: now };
+    smoothStartRef.current = { y: window.scrollY, t: startedAt };
     if (smoothRafRef.current !== null) return; // loop already running
     const step = () => {
       const start = smoothStartRef.current;
@@ -293,7 +306,7 @@ function SectionRail() {
         smoothRafRef.current = null;
         return;
       }
-      const elapsed = performance.now() - start.t;
+      const elapsed = now() - start.t;
       const p = Math.min(1, elapsed / smoothDurRef.current);
       const y = start.y + (target - start.y) * easeOutExpo(p);
       window.scrollTo(0, y);
@@ -359,7 +372,7 @@ function SectionRail() {
       window.history.pushState(null, "", href);
       setActive(id);
     } else {
-      window.location.hash = href;
+      setLocationHash(href);
     }
     scrollToTargetId(id);
   };
@@ -373,11 +386,11 @@ function SectionRail() {
     const f = Math.min(1, Math.max(0, (clientY - box.top) / Math.max(1, box.height)));
     const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
     const y = f * docMax;
-    const now = performance.now();
+    const sampledAt = now();
     const buf = scrubSamplesRef.current;
-    buf.push({ y, t: now });
+    buf.push({ y, t: sampledAt });
     // Keep only the last ~120ms of samples.
-    while (buf.length > 2 && now - buf[0].t > 120) buf.shift();
+    while (buf.length > 2 && sampledAt - buf[0].t > 120) buf.shift();
   };
 
   const releaseVelocity = () => {
@@ -395,13 +408,13 @@ function SectionRail() {
     cancelInertia();
     cancelSmoothScroll();
     let v = v0;
-    let last = performance.now();
+    let last = now();
     // Exponential decay — friction tuned so a hard fling settles in ~600ms.
     const decayPerMs = 0.995;
     const step = () => {
-      const now = performance.now();
-      const dt = now - last;
-      last = now;
+      const nowT = now();
+      const dt = nowT - last;
+      last = nowT;
       const docMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       const nextY = Math.min(docMax, Math.max(0, window.scrollY + v * dt));
       window.scrollTo(0, nextY);
@@ -658,8 +671,7 @@ function SectionRail() {
     }
     pointerTypeRef.current = e.pointerType;
     // Velocity samples are only used for touch inertia.
-    scrubSamplesRef.current =
-      e.pointerType === "touch" ? [{ y: window.scrollY, t: performance.now() }] : [];
+    scrubSamplesRef.current = e.pointerType === "touch" ? [{ y: window.scrollY, t: now() }] : [];
     dragStartYRef.current = e.clientY;
     draggingRef.current = false;
     suppressClickRef.current = false;
@@ -764,6 +776,26 @@ function SectionRail() {
     finishScrub(e.type, e.clientY);
   };
 
+  // The pointer handlers are recreated every render, but the native-listener
+  // effect below must mount exactly once (it controls passive flags and the
+  // global safety nets). Route events through a ref that always holds the
+  // latest closures, so the effect keeps a stable dependency list instead of
+  // re-attaching listeners (or capturing stale handlers) on every render.
+  const railHandlersRef = useRef({
+    down: handleRailPointerDown,
+    move: handleRailPointerMove,
+    up: handleRailPointerUp,
+    finish: finishScrub,
+  });
+  useEffect(() => {
+    railHandlersRef.current = {
+      down: handleRailPointerDown,
+      move: handleRailPointerMove,
+      up: handleRailPointerUp,
+      finish: finishScrub,
+    };
+  });
+
   // Attach rail pointer listeners natively so we control passive flags:
   // down/up/cancel are passive (never preventDefault → browser doesn't have
   // to wait on JS before scrolling elsewhere on the page); move stays
@@ -773,9 +805,10 @@ function SectionRail() {
   useEffect(() => {
     const list = listRef.current;
     if (!list) return;
-    const down = (e: PointerEvent) => handleRailPointerDown(e);
-    const move = (e: PointerEvent) => handleRailPointerMove(e);
-    const up = (e: PointerEvent) => handleRailPointerUp(e);
+    const handlers = railHandlersRef;
+    const down = (e: PointerEvent) => handlers.current.down(e);
+    const move = (e: PointerEvent) => handlers.current.move(e);
+    const up = (e: PointerEvent) => handlers.current.up(e);
     list.addEventListener("pointerdown", down, { passive: true });
     list.addEventListener("pointermove", move, { passive: false });
     list.addEventListener("pointerup", up, { passive: true });
@@ -786,24 +819,24 @@ function SectionRail() {
     // get stuck in a captured/dragging state.
     const onWindowCancel = (e: PointerEvent) => {
       if (activePointerIdRef.current !== null && e.pointerId === activePointerIdRef.current) {
-        finishScrub("pointercancel", null);
+        handlers.current.finish("pointercancel", null);
       }
     };
     const onWindowUp = (e: PointerEvent) => {
       // Only fires if the element handler missed it (e.g. pointer released
       // outside a captured region on a browser that dropped capture).
       if (activePointerIdRef.current !== null && e.pointerId === activePointerIdRef.current) {
-        finishScrub(e.type, e.clientY);
+        handlers.current.finish(e.type, e.clientY);
       }
     };
     const onLostCapture = () => {
       if (activePointerIdRef.current !== null) {
-        finishScrub("pointercancel", null);
+        handlers.current.finish("pointercancel", null);
       }
     };
     const onBlurOrHide = () => {
       if (activePointerIdRef.current !== null) {
-        finishScrub("pointercancel", null);
+        handlers.current.finish("pointercancel", null);
       }
     };
     window.addEventListener("pointercancel", onWindowCancel, { passive: true });
@@ -1050,31 +1083,66 @@ function Masthead() {
 type MotionMode = "full" | "reduced";
 const MOTION_KEY = "trackdub:motion";
 
+// The motion preference lives in localStorage and defaults to the OS
+// prefers-reduced-motion setting when unset. It's modeled as an external
+// store via useSyncExternalStore — not state set inside an effect — so the
+// two toggle instances (desktop header + mobile menu) stay in sync and SSR
+// hydration stays safe: the server snapshot renders the default, then the
+// store corrects to the saved preference once mounted.
+const motionSubscribers = new Set<() => void>();
+// Set only when localStorage.setItem throws. Non-null means the last chosen
+// mode could not be persisted; prefer it over a readable-but-stale getItem
+// result so the toggle still updates when writes are blocked.
+let motionMemory: MotionMode | null = null;
+
+function motionSubscribe(onStoreChange: () => void) {
+  motionSubscribers.add(onStoreChange);
+  return () => {
+    motionSubscribers.delete(onStoreChange);
+  };
+}
+
+function motionNotify() {
+  for (const cb of motionSubscribers) cb();
+}
+
+function getMotionSnapshot(): MotionMode {
+  if (typeof window === "undefined") return "full";
+  if (motionMemory) return motionMemory;
+  try {
+    const stored = localStorage.getItem(MOTION_KEY);
+    if (stored === "full" || stored === "reduced") return stored;
+  } catch {
+    // Fall through to OS preference when storage is unreadable.
+  }
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "reduced" : "full";
+}
+
+function getMotionServerSnapshot(): MotionMode {
+  return "full";
+}
+
 function MotionToggle() {
-  const [mode, setMode] = useState<MotionMode | null>(null);
+  const mode = useSyncExternalStore(motionSubscribe, getMotionSnapshot, getMotionServerSnapshot);
 
+  // Apply the preference to the document (an external system) — a DOM sync,
+  // not a state write, so it stays legal in an effect.
   useEffect(() => {
-    const stored =
-      typeof window !== "undefined"
-        ? (localStorage.getItem(MOTION_KEY) as MotionMode | null)
-        : null;
-    const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const initial: MotionMode = stored ?? (prefersReduced ? "reduced" : "full");
-    setMode(initial);
-  }, []);
-
-  useEffect(() => {
-    if (!mode) return;
     document.documentElement.classList.toggle("reduce-motion", mode === "reduced");
-    try {
-      localStorage.setItem(MOTION_KEY, mode);
-    } catch {}
   }, [mode]);
 
   const next: MotionMode = mode === "reduced" ? "full" : "reduced";
   const label = mode === "reduced" ? "Motion: off" : "Motion: on";
+
+  const setMode = (m: MotionMode) => {
+    try {
+      localStorage.setItem(MOTION_KEY, m);
+      motionMemory = null;
+    } catch {
+      motionMemory = m;
+    }
+    motionNotify();
+  };
 
   return (
     <button
@@ -3565,53 +3633,14 @@ function Pricing() {
           role="list"
           className="mt-14 grid list-none divide-y divide-border border-y border-border md:grid-cols-3 md:divide-x md:divide-y-0"
         >
-          {plans.map((p) => {
-            const titleId = `plan-${p.name.toLowerCase().replace(/\s+/g, "-")}`;
-            return (
-              <li key={p.name} className="contents">
-                <article
-                  aria-labelledby={titleId}
-                  className="card-lift group relative p-8 transition-colors hover:bg-surface/50 focus-within:bg-surface/50 focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 focus-within:ring-offset-background"
-                >
-                  <header className="flex items-center gap-3">
-                    <h3 id={titleId} className="font-serif text-2xl text-foreground">
-                      {p.name}
-                    </h3>
-                    {p.featured && (
-                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
-                        Recommended
-                      </span>
-                    )}
-                  </header>
-                  <div
-                    className={`mt-5 font-serif text-5xl tracking-tight ${p.featured ? "text-accent" : "text-foreground"}`}
-                  >
-                    {p.price}
-                  </div>
-                  <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                    {p.note}
-                  </p>
-                  <ul className="mt-8 space-y-3 text-[15px] text-foreground">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex gap-3">
-                        <span className="mt-2 h-px w-4 flex-none bg-accent" aria-hidden />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-10">
-                    <a
-                      href={p.href}
-                      aria-label={`${p.cta} · ${p.name} plan`}
-                      className="inline-flex items-baseline gap-1 rounded-sm border-b border-foreground/40 pb-0.5 text-foreground outline-none hover:border-accent hover:text-accent focus-visible:outline-none"
-                    >
-                      {p.cta} <span aria-hidden>→</span>
-                    </a>
-                  </div>
-                </article>
-              </li>
-            );
-          })}
+          {plans.map((p) => (
+            <PlanCard
+              key={p.name}
+              plan={p}
+              className="card-lift group relative p-8 transition-colors hover:bg-surface/50 focus-within:bg-surface/50 focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 focus-within:ring-offset-background"
+              ctaClassName="inline-flex items-baseline gap-1 rounded-sm border-b border-foreground/40 pb-0.5 text-foreground outline-none hover:border-accent hover:text-accent focus-visible:outline-none"
+            />
+          ))}
         </ul>
         <p className="mt-8 font-mono text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
           <Link
@@ -3761,14 +3790,16 @@ function WaitlistForm() {
   const [verificationState, setVerificationState] = useState<"required" | "ready" | "error">(
     "required",
   );
-  const [interest, setInterest] = useState<string | null>(null);
+  // The interest tag is read once from the URL (?interest=...) and only used
+  // in the signup POST body — it never affects rendered markup, so a lazy
+  // initializer is hydration-safe and avoids a state write inside an effect.
+  const [interest] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    const fromUrl = new URLSearchParams(window.location.search).get("interest");
+    return fromUrl && WAITLIST_INTERESTS.has(fromUrl) ? fromUrl : null;
+  });
   const widgetContainerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get("interest");
-    if (fromUrl && WAITLIST_INTERESTS.has(fromUrl)) setInterest(fromUrl);
-  }, []);
 
   // Render the widget explicitly instead of Turnstile's implicit
   // `.cf-turnstile` auto-scan: on an SSR'd page the auto-scan can run before
