@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Container, SectionNumber, SiteShell } from "@/components/site-shell";
+import { SectionHeading } from "@/components/section-heading";
 import { PRICING_PLANS } from "@/lib/pricing";
 import { PlanCard } from "@/components/plan-card";
 
@@ -48,54 +50,12 @@ export const Route = createFileRoute("/pricing")({
 
 function PricingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-accent/20 selection:text-ink">
-      <TopBar />
-      <main>
-        <Header />
-        <Plans />
-        <Terms />
-        <Contact />
-      </main>
-      <FooterMini />
-    </div>
-  );
-}
-
-function TopBar() {
-  return (
-    <header className="border-b border-border">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/" className="font-serif text-2xl leading-none text-foreground">
-          Trackdub<span className="text-accent">.</span>
-        </Link>
-        <Link
-          to="/"
-          className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 font-mono text-[12px] uppercase tracking-[0.14em] text-foreground hover:border-accent hover:text-accent"
-        >
-          ← Back to site
-        </Link>
-      </div>
-    </header>
-  );
-}
-
-function Container({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
-}
-
-function SectionNumber({ n, label }: { n: string; label: string }) {
-  return (
-    <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-      <span className="text-accent">{n}</span>
-      <span className="mx-2 text-hairline">/</span>
-      <span>{label}</span>
-    </div>
+    <SiteShell>
+      <Header />
+      <Plans />
+      <Terms />
+      <Contact />
+    </SiteShell>
   );
 }
 
@@ -171,10 +131,10 @@ function Terms() {
   return (
     <section className="border-b border-border">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="01" label="Terms" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          The fine print, in plain language.
-        </h2>
+        <SectionHeading
+          eyebrow={<SectionNumber n="01" label="Terms" />}
+          title="The fine print, in plain language."
+        />
         <dl className="mt-12">
           {items.map(([q, a], i) => (
             <div
@@ -220,18 +180,5 @@ function Contact() {
         </p>
       </Container>
     </section>
-  );
-}
-
-function FooterMini() {
-  return (
-    <footer className="bg-background">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-10 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground sm:px-10">
-        <span>© 2026 Trackdub</span>
-        <Link to="/" className="text-foreground hover:text-accent">
-          trackdub.com
-        </Link>
-      </div>
-    </footer>
   );
 }

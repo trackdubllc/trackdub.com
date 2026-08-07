@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Container, SectionNumber, SiteShell } from "@/components/site-shell";
+import { SectionHeading } from "@/components/section-heading";
 
 export const Route = createFileRoute("/docs")({
   head: () => ({
@@ -26,56 +28,14 @@ export const Route = createFileRoute("/docs")({
 
 function DocsPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-accent/20 selection:text-ink">
-      <TopBar />
-      <main>
-        <Header />
-        <Quickstart />
-        <Stages />
-        <Providers />
-        <Manifest />
-        <MoreDocs />
-      </main>
-      <FooterMini />
-    </div>
-  );
-}
-
-function TopBar() {
-  return (
-    <header className="border-b border-border">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/" className="font-serif text-2xl leading-none text-foreground">
-          Trackdub<span className="text-accent">.</span>
-        </Link>
-        <Link
-          to="/"
-          className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 font-mono text-[12px] uppercase tracking-[0.14em] text-foreground hover:border-accent hover:text-accent"
-        >
-          ← Back to site
-        </Link>
-      </div>
-    </header>
-  );
-}
-
-function Container({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
-}
-
-function SectionNumber({ n, label }: { n: string; label: string }) {
-  return (
-    <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-      <span className="text-accent">{n}</span>
-      <span className="mx-2 text-hairline">/</span>
-      <span>{label}</span>
-    </div>
+    <SiteShell>
+      <Header />
+      <Quickstart />
+      <Stages />
+      <Providers />
+      <Manifest />
+      <MoreDocs />
+    </SiteShell>
   );
 }
 
@@ -108,14 +68,11 @@ function Quickstart() {
   return (
     <section id="quickstart" className="border-b border-border bg-surface/40">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="01" label="CLI quickstart" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          The CLI runs the same pipeline the desktop app runs.
-        </h2>
-        <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-          No separate headless engine, no feature gap: same stages, same models, scriptable for
-          batch localization or CI. Included on every tier, Free included.
-        </p>
+        <SectionHeading
+          eyebrow={<SectionNumber n="01" label="CLI quickstart" />}
+          title="The CLI runs the same pipeline the desktop app runs."
+          lead="No separate headless engine, no feature gap: same stages, same models, scriptable for batch localization or CI. Included on every tier, Free included."
+        />
         <div className="mt-10 space-y-4">
           <Pre>{`trackdub dub --media ./video.mp4 --target-language es`}</Pre>
           <Pre>{`trackdub dub --media ./video.mp4 --target-language de \\
@@ -142,10 +99,10 @@ function Stages() {
   return (
     <section className="border-b border-border">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="02" label="Pipeline stages" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Six stages. Each one a real, inspectable artifact.
-        </h2>
+        <SectionHeading
+          eyebrow={<SectionNumber n="02" label="Pipeline stages" />}
+          title="Six stages. Each one a real, inspectable artifact."
+        />
         <ol className="mt-12 border-t border-border">
           {stages.map(([n, name, body]) => (
             <li key={n} className="grid grid-cols-12 gap-x-4 border-b border-border py-5">
@@ -190,14 +147,11 @@ function Providers() {
   return (
     <section className="border-b border-border bg-surface/40">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="03" label="Execution providers" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Fallback is per-stage, not per-project.
-        </h2>
-        <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-          A missing provider on one stage doesn't disable the rest of the pipeline; each stage picks
-          the fastest provider your hardware supports and falls back on its own.
-        </p>
+        <SectionHeading
+          eyebrow={<SectionNumber n="03" label="Execution providers" />}
+          title="Fallback is per-stage, not per-project."
+          lead="A missing provider on one stage doesn't disable the rest of the pipeline; each stage picks the fastest provider your hardware supports and falls back on its own."
+        />
         <div className="mt-12 grid gap-px bg-border md:grid-cols-3">
           {providers.map(([name, platform, note]) => (
             <div key={name} className="bg-background p-5">
@@ -218,17 +172,19 @@ function Manifest() {
   return (
     <section id="manifest" className="border-b border-border">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="04" label="Model manifest" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Every bundled model, declared, not implied.
-        </h2>
-        <p className="mt-6 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-          <code className="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[14px]">
-            bundled-models.manifest.json
-          </code>{" "}
-          lists every model Trackdub ships: task, license, whether commercial use is allowed, and a
-          checksum. No research-only or non-commercial-only checkpoint ships in any tier.
-        </p>
+        <SectionHeading
+          eyebrow={<SectionNumber n="04" label="Model manifest" />}
+          title="Every bundled model, declared, not implied."
+          lead={
+            <>
+              <code className="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[14px]">
+                bundled-models.manifest.json
+              </code>{" "}
+              lists every model Trackdub ships: task, license, whether commercial use is allowed,
+              and a checksum. No research-only or non-commercial-only checkpoint ships in any tier.
+            </>
+          }
+        />
         <div className="mt-10 grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-4">
           {[
             "VAD",
@@ -277,18 +233,5 @@ function MoreDocs() {
         </p>
       </Container>
     </section>
-  );
-}
-
-function FooterMini() {
-  return (
-    <footer className="bg-background">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-10 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground sm:px-10">
-        <span>© 2026 Trackdub</span>
-        <Link to="/" className="text-foreground hover:text-accent">
-          trackdub.com
-        </Link>
-      </div>
-    </footer>
   );
 }

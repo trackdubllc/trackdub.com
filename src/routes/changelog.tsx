@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { Container, SectionNumber, SiteShell } from "@/components/site-shell";
 
 export const Route = createFileRoute("/changelog")({
   head: () => ({
@@ -49,52 +50,10 @@ const ENTRIES: { date: string; title: string; body: string }[] = [
 
 function ChangelogPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-accent/20 selection:text-ink">
-      <TopBar />
-      <main>
-        <Header />
-        <Entries />
-      </main>
-      <FooterMini />
-    </div>
-  );
-}
-
-function TopBar() {
-  return (
-    <header className="border-b border-border">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/" className="font-serif text-2xl leading-none text-foreground">
-          Trackdub<span className="text-accent">.</span>
-        </Link>
-        <Link
-          to="/"
-          className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 font-mono text-[12px] uppercase tracking-[0.14em] text-foreground hover:border-accent hover:text-accent"
-        >
-          ← Back to site
-        </Link>
-      </div>
-    </header>
-  );
-}
-
-function Container({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
-}
-
-function SectionNumber({ n, label }: { n: string; label: string }) {
-  return (
-    <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-      <span className="text-accent">{n}</span>
-      <span className="mx-2 text-hairline">/</span>
-      <span>{label}</span>
-    </div>
+    <SiteShell>
+      <Header />
+      <Entries />
+    </SiteShell>
   );
 }
 
@@ -141,18 +100,5 @@ function Entries() {
         </ol>
       </Container>
     </section>
-  );
-}
-
-function FooterMini() {
-  return (
-    <footer className="bg-background">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-10 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground sm:px-10">
-        <span>© 2026 Trackdub</span>
-        <Link to="/" className="text-foreground hover:text-accent">
-          trackdub.com
-        </Link>
-      </div>
-    </footer>
   );
 }

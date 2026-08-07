@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { PRICING_PLANS } from "@/lib/pricing";
 import { PlanCard } from "@/components/plan-card";
+import { SectionHeading } from "@/components/section-heading";
 import { Github } from "lucide-react";
 import trackdubIcon from "@/assets/icon.png";
 
@@ -3491,14 +3492,12 @@ function WhatYouGet() {
   return (
     <section id="manifest" data-reveal className="reveal scroll-mt-24 border-b border-border">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="06" label="The manifest" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          A workstation, not a wrapper around a model.
-        </h2>
-        <p className="mt-5 max-w-2xl text-[16px] leading-relaxed text-muted-foreground">
-          Trackdub declares every bundled model in a manifest: source, checksum, license lane.
-          Here's the same idea applied to the product itself: everything in the box, itemized.
-        </p>
+        <SectionHeading
+          eyebrow={<SectionNumber n="06" label="The manifest" />}
+          title="A workstation, not a wrapper around a model."
+          lead="Trackdub declares every bundled model in a manifest: source, checksum, license lane. Here's the same idea applied to the product itself: everything in the box, itemized."
+          leadClassName="mt-5 max-w-2xl text-[16px] leading-relaxed text-muted-foreground"
+        />
         <div className="relative mt-14 border-2 border-foreground bg-background">
           <div
             aria-hidden
@@ -3573,10 +3572,10 @@ function ComparedTo() {
   return (
     <section data-reveal className="reveal border-b border-border bg-surface">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="07" label="Compared to" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Trackdub, next to how dubbing usually gets done.
-        </h2>
+        <SectionHeading
+          eyebrow={<SectionNumber n="07" label="Compared to" />}
+          title="Trackdub, next to how dubbing usually gets done."
+        />
         <div className="mt-12 overflow-x-auto">
           <table className="w-full min-w-[760px] border-collapse text-left">
             <thead>
