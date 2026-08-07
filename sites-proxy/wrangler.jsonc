@@ -1,0 +1,20 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "trackdub-dev-proxy",
+  "account_id": "21cac5947e11018d571c18792118b8b0",
+  "main": "dist/server/index.js",
+  "compatibility_date": "2025-07-25",
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+    "traces": {
+      "enabled": true,
+    },
+  },
+  "vars": {
+    // Optional: override the upstream origin. Defaults to https://trackdub.com.
+    // "UPSTREAM_ORIGIN": "https://trackdub.com",
+  },
+}
