@@ -1528,14 +1528,13 @@ function ResumableJob() {
       <Container className="py-20 sm:py-28">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
-            <SectionNumber n="02b" label="Resumable jobs" />
-            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-              Pause anything. Edit one stage. Resume only what changed.
-            </h2>
-            <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
-              Every stage writes a checkpoint to disk. Close the app, unplug the laptop, edit a
-              translation two days later, and the job picks up from the last completed artifact.
-            </p>
+            <SectionHeading
+              eyebrow={<SectionNumber n="02b" label="Resumable jobs" />}
+              title="Pause anything. Edit one stage. Resume only what changed."
+              lead="Every stage writes a checkpoint to disk. Close the app, unplug the laptop, edit a translation two days later, and the job picks up from the last completed artifact."
+              h2ClassName="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl"
+              leadClassName="mt-6 text-[17px] leading-relaxed text-muted-foreground"
+            />
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
               When you change a translated line, Trackdub marks that stage and everything downstream
               as <em>stale</em> and requeues only those. Ingest, transcription, and diarization stay
@@ -2475,15 +2474,13 @@ function Walkthrough() {
       <Container className="py-20 sm:py-28">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
-            <SectionNumber n="02" label="Try the pipeline" />
-            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-              Edit a line. Watch what invalidates.
-            </h2>
-            <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
-              A sample project, running in your browser. Change the transcript, retarget a
-              translation, rename a speaker, or regenerate a single voice line. Downstream stages
-              mark themselves stale; nothing else is touched.
-            </p>
+            <SectionHeading
+              eyebrow={<SectionNumber n="02" label="Try the pipeline" />}
+              title="Edit a line. Watch what invalidates."
+              lead="A sample project, running in your browser. Change the transcript, retarget a translation, rename a speaker, or regenerate a single voice line. Downstream stages mark themselves stale; nothing else is touched."
+              h2ClassName="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl"
+              leadClassName="mt-6 text-[17px] leading-relaxed text-muted-foreground"
+            />
             <ul className="mt-8 space-y-2 font-mono text-[12px] text-muted-foreground">
               {STAGE_TABS.map((s) => {
                 const c = staleCount(s.id);
@@ -3334,15 +3331,13 @@ function Performance() {
       <div className="mx-auto w-full max-w-[1600px] px-6 py-20 sm:px-10 sm:py-28">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
-            <SectionNumber n="04" label="Performance" />
-            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-              Runs on the hardware you already have.
-            </h2>
-            <p className="mt-6 text-[17px] leading-relaxed text-muted-foreground">
-              Trackdub can select TensorRT RTX, CUDA, DirectML, CoreML, MIGraphX, OpenVINO, QNN, or
-              CPU per stage. Pick a policy or let it choose automatically. The tiers below are
-              directional; measured benchmarks publish via DubBench ahead of v1 launch.
-            </p>
+            <SectionHeading
+              eyebrow={<SectionNumber n="04" label="Performance" />}
+              title="Runs on the hardware you already have."
+              lead="Trackdub can select TensorRT RTX, CUDA, DirectML, CoreML, MIGraphX, OpenVINO, QNN, or CPU per stage. Pick a policy or let it choose automatically. The tiers below are directional; measured benchmarks publish via DubBench ahead of v1 launch."
+              h2ClassName="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl"
+              leadClassName="mt-6 text-[17px] leading-relaxed text-muted-foreground"
+            />
           </div>
           <div className="lg:col-span-8">
             <ol className="relative">
@@ -3663,14 +3658,18 @@ function FAQ() {
       <Container className="py-20 sm:py-28">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
-            <SectionNumber n="09" label="Questions" />
-            <h2 className="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-              Straight answers.
-            </h2>
-            <p className="mt-6 text-[16px] leading-relaxed text-muted-foreground">
-              Not covered here? Write to{" "}
-              <TextLink href="mailto:hello@trackdub.com">hello@trackdub.com</TextLink>.
-            </p>
+            <SectionHeading
+              eyebrow={<SectionNumber n="09" label="Questions" />}
+              title="Straight answers."
+              lead={
+                <>
+                  Not covered here? Write to{" "}
+                  <TextLink href="mailto:hello@trackdub.com">hello@trackdub.com</TextLink>.
+                </>
+              }
+              h2ClassName="mt-6 font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl"
+              leadClassName="mt-6 text-[16px] leading-relaxed text-muted-foreground"
+            />
             <p className="mt-4 text-[14px] leading-relaxed text-muted-foreground">
               New to how AI dubbing works stage by stage? Read the{" "}
               <Link
