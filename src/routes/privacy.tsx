@@ -1,4 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { Container, SectionNumber, SiteShell } from "@/components/site-shell";
+import { SectionHeading } from "@/components/section-heading";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -130,57 +132,15 @@ const OPTIN: { item: string; what: string; how: string; plain: string }[] = [
 
 function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased selection:bg-accent/20 selection:text-ink">
-      <TopBar />
-      <main>
-        <Header />
-        <Principles />
-        <StoredLocally />
-        <NeverLeaves />
-        <OptIn />
-        <Details />
-        <Contact />
-      </main>
-      <FooterMini />
-    </div>
-  );
-}
-
-function TopBar() {
-  return (
-    <header className="border-b border-border">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 sm:px-10">
-        <Link to="/" className="font-serif text-2xl leading-none text-foreground">
-          Trackdub<span className="text-accent">.</span>
-        </Link>
-        <Link
-          to="/"
-          className="inline-flex items-baseline gap-1 border-b border-foreground/30 pb-0.5 font-mono text-[12px] uppercase tracking-[0.14em] text-foreground hover:border-accent hover:text-accent"
-        >
-          ← Back to site
-        </Link>
-      </div>
-    </header>
-  );
-}
-
-function Container({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <div className={`mx-auto w-full max-w-6xl px-6 sm:px-10 ${className}`}>{children}</div>;
-}
-
-function SectionNumber({ n, label }: { n: string; label: string }) {
-  return (
-    <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-      <span className="text-accent">{n}</span>
-      <span className="mx-2 text-hairline">/</span>
-      <span>{label}</span>
-    </div>
+    <SiteShell>
+      <Header />
+      <Principles />
+      <StoredLocally />
+      <NeverLeaves />
+      <OptIn />
+      <Details />
+      <Contact />
+    </SiteShell>
   );
 }
 
@@ -247,10 +207,10 @@ function Principles() {
   return (
     <section className="border-b border-border bg-surface/40">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="01" label="Principles" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Six rules the whole product is built around.
-        </h2>
+        <SectionHeading
+          eyebrow={<SectionNumber n="01" label="Principles" />}
+          title="Six rules the whole product is built around."
+        />
         <dl className="mt-14 grid gap-y-8 gap-x-12 md:grid-cols-2">
           {items.map(([term, def]) => (
             <div key={term} className="border-t border-border pt-5">
@@ -268,14 +228,12 @@ function StoredLocally() {
   return (
     <section className="border-b border-border">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="02" label="Stored locally" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          What Trackdub writes to your disk.
-        </h2>
-        <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground">
-          This is the exhaustive list. If it is not here, Trackdub is not writing it — and the
-          pieces that are here go to folders you pick.
-        </p>
+        <SectionHeading
+          eyebrow={<SectionNumber n="02" label="Stored locally" />}
+          title="What Trackdub writes to your disk."
+          lead="This is the exhaustive list. If it is not here, Trackdub is not writing it. The pieces that are here go to folders you pick."
+          leadClassName="mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground"
+        />
 
         <div className="mt-12 overflow-x-auto">
           <table className="w-full min-w-[720px] border-collapse text-left">
@@ -324,21 +282,24 @@ function NeverLeaves() {
   return (
     <section className="border-b border-border bg-surface/40">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="03" label="Never leaves the machine" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Data the app will not transmit, period.
-        </h2>
-        <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground">
-          The following categories are never sent to Trackdub or to any third party by the default
-          pipeline. Turning on a cloud stage does not change these categories — see{" "}
-          <a
-            href="#optin"
-            className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent"
-          >
-            Opt-in only
-          </a>{" "}
-          for what an enabled cloud stage actually sends.
-        </p>
+        <SectionHeading
+          eyebrow={<SectionNumber n="03" label="Never leaves the machine" />}
+          title="Data the app will not transmit, period."
+          lead={
+            <>
+              The following categories are never sent to Trackdub or to any third party by the
+              default pipeline. Turning on a cloud stage does not change these categories. See{" "}
+              <a
+                href="#optin"
+                className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent"
+              >
+                Opt-in only
+              </a>{" "}
+              for what an enabled cloud stage actually sends.
+            </>
+          }
+          leadClassName="mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground"
+        />
 
         <div className="mt-12 grid gap-10 md:grid-cols-2">
           {NEVER.map((n) => (
@@ -358,14 +319,12 @@ function OptIn() {
   return (
     <section id="optin" className="border-b border-border">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="04" label="Opt-in only" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          The four things you can turn on. Nothing else phones home.
-        </h2>
-        <p className="mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground">
-          Each is off out of the box. Turning one on is a deliberate choice you make in Preferences
-          or per project, and turning it off stops the transmission on the next run.
-        </p>
+        <SectionHeading
+          eyebrow={<SectionNumber n="04" label="Opt-in only" />}
+          title="The four things you can turn on. Nothing else phones home."
+          lead="Each is off out of the box. Turning one on is a deliberate choice you make in Preferences or per project, and turning it off stops the transmission on the next run."
+          leadClassName="mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground"
+        />
 
         <div className="mt-12 space-y-10">
           {OPTIN.map((o) => (
@@ -425,10 +384,7 @@ function Details() {
   return (
     <section className="border-b border-border bg-surface/40">
       <Container className="py-20 sm:py-28">
-        <SectionNumber n="05" label="Details" />
-        <h2 className="mt-6 max-w-3xl font-serif text-4xl leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Housekeeping.
-        </h2>
+        <SectionHeading eyebrow={<SectionNumber n="05" label="Details" />} title="Housekeeping." />
         <dl className="mt-12">
           {items.map(([q, a], i) => (
             <div
@@ -467,18 +423,5 @@ function Contact() {
         </p>
       </Container>
     </section>
-  );
-}
-
-function FooterMini() {
-  return (
-    <footer className="bg-background">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-10 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground sm:px-10">
-        <span>© 2026 Trackdub</span>
-        <Link to="/" className="text-foreground hover:text-accent">
-          trackdub.com
-        </Link>
-      </div>
-    </footer>
   );
 }
