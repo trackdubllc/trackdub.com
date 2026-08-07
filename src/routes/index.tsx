@@ -1104,7 +1104,10 @@ function motionNotify() {
 
 function getMotionSnapshot(): MotionMode {
   if (typeof window === "undefined") return "full";
-  const stored = localStorage.getItem(MOTION_KEY);
+  let stored: string | null = null;
+  try {
+    stored = localStorage.getItem(MOTION_KEY);
+  } catch {}
   if (stored === "full" || stored === "reduced") return stored;
   return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "reduced" : "full";
 }
