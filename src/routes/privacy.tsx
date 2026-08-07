@@ -231,7 +231,7 @@ function StoredLocally() {
         <SectionHeading
           eyebrow={<SectionNumber n="02" label="Stored locally" />}
           title="What Trackdub writes to your disk."
-          lead="This is the exhaustive list. If it is not here, Trackdub is not writing it — and the pieces that are here go to folders you pick."
+          lead="This is the exhaustive list. If it is not here, Trackdub is not writing it. The pieces that are here go to folders you pick."
           leadClassName="mt-6 max-w-2xl text-[16px] leading-relaxed text-muted-foreground"
         />
 
@@ -288,7 +288,7 @@ function NeverLeaves() {
           lead={
             <>
               The following categories are never sent to Trackdub or to any third party by the
-              default pipeline. Turning on a cloud stage does not change these categories — see{" "}
+              default pipeline. Turning on a cloud stage does not change these categories. See{" "}
               <a
                 href="#optin"
                 className="border-b border-foreground/30 pb-0.5 text-foreground hover:border-accent hover:text-accent"

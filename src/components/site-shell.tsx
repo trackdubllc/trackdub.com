@@ -13,7 +13,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 export function TopBar() {
   return (
     <header className="border-b border-border">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5 sm:px-10">
+      <Container className="flex items-center justify-between py-5">
         <Link to="/" className="font-serif text-2xl leading-none text-foreground">
           Trackdub<span className="text-accent">.</span>
         </Link>
@@ -23,7 +23,7 @@ export function TopBar() {
         >
           ← Back to site
         </Link>
-      </div>
+      </Container>
     </header>
   );
 }
