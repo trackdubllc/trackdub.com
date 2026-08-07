@@ -1090,8 +1090,9 @@ const MOTION_KEY = "trackdub:motion";
 // hydration stays safe: the server snapshot renders the default, then the
 // store corrects to the saved preference once mounted.
 const motionSubscribers = new Set<() => void>();
-// Session fallback when Web Storage is blocked or setItem fails, so the toggle
-// still updates after notify even though localStorage never changed.
+// Set only when localStorage.setItem throws. Non-null means the last chosen
+// mode could not be persisted; prefer it over a readable-but-stale getItem
+// result so the toggle still updates when writes are blocked.
 let motionMemory: MotionMode | null = null;
 
 function motionSubscribe(onStoreChange: () => void) {
@@ -1108,11 +1109,12 @@ function motionNotify() {
 function getMotionSnapshot(): MotionMode {
   if (typeof window === "undefined") return "full";
   if (motionMemory) return motionMemory;
-  let stored: string | null = null;
   try {
-    stored = localStorage.getItem(MOTION_KEY);
-  } catch {}
-  if (stored === "full" || stored === "reduced") return stored;
+    const stored = localStorage.getItem(MOTION_KEY);
+    if (stored === "full" || stored === "reduced") return stored;
+  } catch {
+    // Fall through to OS preference when storage is unreadable.
+  }
   return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "reduced" : "full";
 }
 
@@ -1133,10 +1135,12 @@ function MotionToggle() {
   const label = mode === "reduced" ? "Motion: off" : "Motion: on";
 
   const setMode = (m: MotionMode) => {
-    motionMemory = m;
     try {
       localStorage.setItem(MOTION_KEY, m);
-    } catch {}
+      motionMemory = null;
+    } catch {
+      motionMemory = m;
+    }
     motionNotify();
   };
 
