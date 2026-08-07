@@ -17,8 +17,8 @@ export function PlanCard({
 }) {
   const titleId = `plan-${plan.name.toLowerCase().replace(/\s+/g, "-")}`;
   return (
-    <li className="contents">
-      <article aria-labelledby={titleId} className={className}>
+    <li className={className}>
+      <article aria-labelledby={titleId}>
         <header className="flex items-center gap-3">
           <Heading id={titleId} className="font-serif text-2xl text-foreground">
             {plan.name}
