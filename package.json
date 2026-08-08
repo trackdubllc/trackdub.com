@@ -14,7 +14,9 @@
     "deploy": "bun run build && wrangler deploy --config .output/server/wrangler.json",
     "setup-deploy": "pwsh scripts/setup-deploy.ps1",
     "stage:sites": "pwsh scripts/stage-sites.ps1",
-    "agent:dns": "node scripts/apply-agent-dns.mjs"
+    "agent:dns": "node scripts/apply-agent-dns.mjs",
+    "build:sites-proxy": "node sites-proxy/build.mjs",
+    "test:sites-proxy": "node --test sites-proxy/proxy.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "5.2.2",
