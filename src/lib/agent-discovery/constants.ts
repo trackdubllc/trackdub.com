@@ -9,6 +9,7 @@ export const HOMEPAGE_LINK_HEADERS = [
   `</.well-known/oauth-protected-resource>; rel="oauth-protected-resource"`,
   `</.well-known/mcp/server-card.json>; rel="mcp-server-card"; type="application/json"`,
   `</.well-known/agent-skills/index.json>; rel="agent-skills"; type="application/json"`,
+  `</.well-known/http-message-signatures-directory>; rel="http-message-signatures-directory"; type="application/http-message-signatures-directory+json"`,
   `</auth.md>; rel="auth-md"; type="text/markdown"`,
 ] as const;
 

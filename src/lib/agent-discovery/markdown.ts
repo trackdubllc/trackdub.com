@@ -21,6 +21,7 @@ Trackdub runs the entire dubbing pipeline — ASR, translation, diarization, TTS
 - API catalog: ${SITE_ORIGIN}/.well-known/api-catalog
 - MCP server card: ${SITE_ORIGIN}/.well-known/mcp/server-card.json
 - Agent skills: ${SITE_ORIGIN}/.well-known/agent-skills/index.json
+- Web Bot Auth directory: ${SITE_ORIGIN}/.well-known/http-message-signatures-directory
 - Auth notes: ${SITE_ORIGIN}/auth.md
 `;
 

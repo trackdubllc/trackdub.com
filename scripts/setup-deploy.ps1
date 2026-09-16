@@ -99,12 +99,14 @@ $secretSpec = @(
     @{ Name = 'TURNSTILE_SECRET'  }
     @{ Name = 'RESEND_API_KEY'    }
     @{ Name = 'RESEND_FROM_EMAIL' }
+    @{ Name = 'WEB_BOT_AUTH_PRIVATE_JWK' }
 )
 foreach ($s in $secretSpec) {
     $prompt = switch ($s.Name) {
         'TURNSTILE_SECRET'  { 'TURNSTILE_SECRET   (Cloudflare Turnstile -> Widgets -> Secret Key)' }
         'RESEND_API_KEY'    { 'RESEND_API_KEY     (resend.com -> API Keys)' }
         'RESEND_FROM_EMAIL' { 'RESEND_FROM_EMAIL  (e.g. "Trackdub <hello@trackdub.com>")' }
+        'WEB_BOT_AUTH_PRIVATE_JWK' { 'WEB_BOT_AUTH_PRIVATE_JWK (Ed25519 private JWK JSON, one line)' }
     }
     $value = Read-Secret -Prompt $prompt
     Write-Host "  -> wrangler secret put $($s.Name) ..." -ForegroundColor Gray

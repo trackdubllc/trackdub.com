@@ -288,6 +288,11 @@ No agent credentials are issued. Public marketing content uses scope \`public:re
 - Waitlist API POST /api/waitlist (human email + Turnstile)
 - Read-only MCP tools at /mcp
 - Discovery docs under /.well-known/
+- Web Bot Auth key directory: <https://trackdub.com/.well-known/http-message-signatures-directory>
+
+## Web Bot Auth
+
+Outbound Trackdub agent requests are signed per IETF Web Bot Auth (HTTP Message Signatures). The public JWKS is at <https://trackdub.com/.well-known/http-message-signatures-directory>. Signed requests include \`Signature-Agent\` and \`Signature-Input\`.
 
 ## Desktop licensing
 

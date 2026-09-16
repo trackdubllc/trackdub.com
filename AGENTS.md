@@ -14,3 +14,11 @@
 ## Linear (agents)
 
 Track work in Linear workspace [trackdubllc](https://linear.app/trackdubllc) under project **Marketing Site** (label `repo:web`). Agents must search/create/update Linear issues autonomously as progress is made. Link Figma Design System and Notion Specs on visual work. See public-core `docs/operations/linear-workflow.md` when available.
+
+## Cursor Cloud specific instructions
+
+TanStack Start / Vite / Bun / Cloudflare. Local: `bun install`, then `bun run dev` or `bun run build`.
+
+- Install with Bun (lockfile is `bun.lock`), not npm.
+- Secrets often needed for full local/cloud runs: `WEB_BOT_AUTH_PRIVATE_JWK` (`.dev.vars`), plus `TURNSTILE_SECRET`, `SITE_KEY`, `RESEND_API_KEY` (`.env`). Put these in Cursor Secrets for cloud agents; do not commit values.
+- Deploy path: `bun run deploy` (build + wrangler). Prefer verifying with `bun run build` in agents unless deploy is explicitly requested.

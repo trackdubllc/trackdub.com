@@ -1,3 +1,8 @@
+import {
+  DIRECTORY_PATH,
+  type WebBotAuthEnv,
+  httpMessageSignaturesDirectoryResponse,
+} from "../web-bot-auth";
 import { HOMEPAGE_LINK_HEADERS } from "./constants";
 import {
   agentIndexDocument,
@@ -86,7 +91,10 @@ function textResponse(body: string, contentType: string, status = 200): Response
   });
 }
 
-export async function matchAgentDiscovery(request: Request): Promise<Response | null> {
+export async function matchAgentDiscovery(
+  request: Request,
+  env?: WebBotAuthEnv,
+): Promise<Response | null> {
   const url = new URL(request.url);
   // Scanners sometimes append a stray markdown backtick to discovered URLs.
   const path = (url.pathname.replace(/\/+$/, "") || "/").replace(/`+$/g, "");
@@ -140,6 +148,8 @@ export async function matchAgentDiscovery(request: Request): Promise<Response | 
       return jsonResponse(openIdConfigurationDocument(), "application/json; charset=utf-8");
     case "/.well-known/jwks.json":
       return jsonResponse(jwksDocument(), "application/json; charset=utf-8");
+    case DIRECTORY_PATH:
+      return httpMessageSignaturesDirectoryResponse(request, env);
     case "/.well-known/mcp/server-card.json":
       return jsonResponse(mcpServerCardDocument(), "application/json; charset=utf-8");
     case "/.well-known/agent-card.json":

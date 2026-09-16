@@ -1,6 +1,7 @@
 import "./lib/error-capture";
 
 import { matchAgentDiscovery, withHomepageLinkHeaders } from "./lib/agent-discovery";
+import type { WebBotAuthEnv } from "./lib/web-bot-auth";
 import {
   markdownForPath,
   markdownResponseFromHtml,
@@ -100,13 +101,22 @@ async function maybeMarkdownResponse(
   return markdownResponseFromHtml(html, url);
 }
 
+function resolveWorkerEnv(env: unknown): WebBotAuthEnv | undefined {
+  if (env && typeof env === "object") {
+    (globalThis as { __env__?: unknown }).__env__ = env;
+    return env as WebBotAuthEnv;
+  }
+  return (globalThis as { __env__?: WebBotAuthEnv }).__env__;
+}
+
 export default {
-  async fetch(request: Request, env: unknown, ctx: unknown) {
+  async fetch(request: Request, env?: unknown, ctx?: unknown) {
     try {
-      const discovery = await matchAgentDiscovery(request);
+      const workerEnv = resolveWorkerEnv(env);
+      const discovery = await matchAgentDiscovery(request, workerEnv);
       if (discovery) return discovery;
 
-      const markdown = await maybeMarkdownResponse(request, env, ctx);
+      const markdown = await maybeMarkdownResponse(request, workerEnv, ctx);
       if (markdown) return withHomepageLinkHeaders(request, markdown);
 
       // Prevent Cloudflare Assets from rejecting markdown-only Accept on HTML routes.
@@ -115,7 +125,7 @@ export default {
         : request;
 
       const handler = await getServerEntry();
-      const response = await handler.fetch(appRequest, env, ctx);
+      const response = await handler.fetch(appRequest, workerEnv, ctx);
       const normalized = await normalizeCatastrophicSsrResponse(response);
       return withHomepageLinkHeaders(request, normalized);
     } catch (error) {

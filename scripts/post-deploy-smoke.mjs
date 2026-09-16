@@ -1,6 +1,7 @@
 const apexUrl = "https://trackdub.com/";
 const wwwUrl = "https://www.trackdub.com/";
 const waitlistUrl = "https://trackdub.com/api/waitlist";
+const webBotAuthUrl = "https://trackdub.com/.well-known/http-message-signatures-directory";
 const allowedOrigins = ["https://trackdub.dev", "https://www.trackdub.dev"];
 
 function fail(message) {
@@ -68,8 +69,34 @@ async function checkPreflight(origin) {
   console.log(`PASS ${origin} waitlist preflight (HTTP 204)`);
 }
 
+async function checkWebBotAuthDirectory() {
+  const response = await request(webBotAuthUrl);
+  const contentType = response.headers.get("content-type") ?? "";
+  const body = await response.json();
+
+  if (response.status !== 200) {
+    fail(`web bot auth: expected HTTP 200, received HTTP ${response.status}`);
+  }
+  if (!contentType.includes("application/http-message-signatures-directory+json")) {
+    fail(`web bot auth: unexpected content-type ${contentType || "<missing>"}`);
+  }
+  if (!Array.isArray(body?.keys) || body.keys.length < 1) {
+    fail("web bot auth: JWKS must include at least one public key");
+  }
+  const key = body.keys[0];
+  if (key.kty !== "OKP" || key.crv !== "Ed25519" || typeof key.x !== "string") {
+    fail("web bot auth: first key must be an Ed25519 OKP JWK");
+  }
+  if (typeof key.d === "string") {
+    fail("web bot auth: directory leaked a private key parameter");
+  }
+
+  console.log(`PASS web bot auth directory (${body.keys.length} key)`);
+}
+
 try {
   await checkWwwRedirect();
+  await checkWebBotAuthDirectory();
   for (const origin of allowedOrigins) {
     await checkPreflight(origin);
   }
