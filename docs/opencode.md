@@ -1,6 +1,6 @@
 # OpenCode workflows
 
-This repository uses [opencode-review-threads](https://github.com/tonythethompson/opencode-review-threads) through two reusable workflows pinned to `v1.4.0`.
+This repository uses [opencode-review-threads](https://github.com/tonythethompson/opencode-review-threads) through two reusable workflows pinned to `v1`.
 
 ## Workflows
 
